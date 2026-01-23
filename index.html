@@ -2,13 +2,16 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SMK NURUL FALAH - THE GLIMPSE OF FUTURE</title>
     
-   <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="black" stroke="white" stroke-width="4"/%3E%3Cline x1="5" y1="50" x2="95" y2="50" stroke="white" stroke-width="2"/%3E%3Cline x1="50" y1="5" x2="50" y2="95" stroke="white" stroke-width="2"/%3E%3Cellipse cx="50" cy="50" rx="10" ry="45" fill="none" stroke="white" stroke-width="3"%3E%3Canimate attributeName="rx" values="0;44;0" dur="2s" repeatCount="indefinite"/%3E%3C/ellipse%3E%3C/svg%3E'>
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="black" stroke="white" stroke-width="4"/%3E%3Cline x1="5" y1="50" x2="95" y2="50" stroke="white" stroke-width="2"/%3E%3Cline x1="50" y1="5" x2="50" y2="95" stroke="white" stroke-width="2"/%3E%3Cellipse cx="50" cy="50" rx="10" ry="45" fill="none" stroke="white" stroke-width="3"%3E%3Canimate attributeName="rx" values="0;44;0" dur="2s" repeatCount="indefinite"/%3E%3C/ellipse%3E%3C/svg%3E'>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
         :root {
@@ -20,49 +23,45 @@
             --glass: rgba(0, 15, 0, 0.92); 
             --font-main: 'Share Tech Mono', monospace; 
         }
+
+        /* Cursor Effect */
         .typing-cursor::after {
             content: '‎ '; 
             display: inline-block;
-            margin-left: 5px;
+            margin-left: 2px;
             color: var(--neon);
             animation: blink-cursor 0.8s step-end infinite;
         }
-        @keyframes blink-cursor {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
+        @keyframes blink-cursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; cursor: crosshair; }
     
+        /* Scrollbar Keren */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #000; }
         ::-webkit-scrollbar-thumb { background: var(--neon-dim); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--neon); }
 
+        /*Scroll setting*/
         body {
             margin: 0; padding: 0;
             background-color: var(--bg-color);
             color: var(--neon);
             font-family: var(--font-main);
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            position: fixed;
+            overflow-x: hidden; /* Hanya sembunyikan scroll samping */
+            min-height: 100vh;
             font-size: 16px;
             transition: color 0.5s ease;
         }
 
         canvas#matrix-bg { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            z-index: -2; 
-            opacity: 0.85; 
-            pointer-events: none;
+            position: fixed; /* Background tetap diam saat discroll */
+            top: 0; left: 0; width: 100%; height: 100%; 
+            z-index: -2; opacity: 0.85; pointer-events: none;
         }
         .scanlines { display: none; } 
 
+        /* Header Glitch */
         .glitch-wrapper { position: relative; display: inline-block; }
         .glitch {
             position: relative; color: var(--neon); font-size: 2rem; 
@@ -98,7 +97,11 @@
             80% { clip: rect(50px, 9999px, 20px, 0); transform: skew(0.1deg); }
             100% { clip: rect(30px, 9999px, 70px, 0); transform: skew(0.7deg); }
         }
+        
+        /* Efek Error Merah */
+        .critical-error { color: red !important; text-shadow: 2px 2px 0px #000; }
 
+        /* Lockscreen */
         #overlay {
             position: fixed; inset: 0; background: black; z-index: 100;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -114,20 +117,13 @@
             transition: 0.2s; margin-top: 30px;
         }
         .btn-enter:hover { background: var(--neon); color: black; box-shadow: 0 0 30px var(--neon); }
-
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
 
+        /* [FIX 1] Container kembali ke mode normal agar bisa scroll */
         .container {
             position: relative; z-index: 10;
-            width: 100%; height: 100%;
-            overflow-y: auto; overflow-x: hidden;
-            display: none; 
-            padding: 20px;
-        }
-        
-        .inner-content {
-            max-width: 900px; margin: 0 auto;
-            padding-bottom: 100px;
+            max-width: 900px; margin: 0 auto; padding: 20px;
+            display: none; padding-bottom: 100px;
         }
 
         header {
@@ -136,7 +132,7 @@
             border-radius: 4px; box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
             transition: border-color 0.5s;
         }
-        .subtitle { font-size: 1rem; letter-spacing: 3px; border-top: 1px solid var(--neon-dim); display: block; padding-top: 10px; color: #fff; margin-top: 10px; transition: border-color 0.5s; }
+        .subtitle { font-size: 1rem; letter-spacing: 3px; border-top: 1px solid var(--neon-dim); display: block; padding-top: 10px; color: #fff; margin-top: 10px; transition: border-color 0.5s; min-height: 25px; }
 
         nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
         .nav-btn {
@@ -215,9 +211,9 @@
         .author-link { 
             color: var(--neon); text-decoration: none; font-weight: bold; 
             border: 1px solid var(--neon); padding: 8px 15px; display: inline-block; margin-bottom: 10px;
-            transition: 0.3s; text-transform: uppercase;
+            transition: 0.3s; text-transform: uppercase; background: #000;
         }
-        .author-link:hover { background: var(--neon); color: black; box-shadow: 0 0 15px var(--neon); }
+        .author-link:hover { background: var(--neon); color: black; box-shadow: 0 0 15px var(--neon); transform: translateY(-3px); }
         
         #system-log { color: var(--neon) !important; opacity: 0.7; }
 
@@ -254,81 +250,77 @@
     </div>
 
     <div class="container" id="main-content">
-        <div class="inner-content">
-            <header>
-                <div class="glitch-wrapper">
-                    <h1 class="glitch" data-text="SMK NURUL FALAH">SMK NURUL FALAH</h1>
-                </div>
-               <div id="subtitle-text" class="subtitle"></div>
-            </header>
-    
-            <nav>
-                <button class="nav-btn active" onclick="System.nav('home', this)">BERANDA</button>
-                <button class="nav-btn" onclick="System.nav('visi', this)">VISI & MISI</button>
-                <button class="nav-btn" onclick="System.nav('prodi', this)">MATERI</button>
-                <button class="nav-btn" onclick="System.nav('gallery', this)">GALERI</button>
-            </nav>
-    
-            <div id="home" class="slide active">
-                <div class="slide-hud">Latency : <span class="lat-val">--</span>ms | SYSTEM-RUNNING</div>
-                <div id="home-content"></div> 
+        <header>
+            <div class="glitch-wrapper">
+                <h1 class="glitch" data-text="SMK NURUL FALAH">SMK NURUL FALAH</h1>
             </div>
-    
-            <div id="visi" class="slide">
-                <div class="slide-hud">Latency : <span class="lat-val">--</span>ms | SYSTEM-RUNNING</div>
-                <div id="visi-content"></div> 
-            </div>
-    
-            <div id="prodi" class="slide">
-                <div class="slide-hud">Latency : <span class="lat-val">--</span>ms | SYSTEM-RUNNING</div>
-                <h2>KOMPETENSI KEAHLIAN</h2>
-                <div class="comp-grid">
-                    <button class="comp-btn" onclick="System.detail(this, 'dm')">DIGITAL MARKETING</button>
-                    <button class="comp-btn" onclick="System.detail(this, 'rb')">RETAIL BUSINESS</button>
-                    <button class="comp-btn" onclick="System.detail(this, 'ps')">PUBLIC SPEAKING</button>
-                    <button class="comp-btn" onclick="System.detail(this, 'kwu')">PRODUK KREATIF</button>
-                </div>
-                <div id="desc-output" class="desc-box">// SYSTEM-IDLE: MENUNGGU PERINTAH...</div>
-            </div>
-    
-            <div id="gallery" class="slide">
-                <div class="slide-hud">Latency : <span class="lat-val">--</span>ms | DATABASE-SYNCED</div>
-                <h2>GALERI KEGIATAN</h2>
-                <div class="gallery-grid" id="gallery-container"></div>
-            </div>
-                           <footer>
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+            <div id="subtitle-text" class="subtitle"></div>
+        </header>
 
-                <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-bottom: 10px;">
-                    
-                    <a href="https://genzz-xyz.github.io/Snake-game/" target="_blank" class="author-link" onclick="AudioFX.click()" 
-                       style="border-color: #bf00ff !important; color: #bf00ff !important; box-shadow: 0 0 10px rgba(191, 0, 255, 0.3);">
-                        <i class="fa-solid fa-gamepad"></i> MAIN GAME WEB
-                    </a>
+        <nav>
+            <button class="nav-btn active" onclick="System.nav('home', this)">BERANDA</button>
+            <button class="nav-btn" onclick="System.nav('visi', this)">VISI & MISI</button>
+            <button class="nav-btn" onclick="System.nav('prodi', this)">MATERI</button>
+            <button class="nav-btn" onclick="System.nav('gallery', this)">GALERI</button>
+        </nav>
 
-                    <a href="https://wa.me/6283199753711" target="_blank" class="author-link" onclick="AudioFX.click()"
-                       style="border-color: #25D366 !important; color: #25D366 !important; box-shadow: 0 0 10px rgba(37, 211, 102, 0.3);">
-                        <i class="fa-brands fa-whatsapp"></i> ARLING
-                    </a>
-
-                    <a href="https://vm.tiktok.com/ZSHoaESGQ25J7-202tt/" target="_blank" class="author-link" onclick="AudioFX.click()"
-                       style="border-color: #ffffff !important; color: #ffffff !important; box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);">
-                        <i class="fa-brands fa-tiktok"></i> TIKTOK SMK
-                    </a>
-
-                    <a href="https://vm.tiktok.com/ZSHowSW6bHw7J-Hv03y/"_blank" class="author-link" onclick="AudioFX.click()"
-   style="border-color: #ff0000 !important; color: #ffffff !important; background: #000000 !important; box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);">
-    <i class="fa-brands fa-tiktok" style="color: #ff0000;"></i> TIKTOK OSIS
-</a>
-
-
-                </div>
-                
-                <div id="system-log" style="margin-top: 18px; font-size: 0.7rem;">Initializing...</div>
-                <div style="margin-top: 5px;">&copy; 2026 SMK NURUL FALAH</div>
-            </footer>
+        <div id="home" class="slide active">
+            <div class="slide-hud">Latency : <span class="lat-val">--</span>ms | SYSTEM-RUNNING</div>
+            <div id="home-content"></div> 
         </div>
+
+        <div id="visi" class="slide">
+            <div class="slide-hud">Latency : <span class="lat-val">--</span>ms | SYSTEM-RUNNING</div>
+            <div id="visi-content"></div> 
+        </div>
+
+        <div id="prodi" class="slide">
+            <div class="slide-hud">Latency : <span class="lat-val">--</span>ms | SYSTEM-RUNNING</div>
+            <h2>KOMPETENSI KEAHLIAN</h2>
+            <div class="comp-grid">
+                <button class="comp-btn" onclick="System.detail(this, 'dm')">DIGITAL MARKETING</button>
+                <button class="comp-btn" onclick="System.detail(this, 'rb')">RETAIL BUSINESS</button>
+                <button class="comp-btn" onclick="System.detail(this, 'ps')">PUBLIC SPEAKING</button>
+                <button class="comp-btn" onclick="System.detail(this, 'kwu')">PRODUK KREATIF</button>
+            </div>
+            <div id="desc-output" class="desc-box">// SYSTEM-IDLE: MENUNGGU PERINTAH...</div>
+        </div>
+
+        <div id="gallery" class="slide">
+            <div class="slide-hud">Latency : <span class="lat-val">--</span>ms | DATABASE-SYNCED</div>
+            <h2>GALERI KEGIATAN</h2>
+            <div class="gallery-grid" id="gallery-container"></div>
+        </div>
+
+        <footer>
+            <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
+                
+                <a href="https://genzz-xyz.github.io/Snake-game/" target="_blank" class="author-link" onclick="AudioFX.click()" 
+                   style="border-color: #bf00ff !important; color: #bf00ff !important; box-shadow: 0 0 10px rgba(191, 0, 255, 0.3);">
+                    <i class="fa-solid fa-gamepad"></i> GAME WEB
+                </a>
+
+                <a href="https://wa.me/6283199753711" target="_blank" class="author-link" onclick="AudioFX.click()"
+                   style="border-color: #25D366 !important; color: #25D366 !important; box-shadow: 0 0 10px rgba(37, 211, 102, 0.3);">
+                    <i class="fa-brands fa-whatsapp"></i> ARLING
+                </a>
+
+                <a href="https://vm.tiktok.com/ZSHoaESGQ25J7-202tt/" target="_blank" class="author-link" onclick="AudioFX.click()"
+                   style="border-color: #ffffff !important; color: #ffffff !important; box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);">
+                    <i class="fa-brands fa-tiktok"></i> TIKTOK SMK OFFICIAL
+                </a>
+
+                <a href="https://vm.tiktok.com/ZSHowSW6bHw7J-Hv03y/" target="_blank" class="author-link" onclick="AudioFX.click()"
+                   style="border-color: #ff0000 !important; color: #ffffff !important; background: #000 !important; box-shadow: 0 0 10px rgba(255, 0, 0, 0.4);">
+                   <i class="fa-brands fa-tiktok" style="color:red;"></i> TIKTOK OSIS
+                </a>
+            </div>
+            
+            <div id="system-log" style="margin-top: 18px; font-size: 0.7rem;">Initializing...</div>
+            <div style="margin-top: 5px;">&copy; 2026 SMK NURUL FALAH</div>
+        </footer>
     </div>
+
     <script>
         const DATABASE_FOTO = [
             { file: 'foto1.jpg', caption: 'KEGIATAN SEKOLAH' },
@@ -391,7 +383,7 @@
         }
 
         class ScramblerEngine {
-            constructor() { this.chars = '!<>-_\\/[]{}窶+*^?#________'; }
+            constructor() { this.chars = '!<>-_\\/[]{}—+*^?#________'; }
             
             animateClick(el) {
                 const originalText = el.getAttribute('data-original') || el.innerText;
@@ -516,9 +508,10 @@
                 { neon: '#FF0000', dim: '#CC0000', hex: '#FF0000' }, 
                 { neon: '#ffff00', dim: '#808000', hex: '#ffff00' }  
             ],
-            baseOffset: 5030,
+            baseOffset: 4990,
             currentVisits: 0, 
 
+            // Typewriter Effect untuk Subtitle
             typeWriter: function(elementId, text, speed = 100) {
                 const element = document.getElementById(elementId);
                 if (!element) return;
@@ -625,6 +618,7 @@
                     document.getElementById('overlay').style.display = 'none'; 
                     document.getElementById('main-content').style.display = 'block'; 
                     
+                    // Efek ketik untuk subtitle
                     this.typeWriter('subtitle-text', 'XI (BDP) PEMASARAN', 80);
 
                 }, 500);
@@ -659,13 +653,22 @@
                         .catch(() => {
                             latEl.forEach(el => el.innerText = "OFF  ");
                         });
-                }, 3000);
+                }, 3000)
             },
 
+            // [FIX 2] Fungsi toggle music dengan Ikon Emoji/Standard
             toggleMusic: function() {
                 AudioFX.click();
-                if (this.bgm.paused) { this.bgm.play(); this.musicIcon.innerText = "矧"; this.musicBtn.style.opacity = "1"; }
-                else { this.bgm.pause(); this.musicIcon.innerText = "這"; this.musicBtn.style.opacity = "0.5"; }
+                if (this.bgm.paused) { 
+                    this.bgm.play(); 
+                    this.musicIcon.innerText = "🔊"; // 
+                    this.musicBtn.style.opacity = "1"; 
+                }
+                else { 
+                    this.bgm.pause(); 
+                    this.musicIcon.innerText = "🔇"; // 
+                    this.musicBtn.style.opacity = "0.5"; 
+                }
             },
 
             nav: function(id, btn) {
@@ -694,7 +697,8 @@
             }
         };
 
-        const chaosTexts = ["SYSTEM_FAILURE", "0x00_FATAL_ERR", "S#K N@R*L F!L^H", "404_NOT_FOUND", "CONNECTING...", "ENCRYPT_//_99%", "µ-BIOS_CORRUPT"];
+        // --- CHAOS MODE ---
+        const chaosTexts = ["SYSTEM_FAILURE", "0x00_FATAL_ERR", "S#K N@R*L F!L^H", "404_NOT_FOUND", "CONNECTING...", "ENCRYPT_//_99%", "µ-sys$-Hacked"];
         function startChaosMode() {
             const title = document.querySelector('.glitch');
             if (!title) return;
@@ -706,7 +710,7 @@
                     title.innerText = randomString;          
                     title.setAttribute('data-text', randomString); 
                     title.classList.add('critical-error');   
-                    // LLM
+                    
                     setTimeout(() => {
                         title.innerText = originalText;
                         title.setAttribute('data-text', originalText);
