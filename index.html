@@ -640,8 +640,7 @@
                 const container = document.getElementById('gallery-container');
                 container.innerHTML = DATABASE_FOTO.map(item => `
                     <div class="gallery-item" onclick="AudioFX.click()">
-                        <img src="${item.file}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x200/001100/00FF41?text=IMG+MISSING'">
-                        <div class="caption">${item.caption}</div>
+                        <img src="${item.file}" alt="${item.caption}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x200/001100/00FF41?text=IMG+MISSING'"><div class="caption">${item.caption}
                     </div>
                 `).join('');
             },
