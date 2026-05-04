@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://smk-nufa-11-pemasaran.netlify.app/sitemap.xml
