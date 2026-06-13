@@ -223,8 +223,6 @@
         }
         .author-link:hover { background: var(--neon); color: black; box-shadow: 0 0 15px var(--neon); transform: translateY(-3px); }
         
-        #system-log { color: var(--neon) !important; opacity: 0.7; }
-
         .control-btn {
             position: fixed; bottom: 20px; width: 45px; height: 45px;
             border: 1px solid var(--neon); background: rgba(0, 0, 0, 0.8); color: var(--neon);
@@ -272,7 +270,7 @@
             <div class="glitch-wrapper">
                 <h1 class="glitch" data-text="SMK NURUL FALAH">SMK NURUL FALAH</h1>
             </div>
-            <div id="subtitle-text" class="subtitle"></div>
+            <span id="subtitle-text" class="subtitle" style="cursor: pointer; user-select: none;">(BDP) PEMASARAN</span>
         </header>
 
         <nav>
@@ -318,7 +316,7 @@
         <i class="fa-solid fa-gamepad"></i> GAME WEB
     </a>
 
-    <a href="https://wa.me/6283199753711" target="_blank" class="author-link" onclick="AudioFX.click()"
+    <a id="btn-pembuat" href="https://wa.me/6283199753711" target="_blank" class="author-link" onclick="AudioFX.click()"
        style="border-color: #25D366 !important; color: #25D366 !important; box-shadow: 0 0 10px rgba(37, 211, 102, 0.3);">
         <i class="fa-brands fa-whatsapp"></i> PEMBUAT
     </a>
@@ -367,29 +365,24 @@
                 <h2>PROFIL SEKOLAH</h2>
                 <p>Selamat datang di Sistem Informasi Digital <strong> Bisnis Daring dan Pemasaran (BDP)</strong>. Website ini didedikasikan sebagai media dokumentasi, informasi, dan portofolio digital siswa-siswi <strong>SMK Nurul Falah</strong>.</p>
                 <br>
-                <p>SMK Nurul Falah berlokasi di <strong>Desa Gedung Wani Timur, Kecamatan Margatiga, Kabupaten Lampung Timur</strong>. Di bawah naungan Yayasan Pendidikan Islam Nurul Falah, berkomitmen mencetak generasi muda yang kompeten,terampil dan bertanggung jawab
-serta memiliki akhlak mulia sesuai nilai pancasila.</p>
+                <p>SMK Nurul Falah berlokasi di <strong>Desa Gedung Wani Timur, Kecamatan Margatiga, Kabupaten Lampung Timur</strong>. Di bawah naungan Yayasan Pendidikan Islam Nurul Falah, berkomitmen mencetak generasi muda yang kompeten,terampil dan bertanggung jawab serta memiliki akhlak mulia sesuai nilai pancasila.</p>
                 <div class="marquee-container">
                     <div class="marquee-content">SMK NUFA JAYA &nbsp;///&nbsp; BISA - HEBAT - DISIPLIN - KOMPETEN - SIAP KERJA &nbsp;///&nbsp; SYSTEM ONLINE &nbsp;///&nbsp; SMK NUFA JAYA</div>
                 </div>
             `,
             visi: `
                 <h2>VISI DAN MISI</h2>
-<p> <strong>MENJADI LEMBAGA PENDIDIKAN YANG BERKUALITAS DAN DINAMIS DALAM BIDANG KEJURUAN DAN BISNIS</strong> </p>
-
-<br><br>  
-
-<ol>
-    <li>MELAKSANAKAN PEMBELAJARAN YANG PRODUKTIF, KREATIF, DAN INOVATIF.</li>
-    <li>MENYELENGGARAKAN PENDIDIKAN DAN PELATIHAN SESUAI DENGAN KEBUTUHAN MASYARAKAT DUNIA KERJA SEKTOR SWASTA/PEMERINTAH, BAIK NASIONAL MAUPUN INTERNASIONAL.</li>
-    <li>MEMBERDAYAKAN SEKOLAH UNTUK MEWUJUDKAN PELAYANAN BAGI MASYARAKAT.</li>
-    <li>MENINGKATKAN PERAN SERTA MASYARAKAT MENDUKUNG PROSES PENDIDIKAN DAN PELATIHAN.</li>
-    <li>MEMBERDAYAKAN UNIT PRODUKSI SEBAGAI MEDIA PENDIDIKAN.</li>
-    <li>MENINGKATKAN KERJA SAMA DENGAN DUNIA USAHA/DUNIA INDUSTRI.</li>
-    <li>MENINGKATKAN KERJA SAMA DENGAN DINAS PENDIDIKAN KABUPATEN SERTA DINAS PENDIDIKAN PROVINSI SERTA PEMERINTAH PUSAT.</li>
-</ol>
-<br><br>
-
+                <p> <strong>MENJADI LEMBAGA PENDIDIKAN YANG BERKUALITAS DAN DINAMIS DALAM BIDANG KEJURUAN DAN BISNIS</strong> </p>
+                <ol>
+                    <li>MELAKSANAKAN PEMBELAJARAN YANG PRODUKTIF, KREATIF, DAN INOVATIF.</li>
+                    <li>MENYELENGGARAKAN PENDIDIKAN DAN PELATIHAN SESUAI DENGAN KEBUTUHAN MASYARAKAT DUNIA KERJA SEKTOR SWASTA/PEMERINTAH, BAIK NASIONAL MAUPUN INTERNASIONAL.</li>
+                    <li>MEMBERDAYAKAN SEKOLAH UNTUK MEWUJUDKAN PELAYANAN BAGI MASYARAKAT.</li>
+                    <li>MENINGKATKAN PERAN SERTA MASYARAKAT MENDUKUNG PROSES PENDIDIKAN DAN PELATIHAN.</li>
+                    <li>MEMBERDAYAKAN UNIT PRODUKSI SEBAGAI MEDIA PENDIDIKAN.</li>
+                    <li>MENINGKATKAN KERJA SAMA DENGAN DUNIA USAHA/DUNIA INDUSTRI.</li>
+                    <li>MENINGKATKAN KERJA SAMA DENGAN DINAS PENDIDIKAN KABUPATEN SERTA DINAS PENDIDIKAN PROVINSI SERTA PEMERINTAH PUSAT.</li>
+                </ol>
+                <br><br>
                 <p style="color:white; font-weight:bold; margin-bottom:5px;">VISI:</p>
                 <p>"Terwujudnya Lulusan SMK Nurul Falah yang Beriman, Bertakwa, Kompeten, Mandiri, dan Berwawasan Global di Kabupaten Lampung Timur."</p>
                 <hr style="border: 0; border-top: 1px dashed var(--neon); margin: 20px 0;">
@@ -445,32 +438,40 @@ serta memiliki akhlak mulia sesuai nilai pancasila.</p>
                 }, 40);
             }
 
+            // PERBAIKAN UTAMA: Berjalan secara rekursif menyusuri struktur DOM secara real-time
             write(el, htmlContent) {
                 el.innerHTML = htmlContent;
-                const textNodes = [];
-                function findTextNodes(node) {
-                    if (node.nodeType === 3 && node.textContent.trim().length > 0) textNodes.push(node);
-                    else if (node.nodeType === 1) for (let child of node.childNodes) findTextNodes(child);
-                }
-                findTextNodes(el);
-                textNodes.forEach(node => {
-                    const originalText = node.textContent;
-                    const length = originalText.length;
-                    let frame = 0;
-                    const interval = setInterval(() => {
-                        let output = '';
-                        for(let i=0; i<length; i++) {
-                            if(frame >= i) output += originalText[i];
-                            else output += this.chars[Math.floor(Math.random() * this.chars.length)];
+                
+                const processNode = (node) => {
+                    if (node.nodeType === 3) { // Text Node ditemukan
+                        const originalText = node.textContent;
+                        if (originalText.trim().length === 0) return;
+                        
+                        const length = originalText.length;
+                        let frame = 0;
+                        const interval = setInterval(() => {
+                            let output = '';
+                            for (let i = 0; i < length; i++) {
+                                if (frame >= i) output += originalText[i];
+                                else output += this.chars[Math.floor(Math.random() * this.chars.length)];
+                            }
+                            node.textContent = output;
+                            if (frame >= length) {
+                                clearInterval(interval);
+                                node.textContent = originalText;
+                            }
+                            frame += 2;
+                        }, 15);
+                    } else if (node.nodeType === 1) { // Element Node, telusuri anak-anaknya
+                        // Cegah teks di marquee atau objek hud ikut teracak tidak karuan jika ada
+                        if (node.classList.contains('marquee-container')) return;
+                        for (let child of node.childNodes) {
+                            processNode(child);
                         }
-                        node.textContent = output.substring(0, frame + 1);
-                        if(frame >= length) {
-                            clearInterval(interval);
-                            node.textContent = originalText;
-                        }
-                        frame+=2;
-                    }, 20);
-                });
+                    }
+                };
+
+                processNode(el);
             }
 
             animate(el, newText) {
@@ -551,15 +552,12 @@ serta memiliki akhlak mulia sesuai nilai pancasila.</p>
                 { neon: '#00f0ff', dim: '#008F8F', hex: '#00f0ff' }, 
                 { neon: '#FF0000', dim: '#CC0000', hex: '#FF0000' }, 
                 { neon: '#ffff00', dim: '#808000', hex: '#ffff00' },
-
-    { neon: '#bf00ff', dim: '#660080', hex: '#bf00ff' }, // Ungu / Purple Neon
-    { neon: '#ff5500', dim: '#993300', hex: '#ff5500' }  // Oranye / Cyber Gold
-  
+                { neon: '#bf00ff', dim: '#660080', hex: '#bf00ff' }, 
+                { neon: '#ff5500', dim: '#993300', hex: '#ff5500' }  
             ],
             baseOffset: 4990,
             currentVisits: 0, 
 
-            // Typewriter Effect untuk Subtitle
             typeWriter: function(elementId, text, speed = 100) {
                 const element = document.getElementById(elementId);
                 if (!element) return;
@@ -662,14 +660,11 @@ serta memiliki akhlak mulia sesuai nilai pancasila.</p>
                 Scrambler.write(document.getElementById('home-content'), DATABASE_CONTENT.home);
 
                 document.getElementById('overlay').style.opacity = '0';
-                setTimeout(() => { 
-                    document.getElementById('overlay').style.display = 'none'; 
-                    document.getElementById('main-content').style.display = 'block'; 
-                    
-                    // Efek ketik untuk subtitle
-                    this.typeWriter('subtitle-text', '(BDP) PEMASARAN', 80);
-
+                setTimeout(() => {
+                    document.getElementById('overlay').style.display = 'none';
+                    document.getElementById('main-content').style.display = 'block';
                 }, 500);
+                
             },
 
             toggleColor: function() {
@@ -680,16 +675,15 @@ serta memiliki akhlak mulia sesuai nilai pancasila.</p>
             },
 
             renderGallery: function() {
-    const container = document.getElementById('gallery-container');
-    container.innerHTML = DATABASE_FOTO.map(item => `
-        <div class="gallery-item" onclick="AudioFX.click()">
-            <img src="${item.file}" alt="${item.caption}" loading="lazy" 
-                 onerror="this.src='https://via.placeholder.com/300x200/000000/00ff00?text=FILE+TIDAK+ADA'">
-            <div class="caption">${item.caption}</div>
-        </div>
-    `).join('');
-},
-
+                const container = document.getElementById('gallery-container');
+                container.innerHTML = DATABASE_FOTO.map(item => `
+                    <div class="gallery-item" onclick="AudioFX.click()">
+                        <img src="${item.file}" alt="${item.caption}" loading="lazy" 
+                             onerror="this.src='https://placehold.co/300x200/000000/00ff00?text=FILE+TIDAK+ADA'">
+                        <div class="caption">${item.caption}</div>
+                    </div>
+                `).join('');
+            },
 
             startLatency: function() {
                 const latEl = document.querySelectorAll('.lat-val');
@@ -706,17 +700,16 @@ serta memiliki akhlak mulia sesuai nilai pancasila.</p>
                 }, 3000)
             },
 
-            // [] Fungsi toggle music dengan Ikon Emoji/Standard
             toggleMusic: function() {
                 AudioFX.click();
                 if (this.bgm.paused) { 
                     this.bgm.play(); 
-                    this.musicIcon.innerText = "🔊"; // 
+                    this.musicIcon.innerText = "🔊"; 
                     this.musicBtn.style.opacity = "1"; 
                 }
                 else { 
                     this.bgm.pause(); 
-                    this.musicIcon.innerText = "🔇"; // 
+                    this.musicIcon.innerText = "🔇"; 
                     this.musicBtn.style.opacity = "0.8"; 
                 }
             },
@@ -747,7 +740,6 @@ serta memiliki akhlak mulia sesuai nilai pancasila.</p>
             }
         };
 
-        // --- CHAOS MODE ---
         const chaosTexts = ["SYSTEM_FAILURE", "0x00_FATAL_ERR", "S#K N@R*L F!L^H", "404_NOT_FOUND", "CONNECTING...", "ENCRYPT_//_99%", "µ-sys$-Hacked"];
         function startChaosMode() {
             const title = document.querySelector('.glitch');
@@ -774,7 +766,284 @@ serta memiliki akhlak mulia sesuai nilai pancasila.</p>
 
         document.addEventListener("DOMContentLoaded", () => {
             startChaosMode();
-        });
+
+            // --- INJEKSI ANIMATION KEYFRAME UNTUK SKEW INFINITE ---
+            const styleInterlinked = document.createElement('style');
+            styleInterlinked.innerHTML = `
+                @keyframes skew-glitch {
+                    0%, 100% { transform: skew(0deg); filter: hue-rotate(0deg); }
+                    20% { transform: skew(-6deg) scaleY(1.02); filter: hue-rotate(45deg); }
+                    40% { transform: skew(7deg); }
+                    60% { transform: skew(-4deg) scaleY(0.98); filter: hue-rotate(180deg); }
+                    80% { transform: skew(5deg); }
+                }
+            `;
+            document.head.appendChild(styleInterlinked);
+
+            // --- BTN PEMBUAT HOLD LOGIC ---
+            const btnPembuat = document.getElementById("btn-pembuat");
+            if (!btnPembuat) return;
+
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes global-panic-glitch {
+                    0%, 100% { background-color: #050505; }
+                    50% { background-color: #0f0005; }
+                }
+                @keyframes neon-ambient-pulse {
+                    0%, 100% { filter: drop-shadow(0 0 20px var(--neon)) contrast(1.2); }
+                    50% { filter: drop-shadow(0 0 60px var(--neon)) contrast(2) brightness(1.6); }
+                }
+                .override-chaos {
+                    background: rgba(255, 0, 60, 0.25) !important;
+                    border: 2px dashed #ff003c !important;
+                    color: #ffffff !important;
+                    text-shadow: 0 0 10px #ff003c, 0 0 20px #ff003c !important;
+                    box-shadow: 0 0 35px #ff003c, inset 0 0 15px #ff003c !important;
+                }
+                .system-panic {
+                    animation: global-panic-glitch 0.4s infinite !important;
+                    transition: none !important;
+                }
+                .system-panic header, .system-panic .slide.active, .system-panic nav {
+                    animation: neon-ambient-pulse 0.5s infinite alternate ease-in-out !important;
+                    border-color: var(--neon) !important;
+                    box-shadow: 0 0 35px var(--neon) !important;
+                }
+                .system-panic #matrix-bg { opacity: 0.25 !important; }
+            `;
+            document.head.appendChild(style);
+
+            function playTransitionSound() {
+                if (typeof AudioFX === 'undefined' || !AudioFX.ctx) return;
+                AudioFX.resume();
+                const ctx = AudioFX.ctx;
+                const now = ctx.currentTime;
+
+                const oscBeep = ctx.createOscillator();
+                const gainBeep = ctx.createGain();
+                oscBeep.type = 'sine';
+                oscBeep.frequency.setValueAtTime(1200, now);
+                gainBeep.gain.setValueAtTime(0.3, now);
+                gainBeep.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                oscBeep.connect(gainBeep);
+                gainBeep.connect(ctx.destination);
+                oscBeep.start(now);
+                oscBeep.stop(now + 0.15);
+
+                const oscDrop = ctx.createOscillator();
+                const gainDrop = ctx.createGain();
+                oscDrop.type = 'sawtooth';
+                oscDrop.frequency.setValueAtTime(450, now + 0.05); 
+                oscDrop.frequency.exponentialRampToValueAtTime(40, now + 1.2); 
+                gainDrop.gain.setValueAtTime(0.4, now + 0.05);
+                gainDrop.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+                oscDrop.connect(gainDrop);
+                gainDrop.connect(ctx.destination);
+                oscDrop.start(now + 0.05);
+                oscDrop.stop(now + 1.2);
+            }
+
+            function playTick(isPanic = false) {
+                if (typeof AudioFX === 'undefined' || !AudioFX.ctx) return;
+                AudioFX.resume();
+                const ctx = AudioFX.ctx;
+                const o = ctx.createOscillator();
+                const g = ctx.createGain();
+                
+                o.type = 'square';
+                const startFreq = isPanic ? 1400 : 800;
+                const endFreq = isPanic ? 400 : 100;
+                
+                o.frequency.setValueAtTime(startFreq, ctx.currentTime); 
+                o.frequency.exponentialRampToValueAtTime(endFreq, ctx.currentTime + 0.1); 
+                g.gain.setValueAtTime(isPanic ? 0.25 : 0.15, ctx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                o.connect(g); g.connect(ctx.destination);
+                o.start(); o.stop(ctx.currentTime + 0.1);
+            }
+
+            let holdTimer;         
+            let pressTimer;        
+            let countdownInterval; 
+            let isHolding = false; 
+            let timeLeft = 9;
+
+            const originalContent = btnPembuat.innerHTML;
+            const originalStyle = btnPembuat.getAttribute("style") || ""; 
+            const sneakPeekUrl = "https://world-monitor.com/"; 
+            const waUrl = btnPembuat.getAttribute("href"); 
+
+            function startPress(e) {
+                if (e && e.cancelable) e.preventDefault();
+                isHolding = false;
+                clearAllTimers();
+
+                holdTimer = setTimeout(() => {
+                    isHolding = true; 
+                    startCountdownUI();
+                }, 700);
+            }
+
+            function startCountdownUI() {
+                timeLeft = 9;
+                playTransitionSound();
+
+                btnPembuat.classList.add('override-chaos');
+                btnPembuat.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> OVERRIDE: ${timeLeft}s`;
+                
+                countdownInterval = setInterval(() => {
+                    timeLeft--;
+                    if (timeLeft > 0) {
+                        btnPembuat.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> OVERRIDE: ${timeLeft}s`;
+                        if (timeLeft <= 5) {
+                            document.body.classList.add('system-panic');
+                            playTick(true);
+                        } else {
+                            playTick(false); 
+                        }
+                    } else {
+                        clearInterval(countdownInterval);
+                    }
+                }, 1000);
+
+                pressTimer = setTimeout(() => {
+                    document.body.classList.remove('system-panic');
+                    btnPembuat.classList.remove('override-chaos');
+                    
+                    btnPembuat.style.cssText = "background: #ff003c !important; color: #000 !important; box-shadow: 0 0 50px #ff003c !important; border: none !important;";
+                    btnPembuat.innerHTML = `<i class="fa-solid fa-skull"></i> ACCESS GRANTED`;
+                    
+                    if(typeof AudioFX !== 'undefined') AudioFX.click();
+
+                    setTimeout(() => {
+                        window.location.href = sneakPeekUrl;
+                    }, 1000);
+                }, 9000);
+            }
+
+            function clearAllTimers() {
+                clearTimeout(holdTimer);
+                clearTimeout(pressTimer);
+                clearInterval(countdownInterval);
+            }
+
+            function releasePress(e) {
+                if (e && e.cancelable) e.preventDefault();
+                clearAllTimers();
+
+                if (!isHolding) {
+                    if(typeof AudioFX !== 'undefined') AudioFX.click();
+                    window.open(waUrl, "_blank"); 
+                } else {
+                    resetButtonUI();
+                }
+            }
+
+            function abortPress() {
+                clearAllTimers();
+                if (isHolding) resetButtonUI();
+            }
+
+            function resetButtonUI() {
+                document.body.classList.remove('system-panic');
+                btnPembuat.classList.remove('override-chaos');
+                btnPembuat.setAttribute("style", originalStyle);
+                btnPembuat.innerHTML = originalContent;
+                isHolding = false;
+            }
+
+            btnPembuat.addEventListener("click", (e) => {
+                e.preventDefault();
+            });
+
+            btnPembuat.addEventListener("mousedown", startPress);
+            btnPembuat.addEventListener("mouseup", releasePress);
+            btnPembuat.addEventListener("mouseleave", abortPress); 
+
+            btnPembuat.addEventListener("touchstart", startPress, { passive: false });
+            btnPembuat.addEventListener("touchend", releasePress, { passive: false });
+            btnPembuat.addEventListener("touchcancel", abortPress);
+
+            // --- SNEAK PEEK SUBTITLE: TRIPLE CLICK TO INTERLINKED ---
+            const subtitle = document.getElementById("subtitle-text");
+    // PERBAIKAN: Mengincar langsung class .glitch tempat teks SMK NURUL FALAH berada
+    const mainTitle = document.querySelector(".glitch"); 
+    const bgmAudio = document.getElementById("bgm"); 
+    
+    if (!subtitle) return;
+
+    let clickCount = 0;
+    let clickTimeout;
+    let isInterlinkedMode = false;
+
+    const originalBgmUrl = "bgm.mp3"; 
+    const interlinkedBgmUrl = "interlinked.mp3"; 
+
+    subtitle.addEventListener("click", () => {
+        clickCount++;
+        
+        // Reset hitungan jika jeda antar ketukan terlalu lama (2 detik aman untuk triple click)
+        clearTimeout(clickTimeout);
+        clickTimeout = setTimeout(() => {
+            clickCount = 0;
+        }, 2000); 
+
+        if (clickCount === 3) {
+            clickCount = 0; // Reset counter setelah berhasil dipicu
+            toggleInterlinkedMode();
+        }
+    });
+
+    function toggleInterlinkedMode() {
+        if (!isInterlinkedMode) {
+            // === 1. MASUK KE MODE INTERLINKED ===
+            isInterlinkedMode = true;
+
+            subtitle.textContent = "INTERLINKED";
+            subtitle.style.color = "#ff003c";
+            subtitle.style.textShadow = "0 0 15px #ff003c, 0 0 30px #ff003c";
+
+            // Efek kemiringan tak terbatas langsung menyala di judul utama
+            if (mainTitle) {
+                mainTitle.style.animation = "skew-glitch 1s infinite linear";
+                mainTitle.style.textShadow = "3px 0 0 #ff003c, -3px 0 0 #00f0ff";
+            }
+
+            // Ganti lagu utama ke file interlinked.mp3
+            if (bgmAudio) {
+                bgmAudio.src = interlinkedBgmUrl;
+                bgmAudio.load();
+                bgmAudio.play().catch(e => console.log("Audio play diblokir:", e));
+            }
+
+            if (typeof AudioFX !== 'undefined') AudioFX.click();
+
+        } else {
+            // === 2. KEMBALI KE MODE DEFAULT ===
+            isInterlinkedMode = false;
+
+            subtitle.textContent = "(BDP) PEMASARAN";
+            subtitle.style.color = ""; 
+            subtitle.style.textShadow = "";
+
+            // Matikan animasi miring dan kembalikan ke glitch bawaan
+            if (mainTitle) {
+                mainTitle.style.animation = "";
+                mainTitle.style.textShadow = "";
+            }
+
+            // Kembalikan lagu utama ke bgm.mp3
+            if (bgmAudio) {
+                bgmAudio.src = originalBgmUrl;
+                bgmAudio.load();
+                bgmAudio.play().catch(e => console.log("Audio play diblokir:", e));
+            }
+
+            if (typeof AudioFX !== 'undefined') AudioFX.click();
+        }
+    }
+        }); // akhir DOMContentLoaded utama
     </script>
 </body>
 </html>
