@@ -19,6 +19,10 @@
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
+    <!-- Firebase (dipakai untuk GLOBAL LIVE CHAT — realtime antar semua pengunjung) -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+
     <style>
         :root {
             --neon: #0f0;             
@@ -224,14 +228,89 @@
         .author-link:hover { background: var(--neon); color: black; box-shadow: 0 0 15px var(--neon); transform: translateY(-3px); }
         
         .control-btn {
-            position: fixed; bottom: 20px; width: 45px; height: 45px;
+            position: fixed; bottom: 29px; width: 45px; height: 45px;
             border: 1px solid var(--neon); background: rgba(0, 0, 0, 0.8); color: var(--neon);
             display: none; justify-content: center; align-items: center; border-radius: 50%;
             cursor: pointer; z-index: 1000; box-shadow: 0 0 10px var(--neon-dim); transition: 0.3s; font-size: 1.2rem;
         }
         .control-btn:hover { box-shadow: 0 0 20px var(--neon); transform: scale(1.1); }
-        #music-btn { right: 20px; }
-        #color-btn { left: 20px; }
+        #music-btn { right: 5px; }
+        #color-btn { left: 5px; }
+        #chat-btn { left: 50%; transform: translateX(-50%); }
+        #chat-btn:hover { transform: translateX(-50%) scale(1.1); }
+        #chat-btn .chat-dot {
+            position: absolute; top: -2px; right: -2px; width: 10px; height: 10px;
+            background: var(--glitch-red); border-radius: 50%; box-shadow: 0 0 8px var(--glitch-red);
+            display: none;
+        }
+
+        /* ── GLOBAL LIVE CHAT MARQUEE ── */
+        #chat-marquee-bar {
+            position: fixed; bottom: 0; left: 0; right: 0; height: 28px;
+            background: linear-gradient(90deg, rgba(0,0,0,0.95), var(--glass), rgba(0,0,0,0.95));
+            border-top: 1px solid var(--neon-dim); border-bottom: 1px solid var(--neon-dim);
+            overflow: hidden; z-index: 999; display: none; align-items: center;
+            box-shadow: 0 0 12px rgba(0,255,0,0.15) inset;
+        }
+        #chat-marquee-bar.live { display: flex; }
+        #chat-marquee-track {
+            display: inline-flex; white-space: nowrap; will-change: transform;
+            animation: marquee-scroll 22s linear infinite;
+            font-family: var(--font-main); font-size: 0.78rem; color: var(--neon);
+            text-shadow: 0 0 6px var(--neon);
+        }
+        #chat-marquee-track .mq-item { padding: 0 28px; }
+        #chat-marquee-track .mq-ip { opacity: 0.6; color: var(--glitch-blue); margin-right: 6px; }
+        @keyframes marquee-scroll {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* ── GLOBAL LIVE CHAT PANEL ── */
+        #chat-panel {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%);
+            width: min(92vw, 380px); max-height: 70vh; z-index: 1100;
+            background: var(--glass); border: 1px solid var(--neon); border-bottom: none;
+            border-radius: 14px 14px 0 0; box-shadow: 0 0 30px rgba(0,255,0,0.25);
+            display: flex; flex-direction: column; transition: transform 0.35s ease;
+            backdrop-filter: blur(6px);
+        }
+        #chat-panel.open { transform: translateX(-50%) translateY(0%); }
+        #chat-panel-head {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 14px; border-bottom: 1px solid var(--neon-dim);
+            font-family: var(--font-main); color: var(--neon); letter-spacing: 1px;
+        }
+        #chat-panel-head .chat-status { font-size: 0.65rem; opacity: 0.7; }
+        #chat-panel-head .chat-status .dot {
+            display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+            background: var(--neon); margin-right: 5px; box-shadow: 0 0 6px var(--neon);
+            animation: blink-cursor 1.4s step-end infinite;
+        }
+        #chat-close { background: none; border: none; color: var(--neon); font-size: 1rem; cursor: pointer; }
+        #chat-messages {
+            flex: 1; overflow-y: auto; padding: 10px 12px; font-family: var(--font-main);
+            font-size: 0.8rem; display: flex; flex-direction: column; gap: 8px; min-height: 180px;
+        }
+        .chat-msg { border-left: 2px solid var(--neon-dim); padding-left: 8px; }
+        .chat-msg .chat-ip {
+            color: var(--glitch-blue); font-size: 0.68rem; opacity: 0.75; display: block;
+        }
+        .chat-msg .chat-text { color: var(--neon); word-break: break-word; }
+        #chat-input-row { display: flex; gap: 6px; padding: 10px; border-top: 1px solid var(--neon-dim); }
+        #chat-input {
+            flex: 1; background: #000; border: 1px solid var(--neon-dim); color: var(--neon);
+            font-family: var(--font-main); padding: 8px 10px; border-radius: 6px; outline: none; font-size: 0.85rem;
+        }
+        #chat-input:focus { border-color: var(--neon); box-shadow: 0 0 8px var(--neon-dim); }
+        #chat-send {
+            background: var(--neon-dim); border: none; color: #000; font-weight: bold;
+            padding: 0 14px; border-radius: 6px; cursor: pointer; transition: 0.2s;
+        }
+        #chat-send:hover { background: var(--neon); box-shadow: 0 0 10px var(--neon); }
+        @media (max-width: 480px) {
+            #chat-panel { width: 100vw; border-radius: 14px 14px 0 0; }
+        }
 #system-log { 
     color: var(--neon) !important; 
     opacity: 0.65; 
@@ -521,6 +600,32 @@
     <div id="color-btn" class="control-btn" onclick="System.toggleColor()">
         <span id="color-icon">🎨</span>
     </div>
+    <div id="chat-btn" class="control-btn" onclick="GlobalChat.toggle()" title="Global Live Chat">
+        <i class="fa-solid fa-comments"></i>
+        <span class="chat-dot" id="chat-dot"></span>
+    </div>
+
+    <!-- GLOBAL LIVE CHAT — MARQUEE -->
+    <div id="chat-marquee-bar">
+        <div id="chat-marquee-track">
+            <span class="mq-item">// MENGHUBUNGKAN KE GLOBAL CHAT...</span>
+        </div>
+    </div>
+
+    <!-- GLOBAL LIVE CHAT — PANEL -->
+    <div id="chat-panel">
+        <div id="chat-panel-head">
+            <span><i class="fa-solid fa-satellite-dish"></i> GLOBAL LIVE CHAT</span>
+            <span class="chat-status"><span class="dot"></span>ANONIM • IP TERLIHAT</span>
+            <button id="chat-close" onclick="GlobalChat.toggle()">✕</button>
+        </div>
+        <div id="chat-messages"><div class="chat-msg"><span class="chat-text">// Memuat pesan...</span></div></div>
+        <div id="chat-input-row">
+            <input id="chat-input" type="text" maxlength="200" placeholder="Tulis pesan ke semua orang..." onkeydown="if(event.key==='Enter')GlobalChat.send()">
+            <button id="chat-send" onclick="GlobalChat.send()"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+
 
     <div class="container" id="main-content">
         <header>
@@ -958,6 +1063,8 @@
 
                 this.musicBtn.style.display = 'flex'; 
                 this.colorBtn.style.display = 'flex';
+                const chatBtn = document.getElementById('chat-btn');
+                if (chatBtn) chatBtn.style.display = 'flex';
 
                 this.fetchGallery(); 
                 this.startLatency(); 
@@ -1449,7 +1556,9 @@
         // ── UPLOAD SYSTEM (Opsi C — Upload dengan Password ke Apps Script/Drive) ──
         const UploadSystem = {
             // ⚠️ GANTI password ini sesuai keinginanmu
-            ACCESS_CODE: "smks2026",
+            // Disimpan dalam bentuk Base64, didekode via atob() saat dicek (tidak plaintext di source)
+            ACCESS_CODE_B64: "c21rczIwMjY=",
+            get ACCESS_CODE() { return atob(this.ACCESS_CODE_B64); },
 
             selectedFile: null,
 
@@ -1710,6 +1819,141 @@
 
         // Inisialisasi viewer setelah DOM siap
         document.addEventListener('DOMContentLoaded', () => GalleryViewer.init());
+
+        // ============================================================
+        //  GLOBAL LIVE CHAT — semua pengunjung (tanpa login), IP terlihat
+        //  ⚠️ WAJIB DIISI: buat project Firebase GRATIS di console.firebase.google.com,
+        //  aktifkan "Firestore Database" (mode test), lalu tempel config di bawah ini.
+        //  Tanpa config ini, chat akan jalan tapi cuma bersifat LOKAL (1 device saja),
+        //  karena situs statis tidak punya server sendiri untuk menyimpan pesan global.
+        // ============================================================
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyDZuEeW24yyBKJ-dpJyiBMJ6HH5od15L40",
+            authDomain: "server-nufa.firebaseapp.com",
+            projectId: "server-nufa",
+            storageBucket: "server-nufa.firebasestorage.app",
+            messagingSenderId: "168660687360",
+            appId: "1:168660687360:web:bdb56f6ea15e3cd44756e5"
+        };
+
+        const GlobalChat = {
+            db: null,
+            unsub: null,
+            myIp: null,
+            isOpen: false,
+            lastCount: 0,
+            localMessages: [], // fallback kalau Firebase belum dikonfigurasi
+
+            async init() {
+                // Ambil IP publik pengirim (dipakai untuk ditampilkan ke semua orang, tanpa login)
+                try {
+                    const r = await fetch('https://api.ipify.org?format=json');
+                    const d = await r.json();
+                    this.myIp = d.ip;
+                } catch (e) {
+                    this.myIp = 'UNKNOWN';
+                }
+
+                const configured = FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith('GANTI');
+                if (configured && typeof firebase !== 'undefined') {
+                    try {
+                        firebase.initializeApp(FIREBASE_CONFIG);
+                        this.db = firebase.firestore();
+                        this.listen();
+                        return;
+                    } catch (e) {
+                        console.warn('Firebase gagal init, fallback ke mode lokal:', e);
+                    }
+                }
+                // Mode fallback lokal (tidak global, hanya demo di browser ini)
+                this.renderMessages([
+                    { ip: 'SYSTEM', text: '⚠️ Firebase belum dikonfigurasi — chat ini cuma lokal di browser kamu sendiri. Isi FIREBASE_CONFIG di kode untuk mengaktifkan global live chat sungguhan.', ts: Date.now() }
+                ]);
+            },
+
+            listen() {
+                this.db.collection('global_chat')
+                    .orderBy('ts', 'desc')
+                    .limit(50)
+                    .onSnapshot((snap) => {
+                        const msgs = [];
+                        snap.forEach(doc => msgs.push(doc.data()));
+                        msgs.reverse();
+                        this.renderMessages(msgs);
+                        if (!this.isOpen && msgs.length > this.lastCount) {
+                            document.getElementById('chat-dot').style.display = 'block';
+                        }
+                        this.lastCount = msgs.length;
+                    }, (err) => console.warn('Chat listen error:', err));
+            },
+
+            renderMessages(msgs) {
+                const box = document.getElementById('chat-messages');
+                box.innerHTML = msgs.map(m => `
+                    <div class="chat-msg">
+                        <span class="chat-ip">${this._esc(m.ip || 'UNKNOWN')} • ${this._time(m.ts)}</span>
+                        <span class="chat-text">${this._esc(m.text)}</span>
+                    </div>
+                `).join('');
+                box.scrollTop = box.scrollHeight;
+                this.renderMarquee(msgs);
+            },
+
+            renderMarquee(msgs) {
+                const track = document.getElementById('chat-marquee-track');
+                const bar = document.getElementById('chat-marquee-bar');
+                if (!msgs.length) { bar.classList.remove('live'); return; }
+                const recent = msgs.slice(-15);
+                const html = recent.map(m =>
+                    `<span class="mq-item"><span class="mq-ip">[${this._esc(m.ip || '???')}]</span>${this._esc(m.text)}</span>`
+                ).join('');
+                // duplikat agar scroll infinite mulus
+                track.innerHTML = html + html;
+                bar.classList.add('live');
+            },
+
+            _esc(s) {
+                return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+            },
+
+            _time(ts) {
+                if (!ts) return '';
+                const d = new Date(ts);
+                return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            },
+
+            toggle() {
+                this.isOpen = !this.isOpen;
+                document.getElementById('chat-panel').classList.toggle('open', this.isOpen);
+                if (this.isOpen) document.getElementById('chat-dot').style.display = 'none';
+                if (typeof AudioFX !== 'undefined') AudioFX.click();
+            },
+
+            async send() {
+                const input = document.getElementById('chat-input');
+                const text = input.value.trim();
+                if (!text) return;
+                input.value = '';
+
+                const payload = { ip: this.myIp || 'UNKNOWN', text: text.slice(0, 200), ts: Date.now() };
+
+                if (this.db) {
+                    try {
+                        await this.db.collection('global_chat').add(payload);
+                    } catch (e) {
+                        console.warn('Gagal kirim ke server, simpan lokal:', e);
+                        this.localMessages.push(payload);
+                        this.renderMessages(this.localMessages);
+                    }
+                } else {
+                    this.localMessages.push(payload);
+                    this.renderMessages(this.localMessages);
+                }
+                if (typeof AudioFX !== 'undefined') AudioFX.click();
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => GlobalChat.init());
     </script>
 </body>
 </html>
