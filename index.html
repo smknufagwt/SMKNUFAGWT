@@ -6,7 +6,7 @@
     <title>SMK NURUL FALAH - THE GLIMPSE OF FUTURE</title>
 <meta name="google-site-verification" content="bcu4uRS7dTLeJExZS1IX56ZkOeI4F5Wu1O48GXmes8Y" />
 <meta name="description" content="Website Resmi Sistem Informasi Digital dan Galeri Highlight kegiatan SMK Nurul Falah. Berlokasi di jalan raya kauman,Desa Gedung wani timur,Margatiga, Lampung Timur.">
-    <meta name="keywords" content="SMK Nurul Falah, SMK Nufa, Bisnis Daring dan Pemasaran, BDP, Digital Marketing, SMK Lampung Timur, Margatiga, website cyberpunk, masa depan, sekilas pandang,">
+    <meta name="keywords" content="SMK Nurul Falah, SMK Nufa, smks, Gedung wani timur, kauman, SMK Lampung Timur, GWT, DESA, HACKER, gedung wani, biner, code matrix, matrix, NUFA BASE, Margatiga, website cyberpunk, masa depan, sekilas pandang,">
     <meta name="author" content="SMK Nurul Falah">
     <meta name="robots" content="index, follow">
    
@@ -40,7 +40,7 @@
             display: inline-block;
             margin-left: 2px;
             color: var(--neon);
-            animation: blink-cursor 0.8s step-end infinite;
+            animation: blink-cursor 0.4s step-end infinite;
         }
         @keyframes blink-cursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
@@ -61,7 +61,7 @@
             overflow-x: hidden; /* Hanya sembunyikan scroll samping */
             min-height: 100vh;
             font-size: 16px;
-            transition: color 0.3s ease;
+            transition: color 0.3s ease-in-out;
         }
 
         canvas#matrix-bg { 
@@ -308,6 +308,40 @@
             padding: 0 14px; border-radius: 6px; cursor: pointer; transition: 0.2s;
         }
         #chat-send:hover { background: var(--neon); box-shadow: 0 0 10px var(--neon); }
+        #chat-send:disabled, #chat-send.cooldown {
+            background: #222; color: var(--neon-dim); cursor: not-allowed; opacity: 0.6; box-shadow: none;
+        }
+        #chat-send.cooldown::after {
+            content: attr(data-cd); font-size: 0.6rem; margin-left: 4px;
+        }
+
+        /* ── PRIVACY POLICY (footer popover, klik-to-toggle, tanpa pindah tab) ── */
+        .privacy-wrap { position: relative; display: inline-block; }
+        .privacy-link {
+            color: var(--glitch-blue); text-decoration: none; font-weight: bold;
+            border: 1px solid var(--glitch-blue); padding: 8px 15px; display: inline-block; margin-bottom: 10px;
+            transition: 0.3s; text-transform: uppercase; background: #000; font-family: var(--font-main);
+            cursor: pointer; font-size: 0.8rem;
+        }
+        .privacy-link:hover { background: var(--glitch-blue); color: black; box-shadow: 0 0 15px var(--glitch-blue); transform: translateY(-3px); }
+        #privacy-board {
+            position: absolute; bottom: calc(100% + 12px); left: 50%; transform: translateX(-50%) translateY(8px);
+            width: min(86vw, 360px); background: var(--glass); border: 1px solid var(--glitch-blue);
+            border-radius: 8px; padding: 16px; text-align: left; font-size: 0.78rem; line-height: 1.5;
+            color: #ddd; box-shadow: 0 0 25px rgba(0,240,255,0.25); backdrop-filter: blur(6px);
+            opacity: 0; visibility: hidden; pointer-events: none; transition: 0.25s ease; z-index: 50;
+        }
+        #privacy-board.open { opacity: 1; visibility: visible; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+        #privacy-board h4 {
+            margin: 0 0 10px; color: var(--glitch-blue); font-size: 0.85rem; letter-spacing: 1px;
+            border-bottom: 1px solid rgba(0,240,255,0.3); padding-bottom: 6px;
+        }
+        #privacy-board ol { margin: 0; padding-left: 18px; }
+        #privacy-board li { margin-bottom: 8px; }
+        #privacy-board::after {
+            content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+            border: 7px solid transparent; border-top-color: var(--glitch-blue);
+        }
 
         /* ── DASHBOARD MINI: ONLINE USERS + NOTIF TOGGLE (premium redesign) ── */
         #chat-head-right { display: flex; align-items: center; gap: 10px; }
@@ -736,7 +770,8 @@
     <!-- GLOBAL LIVE CHAT — PANEL -->
     <div id="chat-panel">
         <div id="chat-panel-head">
-            <span><i class="fa-solid fa-satellite-dish"></i> GLOBAL LIVE CHAT</span>
+            <span><i class="fa-solid fa-satellite-dish"></i> GLOBAL LIVE CHAT
+ IP-ANONIM</span>
             <div id="chat-head-right">
                 <button id="chat-notif-toggle" class="chat-icon-btn" onclick="GlobalChat.toggleNotif()" title="Toggle Notifikasi"><i class="fa-solid fa-bell-slash"></i></button>
                 <button id="chat-close" onclick="GlobalChat.toggle()">✕</button>
@@ -745,7 +780,7 @@
         <div id="chat-dashboard" onclick="GlobalChat.toggleOnlineList()">
             <div id="chat-online-left">
                 <span class="dot-online"></span>
-                <span id="chat-online-count"><span class="num">0</span> ORANG ONLINE</span>
+                <span id="chat-online-count"><span class="num">0</span> ONLINE</span>
                 <span id="chat-online-updated"></span>
             </div>
             <span id="chat-net-label"><i class="fa-solid fa-tower-broadcast"></i> JARINGAN AKTIF</span>
@@ -754,7 +789,7 @@
         <div id="chat-online-list"></div>
         <div id="chat-messages"><div class="chat-msg"><span class="chat-text">// Memuat pesan...</span></div></div>
         <div id="chat-input-row">
-            <input id="chat-input" type="text" maxlength="200" placeholder="Tulis pesan ke semua orang..." onkeydown="if(event.key==='Enter')GlobalChat.send()">
+            <input id="chat-input" type="text" maxlength="1024" placeholder="Tulis pesan ke semua orang..." onkeydown="if(event.key==='Enter')GlobalChat.send()">
             <button id="chat-send" onclick="GlobalChat.send()"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
     </div>
@@ -874,6 +909,21 @@
     </a>
 </div>
 <div id="system-log">RESPONDING.....</div>
+
+<div class="privacy-wrap" style="margin-top: 12px;">
+    <span class="privacy-link" id="privacy-trigger" onclick="PrivacyBoard.toggle(event)">
+        <i class="fa-solid fa-shield-halved"></i> PRIVACY POLICY
+    </span>
+    <div id="privacy-board">
+        <h4><i class="fa-solid fa-lock"></i> KEBIJAKAN PRIVASI</h4>
+        <ol>
+            <li>Penggunaan IP hanya untuk keperluan identifikasi (ID) pengunjung, bukan untuk mencuri ataupun menyalahgunakan data pribadi.</li>
+            <li>Dengan menggunakan website ini, Anda setuju bahwa tampilan data merupakan bagian dari konsep estetika "hacker" untuk mempresentasikan transparansi proses transfer data, bukan untuk tujuan pengintaian.</li>
+            <li>Data yang dikumpulkan tidak akan dijual, dibagikan, atau dipindahtangankan ke pihak ketiga mana pun untuk tujuan komersial.</li>
+            <li>Pengguna bertanggung jawab atas setiap konten yang dikirim melalui fitur chat dan wajib menjaga etika berkomunikasi yang baik dan sopan.</li>
+        </ol>
+    </div>
+</div>
 
 <div style="text-align: center; color: var(--neon); font-family: var(--font-main); margin-top: 16px; font-size: 0.85rem; letter-spacing: 1px;">
     &copy; 2026 SMK NURUL FALAH. All Rights Reserved.
@@ -1973,6 +2023,96 @@
             appId: "1:168660687360:web:bdb56f6ea15e3cd44756e5"
         };
 
+        // ============================================================
+        //  KONFIGURASI SENSOR IP
+        //  Atur level penyamaran IP di sini saja — berlaku otomatis &
+        //  tersinkron untuk IPv4 maupun IPv6.
+        //
+        //  IP_MASK_LEVEL = 0  → tampilkan IP APA ADANYA (tidak ada yang disensor)
+        //  IP_MASK_LEVEL = 1  → sensor 1 segmen TERAKHIR   (182.1.2.xxx | 2001:db8:1:2:3:4:5:xxxx)
+        //  IP_MASK_LEVEL = 2  → sensor 2 segmen terakhir
+        //  IP_MASK_LEVEL = 3  → sensor 3 segmen terakhir   (182.xxx.xxx.xxx | 2001:db8:1:2:3:xxxx:xxxx:xxxx)
+        //  ...dan seterusnya. IPv4 punya 4 segmen, IPv6 punya 8 segmen,
+        //  jadi nilai akan otomatis dibatasi (clamp) sesuai jumlah segmen tiap jenis IP.
+        // ============================================================
+        const IP_MASK_LEVEL = 1;
+
+        // ============================================================
+        //  KONFIGURASI FILTER KATA KASAR
+        //  Tambah / kurangi daftar kata di sini saja, dipakai otomatis
+        //  oleh seluruh sistem chat (sinkron, tidak perlu ubah kode lain).
+        // ============================================================
+        const BAD_WORDS = ['asu', 'puki', 'goblok', 'dancok', 'anjing', 'bangsat', 'kontol', 'memek', 'tai', 'jancok'];
+
+        // ============================================================
+        //  KONFIGURASI COOLDOWN TOMBOL KIRIM (anti-spam)
+        // ============================================================
+        const SEND_COOLDOWN_MS = 3000;
+
+        // ── MODUL: Sensor IP (IPv4 & IPv6 tersinkron lewat IP_MASK_LEVEL) ──
+        const IpMask = {
+            apply(ip) {
+                if (!ip || ip === 'UNKNOWN' || ip === 'SYSTEM') return 'ANONIM';
+
+                const isV6 = ip.includes(':');
+                const sep = isV6 ? ':' : '.';
+                const maskToken = isV6 ? 'xxxx' : 'xxx';
+                const parts = ip.split(sep).filter(Boolean);
+                if (parts.length < 2) return 'ANONIM';
+
+                // Level 0 = tampil penuh. Clamp agar tidak melebihi jumlah segmen yang ada.
+                const level = Math.max(0, Math.min(IP_MASK_LEVEL, parts.length));
+                if (level === 0) return ip;
+
+                const visibleCount = parts.length - level;
+                const masked = parts.map((seg, i) => (i < visibleCount ? seg : maskToken));
+                return masked.join(sep);
+            }
+        };
+
+        // ── MODUL: Filter kata kasar (sensor otomatis jadi "***") ──
+        const WordFilter = {
+            _regex: null,
+            _build() {
+                if (this._regex) return this._regex;
+                const escaped = BAD_WORDS.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+                this._regex = new RegExp('\\b(' + escaped.join('|') + ')\\b', 'gi');
+                return this._regex;
+            },
+            clean(text) {
+                if (!text) return text;
+                return text.replace(this._build(), (m) => '*'.repeat(m.length));
+            }
+        };
+
+        // ── MODUL: Privacy Policy popover (klik untuk buka, tidak pindah tab/link) ──
+        const PrivacyBoard = {
+            isOpen: false,
+            toggle(e) {
+                if (e) e.stopPropagation();
+                this.isOpen = !this.isOpen;
+                document.getElementById('privacy-board').classList.toggle('open', this.isOpen);
+                if (typeof AudioFX !== 'undefined') AudioFX.click();
+            },
+            close() {
+                this.isOpen = false;
+                const el = document.getElementById('privacy-board');
+                if (el) el.classList.remove('open');
+            },
+            init() {
+                // klik di luar board otomatis menutup
+                document.addEventListener('click', (e) => {
+                    if (!this.isOpen) return;
+                    const board = document.getElementById('privacy-board');
+                    const trigger = document.getElementById('privacy-trigger');
+                    if (board && !board.contains(e.target) && trigger && !trigger.contains(e.target)) {
+                        this.close();
+                    }
+                });
+            }
+        };
+        document.addEventListener('DOMContentLoaded', () => PrivacyBoard.init());
+
         const GlobalChat = {
             db: null,
             unsub: null,
@@ -1980,6 +2120,7 @@
             isOpen: false,
             lastCount: 0,
             started: false,
+            lastSendTime: 0,
             localMessages: [], // fallback kalau Firebase belum dikonfigurasi
 
             // ── Presence (dashboard "orang online") ──
@@ -2105,7 +2246,7 @@
                 const countEl = document.getElementById('chat-online-count');
                 if (countEl) {
                     const prev = this._prevOnlineCount;
-                    countEl.innerHTML = `<span class="num">${count}</span> ORANG ONLINE`;
+                    countEl.innerHTML = `<span class="num">${count}</span> ONLINE`;
                     if (typeof prev === 'number' && prev !== count) {
                         countEl.classList.remove('bump');
                         void countEl.offsetWidth;
@@ -2128,7 +2269,7 @@
                                 <span>${this._esc(d.device ? d.device.label : 'Perangkat')}</span>
                                 <small>terhubung • live</small>
                             </span>
-                            ${isYou ? '<span class="you-tag">KAMU</span>' : ''}
+                            ${isYou ? '<span class="you-tag">ANDA</span>' : ''}
                         </div>`;
                 }).join('') || '<div class="chat-online-item">// Tidak ada yang online</div>';
             },
@@ -2152,7 +2293,7 @@
                     }
                     this.notifEnabled = true;
                     localStorage.setItem('nufa_chat_notif', 'on');
-                    this._showToast({ ip: 'SYSTEM', text: 'Notifikasi aktif — kamu akan dapat alert untuk setiap chat baru.' });
+                    this._showToast({ ip: 'SYSTEM', text: 'Notifikasi aktif — Anda akan dapat alert untuk setiap chat baru.' });
                 } else {
                     this.notifEnabled = false;
                     localStorage.setItem('nufa_chat_notif', 'off');
@@ -2202,7 +2343,7 @@
                 if (!stack) return;
                 const el = document.createElement('div');
                 el.className = 'chat-toast';
-                el.innerHTML = `<span class="t-ip"><i class="fa-solid fa-comment-dots"></i> ${this._esc(m.ip === 'SYSTEM' ? 'SYSTEM' : (this._maskIp(m.ip) || 'Anonim'))}</span>${this._esc(m.text)}`;
+                el.innerHTML = `<span class="t-ip"><i class="fa-solid fa-comment-dots"></i> ${this._esc(m.ip === 'SYSTEM' ? 'SYSTEM' : (this._maskIp(m.ip) || 'Anonim'))}</span>${this._esc(WordFilter.clean(m.text))}`;
                 el.onclick = () => { this.toggle(true); el.remove(); };
                 stack.appendChild(el);
                 setTimeout(() => el.remove(), 4100);
@@ -2234,7 +2375,7 @@
                 box.innerHTML = msgs.map(m => `
                     <div class="chat-msg">
                         <span class="chat-ip">${this._esc(m.ip === 'SYSTEM' ? 'SYSTEM' : (this._maskIp(m.ip) || 'ANONIM'))} • ${this._time(m.ts)}</span>
-                        <span class="chat-text">${this._esc(m.text)}</span>
+                        <span class="chat-text">${this._esc(WordFilter.clean(m.text))}</span>
                     </div>
                 `).join('');
                 box.scrollTop = box.scrollHeight;
@@ -2247,7 +2388,7 @@
                 if (!msgs.length) { bar.classList.remove('live'); return; }
                 const recent = msgs.slice(-15);
                 const html = recent.map(m =>
-                    `<span class="mq-item"><span class="mq-ip">[${this._esc(m.ip === 'SYSTEM' ? 'SYSTEM' : (this._maskIp(m.ip) || 'ANONIM'))}]</span>${this._esc(m.text)}</span>`
+                    `<span class="mq-item"><span class="mq-ip">[${this._esc(m.ip === 'SYSTEM' ? 'SYSTEM' : (this._maskIp(m.ip) || 'ANONIM'))}]</span>${this._esc(WordFilter.clean(m.text))}</span>`
                 ).join('');
                 // duplikat agar scroll infinite mulus
                 track.innerHTML = html + html;
@@ -2258,20 +2399,12 @@
                 return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
             },
 
-            // ── SENSOR IP — privasi pengunjung dijaga, IP asli tidak pernah ditampilkan utuh ──
-            // IPv4: hanya oktet pertama terlihat → "182.xxx.xxx.xxx"
-            // IPv6: hanya blok pertama terlihat → "2001:xxxx:..."
-            // Aman dipanggil berkali-kali (idempotent), jadi data lama yang kebetulan belum
-            // tersensor saat disimpan pun tetap akan tersensor saat ditampilkan.
+            // ── SENSOR IP — level sensor diatur terpusat lewat IP_MASK_LEVEL ──
+            // IP_MASK_LEVEL = 0 → IP tampil penuh, N → N segmen terakhir disensor "xxx"/"xxxx".
+            // Sinkron otomatis untuk IPv4 (titik) & IPv6 (titik dua) lewat modul IpMask.
+            // Aman dipanggil berkali-kali (idempotent), jadi data lama pun tetap konsisten saat ditampilkan.
             _maskIp(ip) {
-                if (!ip || ip === 'UNKNOWN' || ip === 'SYSTEM') return 'ANONIM';
-                if (ip.includes(':')) {
-                    const parts = ip.split(':').filter(Boolean);
-                    return (parts[0] || 'xxxx') + ':xxxx:xxxx::xxxx';
-                }
-                const parts = ip.split('.');
-                if (parts.length === 4) return `${parts[0]}.xxx.xxx.xxx`;
-                return 'ANONIM';
+                return IpMask.apply(ip);
             },
 
             _time(ts) {
@@ -2293,11 +2426,28 @@
                 if (typeof AudioFX !== 'undefined') AudioFX.click();
             },
 
+            // ── Kirim pesan, dengan cooldown anti-spam + filter kata kasar ──
             async send() {
+                const sendBtn = document.getElementById('chat-send');
+                const now = Date.now();
+                const elapsed = now - this.lastSendTime;
+
+                // Masih dalam cooldown → blok kirim, tampilkan sisa waktu di tombol.
+                if (elapsed < SEND_COOLDOWN_MS) {
+                    this._flashCooldown(sendBtn, SEND_COOLDOWN_MS - elapsed);
+                    return;
+                }
+
                 const input = document.getElementById('chat-input');
-                const text = input.value.trim();
-                if (!text) return;
+                const rawText = input.value.trim();
+                if (!rawText) return;
                 input.value = '';
+
+                this.lastSendTime = now;
+                this._lockSendButton(sendBtn, SEND_COOLDOWN_MS);
+
+                // Kata kasar otomatis disensor jadi tanda bintang sebelum disimpan.
+                const text = WordFilter.clean(rawText.slice(0, 1024));
 
                 // IP disensor SEBELUM dikirim — jadi server/Firestore tidak pernah menyimpan IP utuh.
                 // uid (presenceId) dipakai sebagai identitas internal supaya deteksi "pesan sendiri"
@@ -2305,8 +2455,8 @@
                 const payload = {
                     ip: this._maskIp(this.myIp),
                     uid: this.presenceId,
-                    text: text.slice(0, 200),
-                    ts: Date.now()
+                    text,
+                    ts: now
                 };
 
                 if (this.db) {
@@ -2322,6 +2472,33 @@
                     this.renderMessages(this.localMessages);
                 }
                 if (typeof AudioFX !== 'undefined') AudioFX.click();
+            },
+
+            // Mengunci tombol kirim selama cooldown berjalan + tampilkan hitung mundur.
+            _lockSendButton(btn, durationMs) {
+                if (!btn) return;
+                btn.disabled = true;
+                btn.classList.add('cooldown');
+                const startedAt = Date.now();
+                const tick = () => {
+                    const remain = durationMs - (Date.now() - startedAt);
+                    if (remain <= 0) {
+                        btn.disabled = false;
+                        btn.classList.remove('cooldown');
+                        btn.removeAttribute('data-cd');
+                        return;
+                    }
+                    btn.setAttribute('data-cd', Math.ceil(remain / 1000) + 's');
+                    requestAnimationFrame(tick);
+                };
+                tick();
+            },
+
+            // Klik tombol saat masih cooldown → beri getaran/feedback kecil tanpa reset timer.
+            _flashCooldown(btn) {
+                if (!btn) return;
+                btn.classList.add('cooldown');
+                if (navigator.vibrate) { try { navigator.vibrate(60); } catch (e) {} }
             }
         };
 
