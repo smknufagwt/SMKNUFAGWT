@@ -5,12 +5,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SMK NURUL FALAH - THE GLIMPSE OF FUTURE</title>
 <meta name="google-site-verification" content="bcu4uRS7dTLeJExZS1IX56ZkOeI4F5Wu1O48GXmes8Y" />
-<meta name="description" content="Website Resmi Sistem Informasi Digital dan Galeri Highlight kegiatan SMK Nurul Falah. Berlokasi di jalan raya kauman,Desa Gedung wani timur,Margatiga, Lampung Timur.">
+<meta name="description" content="Website Resmi Sistem Informasi Digital dan Galeri Highlight kegiatan SMK Nurul Falah. Berlokasi di jalan raya kauman, Desa Gedung wani timur, Margatiga, Lampung Timur.">
     <meta name="keywords" content="SMK Nurul Falah, SMK Nufa, smks, Gedung wani timur, kauman, SMK Lampung Timur, GWT, DESA, HACKER, gedung wani, biner, code matrix, matrix, NUFA BASE, Margatiga, website cyberpunk, masa depan, sekilas pandang,">
     <meta name="author" content="SMK Nurul Falah">
     <meta name="robots" content="index, follow">
-   
+
+ <meta property="og:type" content="website" />
+    <meta property="og:title" content="SMK NURUL FALAH - THE GLIMPSE OF FUTURE" />
+    <meta property="og:description" content="Situs Resmi Sistem Informasi Digital dan Galeri Highlight kegiatan SMK Nurul Falah. Berlokasi di jalan raya kauman, Desa Gedung wani timur, Margatiga, Lampung Timur." />
+    <meta property="og:image" content="https://raw.githubusercontent.com/smknufagwt/SMKNUFAGWT/main/appcover.jpg" />
+    <meta property="og:image:width" content="612" />
+    <meta property="og:image:height" content="612" />
+    <meta property="og:image:type" content="image/jpeg" />
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="SMK NURUL FALAH - THE GLIMPSE OF FUTURE" />
+    <meta name="twitter:description" content="situs Resmi Sistem Informasi Digital dan Galeri Highlight kegiatan SMK Nurul Falah." />
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/smknufagwt/SMKNUFAGWT/main/appcover.jpg" />
+    <link rel="icon" type="image/x-icon" href="Logo Smk.png">
     
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #030712;
+        }
+        .font-display {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .glow-effect {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+        .glow-text {
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #030712;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2937;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3b82f6;
+        }
+    </style>
+
     <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="black" stroke="white" stroke-width="4"/%3E%3Cline x1="5" y1="50" x2="95" y2="50" stroke="white" stroke-width="2"/%3E%3Cline x1="50" y1="5" x2="50" y2="95" stroke="white" stroke-width="2"/%3E%3Cellipse cx="50" cy="50" rx="10" ry="45" fill="none" stroke="white" stroke-width="3"%3E%3Canimate attributeName="rx" values="0;44;0" dur="2s" repeatCount="indefinite"/%3E%3C/ellipse%3E%3C/svg%3E'>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,22 +70,33 @@
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Firebase (dipakai untuk GLOBAL LIVE CHAT — realtime antar semua pengunjung) -->
     <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 
     <style>
         :root {
-            --neon: #0f0;             
-            --neon-dim: #008F11;      
-            --glitch-red: #ff003c;    
-            --glitch-blue: #00f0ff;   
-            --bg-color: #050505;      
-            --glass: rgba(0, 15, 0, 0.78); 
-            --font-main: 'Share Tech Mono', monospace; 
+            --neon: #0f0;
+            --neon-dim: #008F11;
+            --glitch-red: #ff003c;
+            --glitch-blue: #00f0ff;
+            --bg-color: #050505;
+            --glass: rgba(0, 15, 0, 0.78);
+            --font-main: 'Share Tech Mono', monospace;
+
+               --premium-white: #ffffff;
+              --cyan-ringan: #b3ffff;
+
+            --premium-white: #f5f6f8;
+            --premium-silver: #c7ccd1;
+            --premium-silver-dim: #8b9197;
+            --premium-platinum: #e4e7eb;
+            --premium-gold: #d9c089;
+            --premium-glass: rgba(20, 22, 26, 0.78);
+            --premium-shadow: rgba(199, 204, 209, 0.25);
+            --premium-gradient: linear-gradient(135deg, var(--premium-white) 0%, var(--premium-silver) 50%, var(--premium-platinum) 100%);
         }
 
-        /* Cursor Effect */
         .typing-cursor::after {
             content: '‎ '; 
             display: inline-block;
@@ -45,33 +107,30 @@
         @keyframes blink-cursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; cursor: crosshair; }
-    
-        /* Scrollbar Keren */
+
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #000; }
         ::-webkit-scrollbar-thumb { background: var(--neon-dim); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--neon); }
 
-        /*Scroll setting*/
         body {
             margin: 0; padding: 0;
             background-color: var(--bg-color);
             color: var(--neon);
             font-family: var(--font-main);
-            overflow-x: hidden; /* Hanya sembunyikan scroll samping */
+            overflow-x: hidden; 
             min-height: 100vh;
             font-size: 16px;
             transition: color 0.3s ease-in-out;
         }
 
         canvas#matrix-bg { 
-            position: fixed; /* Background tetap diam saat discroll */
+            position: fixed; 
             top: 0; left: 0; width: 100%; height: 100%; 
             z-index: -2; opacity: 0.85; pointer-events: none;
         }
         .scanlines { display: none; } 
 
-        /* Header Glitch */
         .glitch-wrapper { position: relative; display: inline-block; }
         .glitch {
             position: relative; color: var(--neon); font-size: 2rem; 
@@ -107,11 +166,9 @@
             80% { clip: rect(50px, 9999px, 20px, 0); transform: skew(0.1deg); }
             100% { clip: rect(30px, 9999px, 70px, 0); transform: skew(0.7deg); }
         }
-        
-        /* Efek Error Merah */
+
         .critical-error { color: red !important; text-shadow: 2px 2px 0px #000; }
 
-        /* Lockscreen */
         #overlay {
             position: fixed; inset: 0; background: black; z-index: 100;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -129,7 +186,6 @@
         .btn-enter:hover { background: var(--neon); color: black; box-shadow: 0 0 30px var(--neon); }
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
 
-        /* Container kembali ke mode normal agar bisa scroll */
         .container {
             position: relative; z-index: 10;
             max-width: 900px; margin: 0 auto; padding: 20px;
@@ -244,7 +300,6 @@
             display: none;
         }
 
-        /* ── GLOBAL LIVE CHAT MARQUEE ── */
         #chat-marquee-bar {
             position: fixed; bottom: 0; left: 0; right: 0; height: 28px;
             background: linear-gradient(90deg, rgba(0,0,0,0.95), var(--glass), rgba(0,0,0,0.95));
@@ -266,7 +321,6 @@
             100% { transform: translateX(-50%); }
         }
 
-        /* ── GLOBAL LIVE CHAT PANEL ── */
         #chat-panel {
             position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%);
             width: min(92vw, 380px); max-height: 70vh; z-index: 1100;
@@ -294,7 +348,7 @@
         }
         .chat-msg { border-left: 2px solid var(--neon-dim); padding-left: 8px; }
         .chat-msg .chat-ip {
-            color: var(--glitch-blue); font-size: 0.68rem; opacity: 0.75; display: block;
+            color: var(--premium-white); font-size: 0.68rem; opacity: 0.75; display: block;
         }
         .chat-msg .chat-text { color: var(--neon); word-break: break-word; }
         #chat-input-row { display: flex; gap: 6px; padding: 10px; border-top: 1px solid var(--neon-dim); }
@@ -315,15 +369,14 @@
             content: attr(data-cd); font-size: 0.6rem; margin-left: 4px;
         }
 
-        /* ── PRIVACY POLICY (footer popover, klik-to-toggle, tanpa pindah tab) ── */
         .privacy-wrap { position: relative; display: inline-block; }
         .privacy-link {
-            color: var(--glitch-blue); text-decoration: none; font-weight: bold;
-            border: 1px solid var(--glitch-blue); padding: 8px 15px; display: inline-block; margin-bottom: 10px;
+            color: var(--neon); text-decoration: none; font-weight: bold;
+            border: 1px solid var(--neon); padding: 8px 15px; display: inline-block; margin-bottom: 10px;
             transition: 0.3s; text-transform: uppercase; background: #000; font-family: var(--font-main);
             cursor: pointer; font-size: 0.8rem;
         }
-        .privacy-link:hover { background: var(--glitch-blue); color: black; box-shadow: 0 0 15px var(--glitch-blue); transform: translateY(-3px); }
+        .privacy-link:hover { background: var(--neon); color: black; box-shadow: 0 0 15px var(--neon); transform: translateY(-3px); }
         #privacy-board {
             position: absolute; bottom: calc(100% + 12px); left: 50%; transform: translateX(-50%) translateY(8px);
             width: min(86vw, 360px); background: var(--glass); border: 1px solid var(--glitch-blue);
@@ -343,7 +396,6 @@
             border: 7px solid transparent; border-top-color: var(--glitch-blue);
         }
 
-        /* ── DASHBOARD MINI: ONLINE USERS + NOTIF TOGGLE (premium redesign) ── */
         #chat-head-right { display: flex; align-items: center; gap: 10px; }
         .chat-icon-btn {
             background: none; border: 1px solid var(--neon-dim); color: var(--neon);
@@ -423,7 +475,6 @@
             box-shadow: 0 0 8px rgba(255,0,60,0.5);
         }
 
-        /* ── TOAST NOTIFIKASI IN-APP (fallback universal, jalan di semua device) ── */
         #chat-toast-stack {
             position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
             z-index: 1300; display: flex; flex-direction: column; gap: 8px;
@@ -459,7 +510,6 @@
     letter-spacing: 1px;
 }
 
-/* ── LIGHTBOX VIEWER ── */
 #gallery-lightbox {
     display: none;
     position: fixed; inset: 0; z-index: 200;
@@ -511,9 +561,6 @@
     font-family: var(--font-main);
 }
 
-/* ══════════════════════════════════════════════════════════
-   HOLOGRAM UPLOAD FLOATER — Tombol Upload di Tab Galeri
-   ══════════════════════════════════════════════════════════ */
 .gallery-toolbar {
     display: flex; justify-content: flex-end; align-items: center;
     margin: -10px 0 15px 0;
@@ -541,7 +588,6 @@
     box-shadow: 0 0 25px var(--neon), 0 0 50px rgba(0,255,65,0.3);
 }
 
-/* Lapisan kaca/scanline hologram di atas tombol */
 #hologram-upload-btn::before {
     content: '';
     position: absolute; inset: 0;
@@ -550,7 +596,7 @@
     animation: holo-scan 1.8s linear infinite;
     pointer-events: none;
 }
-/* Sapuan cahaya warna-warni yang lewat */
+
 #hologram-upload-btn::after {
     content: '';
     position: absolute; top: -50%; left: -60%;
@@ -578,18 +624,15 @@
     0%   { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
-/* Border + glow warna-warni berputar mengikuti tema cyberpunk */
+
 @keyframes holo-rainbow-pulse {
     0%   { border-color: var(--neon);     box-shadow: 0 0 10px var(--neon), inset 0 0 10px rgba(0,255,65,0.08); }
     25%  { border-color: var(--glitch-blue); box-shadow: 0 0 14px var(--glitch-blue), inset 0 0 10px rgba(0,240,255,0.08); }
     50%  { border-color: var(--glitch-red); box-shadow: 0 0 14px var(--glitch-red), inset 0 0 10px rgba(255,0,60,0.08); }
     75%  { border-color: #bf00ff;          box-shadow: 0 0 14px #bf00ff, inset 0 0 10px rgba(191,0,255,0.08); }
-    100% { border-color: var(--neon);      box-shadow: 0 0 10px var(--neon), inset 0 0 10px rgba(0,255,65,0.08); }
+    100% { border-color: var(--neon);      box-shadow: 0 0 10px var(--premium-white), inset 0 0 10px rgba(0,255,65,0.08); }
 }
 
-/* ══════════════════════════════════════════════════════════
-   MODAL UPLOAD — Holographic Panel
-   ══════════════════════════════════════════════════════════ */
 #upload-modal {
     display: none;
     position: fixed; inset: 0; z-index: 300;
@@ -612,7 +655,7 @@
     animation: holo-rainbow-pulse 4s linear infinite, slideUp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     overflow: hidden;
 }
-/* Scanline overlay di dalam panel */
+
 .upload-panel::before {
     content: '';
     position: absolute; inset: 0;
@@ -654,7 +697,6 @@
 }
 .upload-field input:focus { border-color: var(--neon); box-shadow: 0 0 12px rgba(0,255,65,0.3); }
 
-/* Dropzone */
 .upload-dropzone {
     border: 1.5px dashed var(--neon-dim); border-radius: 4px;
     padding: 22px 10px; text-align: center; cursor: pointer;
@@ -690,7 +732,6 @@
 #upload-status.success { color: var(--neon); text-shadow: 0 0 8px var(--neon); }
 #upload-status.loading { color: var(--glitch-blue); text-shadow: 0 0 8px var(--glitch-blue); }
 
-/* Progress bar holografik */
 #upload-progress-wrap {
     width: 100%; height: 4px; background: rgba(255,255,255,0.08);
     border-radius: 2px; margin-top: 10px; overflow: hidden; display: none; position: relative; z-index: 1;
@@ -711,13 +752,12 @@
     margin-bottom: 4px;
 }
 .chat-msg .chat-ip {
-    color: var(--glitch-blue);
+    color: var(--premium-white);
     font-size: 0.68rem;
     opacity: 0.75;
     display: block;
-    margin-bottom: 2px; /* memberi sedikit jarak dengan teks chat */
+    margin-bottom: 2px; 
 }
-
 
     </style>
 </head>
@@ -727,7 +767,6 @@
     <canvas id="matrix-bg"></canvas>
     <div class="scanlines"></div>
 
-    <!-- LIGHTBOX VIEWER -->
     <div id="gallery-lightbox">
         <button id="lb-close" onclick="GalleryViewer.close()">✕</button>
         <img id="lb-img" src="" alt="">
@@ -757,17 +796,14 @@
         <span class="chat-dot" id="chat-dot"></span>
     </div>
 
-    <!-- GLOBAL LIVE CHAT — MARQUEE -->
     <div id="chat-marquee-bar">
         <div id="chat-marquee-track">
             <span class="mq-item">// MENGHUBUNGKAN KE GLOBAL CHAT...</span>
         </div>
     </div>
 
-    <!-- TOAST NOTIFIKASI IN-APP — fallback universal, jalan di semua device -->
     <div id="chat-toast-stack"></div>
 
-    <!-- GLOBAL LIVE CHAT — PANEL -->
     <div id="chat-panel">
         <div id="chat-panel-head">
             <span><i class="fa-solid fa-satellite-dish"></i> GLOBAL LIVE CHAT
@@ -793,7 +829,6 @@
             <button id="chat-send" onclick="GlobalChat.send()"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
     </div>
-
 
     <div class="container" id="main-content">
         <header>
@@ -843,7 +878,6 @@
             <div class="gallery-grid" id="gallery-container"></div>
         </div>
 
-        <!-- UPLOAD MODAL -->
         <div id="upload-modal">
             <div class="upload-panel">
                 <button id="upload-close" onclick="UploadSystem.close()">✕</button>
@@ -878,7 +912,6 @@
                 <div id="upload-status"></div>
             </div>
         </div>
-
 
         <footer>
 <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
@@ -917,7 +950,7 @@
     <div id="privacy-board">
         <h4><i class="fa-solid fa-lock"></i> KEBIJAKAN PRIVASI</h4>
         <ol>
-            <li>Penggunaan IP hanya untuk keperluan identifikasi (ID) pengunjung, bukan untuk mencuri ataupun menyalahgunakan data pribadi.</li>
+            <li>Penggunaan alamat IP (Internet Protocol) hanya  untuk keperluan identifikasi (ID) pengunjung, bukan untuk mencuri ataupun menyalahgunakan data pribadi.</li>
             <li>Dengan menggunakan website ini, Anda setuju bahwa tampilan data merupakan bagian dari konsep estetika "hacker" untuk mempresentasikan transparansi proses transfer data, bukan untuk tujuan pengintaian.</li>
             <li>Data yang dikumpulkan tidak akan dijual, dibagikan, atau dipindahtangankan ke pihak ketiga mana pun untuk tujuan komersial.</li>
             <li>Pengguna bertanggung jawab atas setiap konten yang dikirim melalui fitur chat dan wajib menjaga etika berkomunikasi yang baik dan sopan.</li>
@@ -931,13 +964,11 @@
 
         </footer>
 
-
     <script>
         // ============================================================
         //  ⚠️ GANTI URL INI setelah deploy Google Apps Script kamu
-        //  Cara dapat URL: Apps Script → Deploy → Manage Deployments
-        //  Salin "Web app URL" dan paste di bawah ini
-        // ============================================================
+
+        
         const GALLERY_API_URL = "https://script.google.com/macros/s/AKfycbyQivqt0OaXD9inSftMHkrXVDkQq719Tf1ok0wVkjgCzNWc1_3KMRseKV4iyh-UOPcNxQ/exec";
 
         // Database foto kosong — akan diisi otomatis dari Drive
@@ -1021,7 +1052,6 @@
                 }, 40);
             }
 
-            // PERBAIKAN UTAMA: Berjalan secara rekursif menyusuri struktur DOM secara real-time
             write(el, htmlContent) {
                 el.innerHTML = htmlContent;
                 
@@ -1046,7 +1076,7 @@
                             frame += 2;
                         }, 15);
                     } else if (node.nodeType === 1) { // Element Node, telusuri anak-anaknya
-                        // Cegah teks di marquee atau objek hud ikut teracak tidak karuan jika ada
+                        
                         if (node.classList.contains('marquee-container')) return;
                         for (let child of node.childNodes) {
                             processNode(child);
@@ -1136,7 +1166,9 @@
                 { neon: '#FF0000', dim: '#CC0000', hex: '#FF0000' }, 
                 { neon: '#ffff00', dim: '#808000', hex: '#ffff00' },
                 { neon: '#bf00ff', dim: '#660080', hex: '#bf00ff' }, 
-                { neon: '#ff5500', dim: '#993300', hex: '#ff5500' }  
+                { neon: '#ff5500', dim: '#993300', hex: '#ff5500' },
+                { neon: '#ffffff', dim: '#8ce6ef', hex: '#ffffff' }  
+
             ],
             baseOffset: 4990,
             currentVisits: 0, 
@@ -1224,15 +1256,13 @@
                 this.bgm.volume = 0.7;
 
                 // ✅ Cek preferensi musik dari kunjungan sebelumnya
-                // Kunjungan pertama (null) → tetap putar seperti biasa
-                // Kunjungan berikutnya → ikuti pilihan terakhir user
+
                 const savedMusic = localStorage.getItem('nufa_music');
                 if (savedMusic === 'off') {
                     this.bgm.pause();
                     this.musicIcon.innerText = "🔇";
                     this.musicBtn.style.opacity = "0.8";
                 }
-                // jika 'on' atau null (pertama kali) → biarkan lagu tetap jalan
 
                 const btnEnter = document.querySelector('.btn-enter');
                 const oldText = btnEnter.innerText;
@@ -1252,7 +1282,6 @@
                 // ✅ Global Live Chat + Marquee HANYA dimulai setelah akses data dibuka
                 if (typeof GlobalChat !== 'undefined') GlobalChat.start();
 
-
                 this.fetchGallery(); 
                 this.startLatency(); 
                 this.initLog(); 
@@ -1263,7 +1292,7 @@
                 setTimeout(() => {
                     document.getElementById('overlay').style.display = 'none';
                     document.getElementById('main-content').style.display = 'block';
-                    startChaosMode(); // ✅ FIX: dipanggil setelah user masuk, bukan sebelumnya
+                    startChaosMode(); 
                 }, 500);
                 
             },
@@ -1299,7 +1328,6 @@
                     return;
                 }
 
-                // Tampilkan loading state
                 container.innerHTML = `
                     <div style="color:var(--neon);grid-column:1/-1;text-align:center;padding:60px 0;font-size:0.85rem;letter-spacing:2px;">
                         <div style="margin-bottom:12px;font-size:1.4rem;">📡</div>
@@ -1681,9 +1709,8 @@
             btnPembuat.addEventListener("touchend", releasePress, { passive: false });
             btnPembuat.addEventListener("touchcancel", abortPress);
 
-            } // akhir if (btnPembuat)
+            } 
 
-            // --- SNEAK PEEK SUBTITLE: TRIPLE CLICK TO INTERLINKED ---
             const subtitle = document.getElementById("subtitle-text");
             const mainTitle = document.querySelector(".glitch"); 
             const bgmAudio = document.getElementById("bgm"); 
@@ -1740,10 +1767,9 @@
             }
         }); // akhir DOMContentLoaded utama
 
-        // ── UPLOAD SYSTEM (Opsi C — Upload dengan Password ke Apps Script/Drive) ──
         const UploadSystem = {
             // ⚠️ GANTI password ini sesuai keinginanmu
-            // Disimpan dalam bentuk Base64, didekode via atob() saat dicek (tidak plaintext di source)
+            
             ACCESS_CODE_B64: "c21rczIwMjY=",
             get ACCESS_CODE() { return atob(this.ACCESS_CODE_B64); },
 
@@ -1903,7 +1929,7 @@
                     this.setProgress(100);
 
                     if (result.status === 'ok') {
-                        this.setStatus('✓ UPLOAD BERHASIL — SINKRONISASI GALERI...', 'success');
+                        this.setStatus('✓ UPLOAD BERHASIL — SINKRONISASI GALERI BERLANGSUNG...', 'success');
 
                         // Simpan ke cache lokal browser supaya langsung tampil walau belum sinkron Drive
                         if (result.file) {
@@ -1936,7 +1962,6 @@
             }
         };
         document.addEventListener('DOMContentLoaded', () => UploadSystem.init());
-
 
         const GalleryViewer = {
             index: 0,
@@ -2009,44 +2034,39 @@
 
         // ============================================================
         //  GLOBAL LIVE CHAT — semua pengunjung (tanpa login), IP terlihat
-        //  ⚠️ WAJIB DIISI: buat project Firebase GRATIS di console.firebase.google.com,
-        //  aktifkan "Firestore Database" (mode test), lalu tempel config di bawah ini.
-        //  Tanpa config ini, chat akan jalan tapi cuma bersifat LOKAL (1 device saja),
-        //  karena situs statis tidak punya server sendiri untuk menyimpan pesan global.
-        // ============================================================
+
+        
+
+        
+
+        
+
         const FIREBASE_CONFIG = {
             apiKey: "AIzaSyDZuEeW24yyBKJ-dpJyiBMJ6HH5od15L40",
             authDomain: "server-nufa.firebaseapp.com",
             projectId: "server-nufa",
             storageBucket: "server-nufa.firebasestorage.app",
             messagingSenderId: "168660687360",
-            appId: "1:168660687360:web:bdb56f6ea15e3cd44756e5"
+            appId: "1:168660687360:web:bdb56f6ea15e3cd44756e5",
+            databaseURL: "https://server-nufa-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
 
         // ============================================================
         //  KONFIGURASI SENSOR IP
-        //  Atur level penyamaran IP di sini saja — berlaku otomatis &
-        //  tersinkron untuk IPv4 maupun IPv6.
-        //
-        //  IP_MASK_LEVEL = 0  → tampilkan IP APA ADANYA (tidak ada yang disensor)
-        //  IP_MASK_LEVEL = 1  → sensor 1 segmen TERAKHIR   (182.1.2.xxx | 2001:db8:1:2:3:4:5:xxxx)
-        //  IP_MASK_LEVEL = 2  → sensor 2 segmen terakhir
-        //  IP_MASK_LEVEL = 3  → sensor 3 segmen terakhir   (182.xxx.xxx.xxx | 2001:db8:1:2:3:xxxx:xxxx:xxxx)
-        //  ...dan seterusnya. IPv4 punya 4 segmen, IPv6 punya 8 segmen,
-        //  jadi nilai akan otomatis dibatasi (clamp) sesuai jumlah segmen tiap jenis IP.
-        // ============================================================
-        const IP_MASK_LEVEL = 1;
 
-        // ============================================================
+        
+
+        
+
+        
+        
+        const IP_MASK_LEVEL = 1;
         //  KONFIGURASI FILTER KATA KASAR
-        //  Tambah / kurangi daftar kata di sini saja, dipakai otomatis
-        //  oleh seluruh sistem chat (sinkron, tidak perlu ubah kode lain).
-        // ============================================================
-        const BAD_WORDS = ['asu', 'puki', 'goblok', 'dancok', 'anjing', 'bangsat', 'kontol', 'memek', 'tai', 'jancok'];
+        const BAD_WORDS = ['asu', 'smks2026', 'puki', 'goblok', 'dancok', 'anjing', 'bangsat', 'kontol', 'memek', 'tai', 'jancok'];
 
         // ============================================================
         //  KONFIGURASI COOLDOWN TOMBOL KIRIM (anti-spam)
-        // ============================================================
+        
         const SEND_COOLDOWN_MS = 3000;
 
         // ── MODUL: Sensor IP (IPv4 & IPv6 tersinkron lewat IP_MASK_LEVEL) ──
@@ -2123,7 +2143,6 @@
             lastSendTime: 0,
             localMessages: [], // fallback kalau Firebase belum dikonfigurasi
 
-            // ── Presence (dashboard "orang online") ──
             presenceId: null,
             presenceUnsub: null,
             presenceInterval: null,
@@ -2172,7 +2191,7 @@
                         console.warn('Firebase gagal init, fallback ke mode lokal:', e);
                     }
                 }
-                // Mode fallback lokal (tidak global, hanya demo di browser ini)
+                
                 this.renderMessages([
                     { ip: 'SYSTEM', text: '⚠️ Firebase belum dikonfigurasi — chat ini cuma lokal di browser kamu sendiri. Isi FIREBASE_CONFIG di kode untuk mengaktifkan global live chat sungguhan.', ts: Date.now() }
                 ]);
@@ -2209,34 +2228,97 @@
                     }, (err) => console.warn('Chat listen error:', err));
             },
 
-            // ── PRESENCE: tandai device ini online + dengarkan siapa saja yang online ──
+            // ── PRESENCE: tandai device ini online (push-based, real-time lintas perangkat) ──
+
             startPresence() {
+                if (!FIREBASE_CONFIG.databaseURL || !firebase.database) {
+                    console.warn('Realtime Database belum dikonfigurasi — presence fallback ke mode polling Firestore.');
+                    return this.startPresenceFallback();
+                }
+
+                const rtdb = firebase.database();
+                const myIpKey = this._ipKey(this.myIp);
+                const presenceRef = rtdb.ref('presence_global/' + this.presenceId);
+                const connectedRef = rtdb.ref('.info/connected');
+
+                // Setiap kali koneksi ke Firebase tersambung (termasuk reconnect otomatis
+                
+                connectedRef.on('value', (snap) => {
+                    if (snap.val() === false) return;
+                    presenceRef.onDisconnect().remove().then(() => {
+                        presenceRef.set({
+                            ipKey: myIpKey,
+                            ip: this.myIp,
+                            device: this.myDevice,
+                            ts: firebase.database.ServerValue.TIMESTAMP
+                        });
+                    });
+                });
+
+                const goOffline = () => { try { presenceRef.remove(); } catch (e) {} };
+                window.addEventListener('pagehide', goOffline);
+                window.addEventListener('beforeunload', goOffline);
+
+                // onValue di sini PUSH dari server tiap ada perubahan — bukan polling —
+                
+                rtdb.ref('presence_global').on('value', (snap) => {
+                    const data = snap.val() || {};
+                    const grouped = this._groupByIp(data);
+                    this.onlineMap = grouped;
+                    this.renderOnlineList(grouped);
+                }, (err) => console.warn('Presence listen error:', err));
+            },
+
+            // Kelompokkan entri presence berdasarkan IP, supaya 1 IP dengan banyak
+            
+            _groupByIp(data) {
+                const byIp = {};
+                Object.keys(data).forEach(id => {
+                    const d = data[id];
+                    if (!d) return;
+                    const key = d.ipKey || this._ipKey(d.ip);
+                    if (!byIp[key]) {
+                        byIp[key] = { ip: d.ip, device: d.device, ts: d.ts, count: 1, ids: [id], isYou: id === this.presenceId };
+                    } else {
+                        byIp[key].count += 1;
+                        byIp[key].ids.push(id);
+                        byIp[key].ts = Math.max(byIp[key].ts || 0, d.ts || 0);
+                        if (id === this.presenceId) byIp[key].isYou = true;
+                    }
+                });
+                return byIp;
+            },
+
+            _ipKey(ip) {
+                return String(ip || 'UNKNOWN').replace(/[.#$\[\]/]/g, '_');
+            },
+
+            // ── Fallback: dipakai HANYA kalau Realtime Database belum dikonfigurasi ──
+            
+            startPresenceFallback() {
                 const ref = this.db.collection('presence_global').doc(this.presenceId);
-                const beat = () => ref.set({ device: this.myDevice, ts: Date.now() }).catch(() => {});
+                const beat = () => ref.set({ ip: this.myIp, device: this.myDevice, ts: Date.now() }).catch(() => {});
                 beat();
-                // Heartbeat lebih sering (8s) → status online/offline kerasa lebih real-time
                 this.presenceInterval = setInterval(beat, 8000);
 
-                // Saat tab balik aktif (HP dibuka lagi dari background) → langsung beat ulang
                 document.addEventListener('visibilitychange', () => {
                     if (document.visibilityState === 'visible') beat();
                 });
 
-                // pagehide lebih reliable dibanding beforeunload di HP/iOS saat tab ditutup/dikunci
                 const goOffline = () => { try { ref.delete(); } catch (e) {} };
                 window.addEventListener('pagehide', goOffline);
                 window.addEventListener('beforeunload', goOffline);
 
                 this.db.collection('presence_global').onSnapshot((snap) => {
                     const now = Date.now();
-                    const map = {};
+                    const data = {};
                     snap.forEach(doc => {
                         const d = doc.data();
-                        // Window toleransi diperketat ke 20s (2.5x heartbeat) → lebih akurat real-time
-                        if (d.ts && now - d.ts < 20000) map[doc.id] = d;
+                        if (d.ts && now - d.ts < 20000) data[doc.id] = d;
                     });
-                    this.onlineMap = map;
-                    this.renderOnlineList(map);
+                    const grouped = this._groupByIp(data);
+                    this.onlineMap = grouped;
+                    this.renderOnlineList(grouped);
                 }, (err) => console.warn('Presence listen error:', err));
             },
 
@@ -2259,17 +2341,16 @@
 
                 const listEl = document.getElementById('chat-online-list');
                 if (!listEl) return;
-                listEl.innerHTML = ids.map(id => {
-                    const d = map[id];
-                    const isYou = id === this.presenceId;
+                listEl.innerHTML = ids.map(key => {
+                    const d = map[key];
                     return `
                         <div class="chat-online-item">
                             <span class="chat-online-avatar"><i class="fa-solid ${d.device && d.device.icon ? d.device.icon : 'fa-mobile-screen'}"></i></span>
                             <span class="label">
-                                <span>${this._esc(d.device ? d.device.label : 'Perangkat')}</span>
-                                <small>terhubung • live</small>
+                                <span>${this._esc(this._maskIp(d.ip) || 'Perangkat')}${d.count > 1 ? ` <small>(${d.count} perangkat)</small>` : ''}</span>
+                                <small>${this._esc(d.device ? d.device.label : 'Perangkat')} • live</small>
                             </span>
-                            ${isYou ? '<span class="you-tag">ANDA</span>' : ''}
+                            ${d.isYou ? '<span class="you-tag">ANDA</span>' : ''}
                         </div>`;
                 }).join('') || '<div class="chat-online-item">// Tidak ada yang online</div>';
             },
@@ -2286,8 +2367,7 @@
                 if (typeof AudioFX !== 'undefined') AudioFX.click();
                 if (!this.notifEnabled) {
                     // Minta izin OS Notification kalau didukung — tapi ini cuma bonus (lapis 4).
-                    // Toast in-app + vibrasi (lapis 1-3) tetap jalan walau izin ditolak/tidak didukung,
-                    // jadi notifikasi tetap berfungsi di iOS Safari, mode privat, dll.
+
                     if ('Notification' in window && Notification.permission === 'default') {
                         try { await Notification.requestPermission(); } catch (e) {}
                     }
@@ -2312,13 +2392,12 @@
                 if (!this.notifEnabled) return;
 
                 // Lapis 1: Toast in-app — JALAN DI SEMUA DEVICE, gak tergantung izin OS
-                // (penting karena Safari iOS non-PWA tidak mendukung Web Notification API sama sekali)
+                
                 this._showToast(m);
 
                 // Lapis 2: Vibrasi HP (kalau didukung), kerasa walau HP di saku
                 if (navigator.vibrate) { try { navigator.vibrate([180, 80, 180]); } catch (e) {} }
 
-                // Lapis 3: tombol chat berkedip merah sebentar biar makin kelihatan
                 const chatBtn = document.getElementById('chat-btn');
                 if (chatBtn) {
                     chatBtn.classList.remove('pulse-alert');
@@ -2327,7 +2406,6 @@
                     chatBtn.classList.add('pulse-alert');
                 }
 
-                // Lapis 4: OS Notification asli (kalau didukung & diizinkan) — opsional, sifatnya bonus
                 if ('Notification' in window && Notification.permission === 'granted') {
                     try {
                         const n = new Notification('💬 ' + this._maskIp(m.ip || 'Anonim') + ' • Global Chat SMK Nufa', {
@@ -2399,10 +2477,6 @@
                 return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
             },
 
-            // ── SENSOR IP — level sensor diatur terpusat lewat IP_MASK_LEVEL ──
-            // IP_MASK_LEVEL = 0 → IP tampil penuh, N → N segmen terakhir disensor "xxx"/"xxxx".
-            // Sinkron otomatis untuk IPv4 (titik) & IPv6 (titik dua) lewat modul IpMask.
-            // Aman dipanggil berkali-kali (idempotent), jadi data lama pun tetap konsisten saat ditampilkan.
             _maskIp(ip) {
                 return IpMask.apply(ip);
             },
@@ -2417,7 +2491,6 @@
         day: 'numeric'
     }) + ' ' + d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 },
-
 
             toggle(forceOpen) {
                 this.isOpen = typeof forceOpen === 'boolean' ? forceOpen : !this.isOpen;
@@ -2449,9 +2522,6 @@
                 // Kata kasar otomatis disensor jadi tanda bintang sebelum disimpan.
                 const text = WordFilter.clean(rawText.slice(0, 1024));
 
-                // IP disensor SEBELUM dikirim — jadi server/Firestore tidak pernah menyimpan IP utuh.
-                // uid (presenceId) dipakai sebagai identitas internal supaya deteksi "pesan sendiri"
-                // tidak perlu bergantung pada IP mentah.
                 const payload = {
                     ip: this._maskIp(this.myIp),
                     uid: this.presenceId,
@@ -2474,7 +2544,6 @@
                 if (typeof AudioFX !== 'undefined') AudioFX.click();
             },
 
-            // Mengunci tombol kirim selama cooldown berjalan + tampilkan hitung mundur.
             _lockSendButton(btn, durationMs) {
                 if (!btn) return;
                 btn.disabled = true;
@@ -2502,9 +2571,6 @@
             }
         };
 
-        // ⚠️ GlobalChat TIDAK auto-start saat halaman load.
-        // Marquee + Live Chat + Dashboard online HANYA aktif setelah
-        // pengguna menekan tombol "BUKA AKSES DATA" (lihat System.enter()).
     </script>
 </body>
 </html>
