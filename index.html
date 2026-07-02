@@ -2352,7 +2352,12 @@
 
             renderOnlineList(map) {
                 const ids = Object.keys(map);
-                const count = ids.length;
+                
+                // MENGUBAH CARA MENGHITUNG COUNT:
+                // Menjumlahkan semua d.count dari setiap item di map. 
+                // Jika d.count tidak ada/undifined, default ke 1.
+                const count = ids.reduce((total, key) => total + (map[key].count || 1), 0);
+
                 const countEl = document.getElementById('chat-online-count');
                 if (countEl) {
                     const prev = this._prevOnlineCount;
