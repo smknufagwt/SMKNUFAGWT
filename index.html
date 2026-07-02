@@ -14,7 +14,7 @@
     <meta property="og:title" content="SMK NURUL FALAH - THE GLIMPSE OF FUTURE" />
     <meta property="og:description" content="Situs Resmi Sistem Informasi Digital dan Galeri Highlight kegiatan SMK Nurul Falah. Berlokasi di jalan raya kauman, Desa Gedung wani timur, Margatiga, Lampung Timur.
         NOMOR NPSN	:	10814959
-        TERAKREDITASI:   BAN-SM Nomor 1857/BAN-SM/SK/2022" />
+        TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022" />
     <meta property="og:image" content="https://raw.githubusercontent.com/smknufagwt/SMKNUFAGWT/main/appcover.jpg" />
     <meta property="og:image:width" content="612" />
     <meta property="og:image:height" content="612" />
@@ -951,12 +951,12 @@
     </span>
     <div id="privacy-board">
         <h4><i class="fa-solid fa-lock"></i> KEBIJAKAN PRIVASI</h4>
-        <ol>
+        <ul class="list-disc pl-5">
             <li>Penggunaan alamat IP (Internet Protocol) hanya  untuk keperluan identifikasi (ID) pengunjung, bukan untuk mencuri ataupun menyalahgunakan data pribadi.</li>
             <li>Dengan menggunakan website ini, Anda setuju bahwa tampilan data merupakan bagian dari konsep estetika "hacker" untuk mempresentasikan transparansi proses transfer data, bukan untuk tujuan pengintaian.</li>
             <li>Data yang dikumpulkan tidak akan dijual, dibagikan, atau dipindahtangankan ke pihak ketiga mana pun untuk tujuan komersial.</li>
             <li>Pengguna bertanggung jawab atas setiap konten yang dikirim melalui fitur chat dan wajib menjaga etika berkomunikasi yang baik dan sopan.</li>
-        </ol>
+        </ul>
     </div>
 </div>
 
@@ -989,7 +989,7 @@
             visi: `
                 <h2>VISI DAN MISI</h2>
                 <p> <strong>MENJADI LEMBAGA PENDIDIKAN YANG BERKUALITAS DAN DINAMIS DALAM BIDANG KEJURUAN DAN BISNIS</strong> </p>
-                <ol>
+                <ol class="list-disc pl-5">
                     <li>MELAKSANAKAN PEMBELAJARAN YANG PRODUKTIF, KREATIF, DAN INOVATIF.</li>
                     <li>MENYELENGGARAKAN PENDIDIKAN DAN PELATIHAN SESUAI DENGAN KEBUTUHAN MASYARAKAT DUNIA KERJA SEKTOR SWASTA/PEMERINTAH, BAIK NASIONAL MAUPUN INTERNASIONAL.</li>
                     <li>MEMBERDAYAKAN SEKOLAH UNTUK MEWUJUDKAN PELAYANAN BAGI MASYARAKAT.</li>
@@ -2243,17 +2243,37 @@
                 const presenceRef = rtdb.ref('presence_global/' + this.presenceId);
                 const connectedRef = rtdb.ref('.info/connected');
 
+                // FIX: render DOT diri sendiri SEGERA (optimistic), jangan nunggu
+                // round-trip ke server dulu — biar begitu startPresence() jalan,
+                // DOT online langsung kelihatan tanpa delay/kedip.
+                this.onlineMap = this._groupByIp({
+                    [this.presenceId]: { ip: this.myIp, device: this.myDevice, ts: Date.now() }
+                });
+                this.renderOnlineList(this.onlineMap);
+
                 // Setiap kali koneksi ke Firebase tersambung (termasuk reconnect otomatis
                 
                 connectedRef.on('value', (snap) => {
                     if (snap.val() === false) return;
-                    presenceRef.onDisconnect().remove().then(() => {
-                        presenceRef.set({
-                            ipKey: myIpKey,
-                            ip: this.myIp,
-                            device: this.myDevice,
-                            ts: firebase.database.ServerValue.TIMESTAMP
-                        });
+
+                    // FIX: langsung .set() presence, JANGAN digantung nunggu
+                    // onDisconnect().remove() selesai dulu. Sebelumnya kalau
+                    // setup onDisconnect telat/gagal, set() gak pernah kepanggil
+                    // sama sekali -> device gak pernah tercatat online -> DOT
+                    // gak pernah muncul.
+                    presenceRef.set({
+                        ipKey: myIpKey,
+                        ip: this.myIp,
+                        device: this.myDevice,
+                        ts: firebase.database.ServerValue.TIMESTAMP
+                    }).catch(err => {
+                        console.error('[Presence] Gagal set data online — cek Realtime Database Rules (write) & databaseURL:', err);
+                    });
+
+                    // Setup onDisconnect terpisah, paralel, dengan error ketangkap
+                    // supaya gagalnya gak diam-diam.
+                    presenceRef.onDisconnect().remove().catch(err => {
+                        console.error('[Presence] Gagal set onDisconnect handler:', err);
                     });
                 });
 
@@ -2265,10 +2285,16 @@
                 
                 rtdb.ref('presence_global').on('value', (snap) => {
                     const data = snap.val() || {};
+                    // FIX: kalau snapshot server belum sempat menyertakan device
+                    // sendiri (misal baru konek), tetap selipkan biar DOT sendiri
+                    // gak sempat hilang/flicker.
+                    if (!data[this.presenceId]) {
+                        data[this.presenceId] = { ip: this.myIp, device: this.myDevice, ts: Date.now() };
+                    }
                     const grouped = this._groupByIp(data);
                     this.onlineMap = grouped;
                     this.renderOnlineList(grouped);
-                }, (err) => console.warn('Presence listen error:', err));
+                }, (err) => console.error('[Presence] Gagal baca daftar online — cek Realtime Database Rules (read):', err));
             },
 
             // Kelompokkan entri presence berdasarkan IP, supaya 1 IP dengan banyak
