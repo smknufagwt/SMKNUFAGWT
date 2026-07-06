@@ -346,7 +346,8 @@
         #chat-close { background: none; border: none; color: var(--neon); font-size: 1rem; cursor: pointer; }
         #chat-messages {
             flex: 1; overflow-y: auto; padding: 10px 12px; font-family: var(--font-main);
-            font-size: 0.8rem; display: flex; flex-direction: column; gap: 8px; min-height: 180px;
+            font-size: 0.8rem; display: flex; flex-direction: column; gap: 8px; 
+            min-height: 100px; /* dikurangi agar list online tidak squish */
         }
         .chat-msg { border-left: 2px solid var(--neon-dim); padding-left: 8px; }
         .chat-msg .chat-ip {
@@ -407,6 +408,20 @@
         .chat-icon-btn:hover { border-color: var(--neon); box-shadow: 0 0 8px var(--neon); }
         .chat-icon-btn.notif-on { color: #000; background: var(--neon); box-shadow: 0 0 10px var(--neon); border-color: var(--neon); }
 
+        /* ── MY IP BAR: tampil di bawah header, selalu terlihat ── */
+        #chat-myip-bar {
+            display: flex; align-items: center; gap: 6px;
+            padding: 5px 14px; border-bottom: 1px solid rgba(0,240,255,0.15);
+            background: rgba(0, 240, 255, 0.04);
+            font-family: var(--font-main); font-size: 0.6rem; color: var(--neon);
+            letter-spacing: 1px; flex-wrap: wrap; gap: 8px;
+        }
+        #chat-myip-bar .myip-segment {
+            display: flex; align-items: center; gap: 4px; opacity: 0.85;
+        }
+        #chat-myip-bar .myip-segment i { font-size: 0.62rem; }
+        #chat-myip-bar .myip-val { color: var(--neon); opacity: 1; font-weight: bold; }
+
         #chat-dashboard {
             position: relative; display: flex; align-items: center; justify-content: space-between; gap: 8px;
             padding: 9px 14px; border-bottom: 1px solid var(--neon-dim);
@@ -420,8 +435,9 @@
         }
         #chat-dashboard:hover { background: linear-gradient(90deg, rgba(0,255,65,0.12), rgba(0,240,255,0.07), rgba(0,255,65,0.12)); }
         #chat-net-label {
-            display: flex; align-items: center; gap: 7px; font-size: 0.62rem;
-            letter-spacing: 1.5px; color: var(--glitch-blue); opacity: 0.85; text-transform: uppercase;
+            display: flex; align-items: center; gap: 5px; font-size: 0.58rem;
+            letter-spacing: 1px; color: var(--glitch-blue); opacity: 0.85; text-transform: uppercase;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;
         }
         #chat-online-left {
             display: flex; align-items: center; gap: 7px; color: var(--neon); position: relative; z-index: 1;
@@ -450,8 +466,19 @@
                 radial-gradient(circle at 10% 0%, rgba(0,255,65,0.05), transparent 60%),
                 rgba(0,6,0,0.92);
             border-bottom: 1px solid var(--neon-dim);
+            /* Jangan pernah mengecilkan diri (flex-shrink:0 diterapkan via class) */
         }
-        #chat-online-list.expanded { max-height: 190px; overflow-y: auto; }
+        #chat-online-list.expanded { 
+            max-height: 160px; 
+            overflow-y: auto; 
+            overflow-x: hidden;
+            /* Scrollbar tipis agar tidak makan lebar */
+            scrollbar-width: thin;
+            scrollbar-color: var(--neon-dim) transparent;
+        }
+        #chat-online-list.expanded::-webkit-scrollbar { width: 4px; }
+        #chat-online-list.expanded::-webkit-scrollbar-track { background: transparent; }
+        #chat-online-list.expanded::-webkit-scrollbar-thumb { background: var(--neon-dim); border-radius: 4px; }
         .chat-online-item {
             display: flex; align-items: center; gap: 10px; padding: 7px 14px;
             font-size: 0.74rem; color: var(--neon); border-bottom: 1px solid rgba(0,255,65,0.08);
@@ -500,7 +527,14 @@
         #chat-btn.pulse-alert { animation: chat-btn-pulse 0.6s ease 2; }
         @media (max-width: 480px) {
             #chat-panel { width: 100vw; border-radius: 14px 14px 0 0; }
-            #chat-net-label { display: none; }
+            /* chat-net-label tetap tampil, tapi lebih pendek di HP */
+            #chat-net-label { max-width: 80px; font-size: 0.52rem; }
+            #chat-net-label .net-label-text { display: none; }
+        }
+
+
+        #chat-online-list {
+            flex-shrink: 0 !important;
         }
 #system-log { 
     color: var(--neon) !important; 
@@ -808,12 +842,16 @@
 
     <div id="chat-panel">
         <div id="chat-panel-head">
-            <span><i class="fa-solid fa-satellite-dish"></i> GLOBAL LIVE CHAT
- IP-ANONIM</span>
+            <span><i class="fa-solid fa-satellite-dish"></i> GLOBAL LIVE CHAT</span>
             <div id="chat-head-right">
                 <button id="chat-notif-toggle" class="chat-icon-btn" onclick="GlobalChat.toggleNotif()" title="Toggle Notifikasi"><i class="fa-solid fa-bell-slash"></i></button>
                 <button id="chat-close" onclick="GlobalChat.toggle()">✕</button>
             </div>
+        </div>
+        <!-- MY IP + DEVICE BAR — selalu terlihat di bawah header -->
+        <div id="chat-myip-bar">
+            <span class="myip-segment"><i class="fa-solid fa-network-wired"></i> IP: <span class="myip-val" id="chat-myip-display">...</span></span>
+            <span class="myip-segment"><i id="chat-device-icon" class="fa-solid fa-mobile-screen"></i> <span class="myip-val" id="chat-device-label">Memuat...</span></span>
         </div>
         <div id="chat-dashboard" onclick="GlobalChat.toggleOnlineList()">
             <div id="chat-online-left">
@@ -821,7 +859,7 @@
                 <span id="chat-online-count"><span class="num">0</span> ONLINE</span>
                 <span id="chat-online-updated"></span>
             </div>
-            <span id="chat-net-label"><i class="fa-solid fa-tower-broadcast"></i> JARINGAN AKTIF</span>
+            <span id="chat-net-label"><i class="fa-solid fa-tower-broadcast"></i> <span class="net-label-text">JARINGAN AKTIF</span></span>
             <i class="fa-solid fa-chevron-down" id="chat-online-chevron"></i>
         </div>
         <div id="chat-online-list"></div>
@@ -2033,15 +2071,7 @@
 
         // Inisialisasi viewer setelah DOM siap
         document.addEventListener('DOMContentLoaded', () => GalleryViewer.init());
-
-        // ============================================================
-        //  GLOBAL LIVE CHAT — semua pengunjung (tanpa login), IP terlihat
-
-        
-
-        
-
-        
+        //  GLOBAL LIVE CHAT — semua pengunjung (tanpa login), IP terlihat    
 
         const FIREBASE_CONFIG = {
             apiKey: "AIzaSyDZuEeW24yyBKJ-dpJyiBMJ6HH5od15L40",
@@ -2052,16 +2082,7 @@
             appId: "1:168660687360:web:bdb56f6ea15e3cd44756e5",
             databaseURL: "https://server-nufa-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
-
-        // ============================================================
-        //  KONFIGURASI SENSOR IP
-
-        
-
-        
-
-        
-        
+        //  KONFIGURASI SENSOR IP   
         const IP_MASK_LEVEL = 1;
         //  KONFIGURASI FILTER KATA KASAR
         const BAD_WORDS = ['asu', 'smks2026', 'puki', 'goblok', 'dancok', 'anjing', 'bangsat', 'kontol', 'memek', 'tai', 'jancok'];
@@ -2143,7 +2164,7 @@
             lastCount: 0,
             started: false,
             lastSendTime: 0,
-            localMessages: [], // fallback kalau Firebase belum dikonfigurasi
+            localMessages: [], 
 
             presenceId: null,
             presenceUnsub: null,
@@ -2172,13 +2193,31 @@
                 this.presenceId = sessionStorage.getItem('nufa_presence_id') || ('U-' + Math.random().toString(36).slice(2, 9));
                 sessionStorage.setItem('nufa_presence_id', this.presenceId);
 
+                const devIconEl = document.getElementById('chat-device-icon');
+                const devLabelEl = document.getElementById('chat-device-label');
+                if (devIconEl) { devIconEl.className = 'fa-brands ' + this.myDevice.icon + (
+                    // fa-android, fa-apple, fa-windows, fa-linux semuanya brands
+                    // fa-question-circle adalah solid
+                    this.myDevice.icon === 'fa-question-circle' ? ' fa-solid' : ' fa-brands'
+                ).replace('fa-brands fa-brands', 'fa-brands'); }
+                if (devLabelEl) devLabelEl.textContent = this.myDevice.label;
+
                 // Ambil IP publik pengirim (dipakai untuk ditampilkan ke semua orang, tanpa login)
+                const ipDisplayEl = document.getElementById('chat-myip-display');
+                if (ipDisplayEl) ipDisplayEl.textContent = 'Mengambil...';
                 try {
                     const r = await fetch('https://api.ipify.org?format=json');
                     const d = await r.json();
                     this.myIp = d.ip;
+                    if (ipDisplayEl) ipDisplayEl.textContent = this.myIp;
                 } catch (e) {
                     this.myIp = 'UNKNOWN';
+                    if (ipDisplayEl) ipDisplayEl.textContent = 'UNKNOWN';
+                }
+                // Perbaiki ikon device setelah kita punya semua info
+                if (devIconEl) {
+                    const isBrand = ['fa-android','fa-apple','fa-windows','fa-linux'].includes(this.myDevice.icon);
+                    devIconEl.className = (isBrand ? 'fa-brands ' : 'fa-solid ') + this.myDevice.icon;
                 }
 
                 const configured = FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith('GANTI');
@@ -2242,10 +2281,6 @@
                 const myIpKey = this._ipKey(this.myIp);
                 const presenceRef = rtdb.ref('presence_global/' + this.presenceId);
                 const connectedRef = rtdb.ref('.info/connected');
-
-                // FIX: render DOT diri sendiri SEGERA (optimistic), jangan nunggu
-                // round-trip ke server dulu — biar begitu startPresence() jalan,
-                // DOT online langsung kelihatan tanpa delay/kedip.
                 this.onlineMap = this._groupByIp({
                     [this.presenceId]: { ip: this.myIp, device: this.myDevice, ts: Date.now() }
                 });
@@ -2255,12 +2290,6 @@
                 
                 connectedRef.on('value', (snap) => {
                     if (snap.val() === false) return;
-
-                    // FIX: langsung .set() presence, JANGAN digantung nunggu
-                    // onDisconnect().remove() selesai dulu. Sebelumnya kalau
-                    // setup onDisconnect telat/gagal, set() gak pernah kepanggil
-                    // sama sekali -> device gak pernah tercatat online -> DOT
-                    // gak pernah muncul.
                     presenceRef.set({
                         ipKey: myIpKey,
                         ip: this.myIp,
@@ -2269,9 +2298,6 @@
                     }).catch(err => {
                         console.error('[Presence] Gagal set data online — cek Realtime Database Rules (write) & databaseURL:', err);
                     });
-
-                    // Setup onDisconnect terpisah, paralel, dengan error ketangkap
-                    // supaya gagalnya gak diam-diam.
                     presenceRef.onDisconnect().remove().catch(err => {
                         console.error('[Presence] Gagal set onDisconnect handler:', err);
                     });
@@ -2321,7 +2347,6 @@
                 return String(ip || 'UNKNOWN').replace(/[.#$\[\]/]/g, '_');
             },
 
-            // ── Fallback: dipakai HANYA kalau Realtime Database belum dikonfigurasi ──
             
             startPresenceFallback() {
                 const ref = this.db.collection('presence_global').doc(this.presenceId);
@@ -2374,18 +2399,26 @@
 
                 const listEl = document.getElementById('chat-online-list');
                 if (!listEl) return;
-                listEl.innerHTML = ids.map(key => {
-                    const d = map[key];
-                    return `
-                        <div class="chat-online-item">
-                            <span class="chat-online-avatar"><i class="fa-solid ${d.device && d.device.icon ? d.device.icon : 'fa-mobile-screen'}"></i></span>
-                            <span class="label">
-                                <span>${this._esc(this._maskIp(d.ip) || 'Perangkat')}${d.count > 1 ? ` <small>(${d.count} perangkat)</small>` : ''}</span>
-                                <small>${this._esc(d.device ? d.device.label : 'Perangkat')} • live</small>
-                            </span>
-                            ${d.isYou ? '<span class="you-tag">ANDA</span>' : ''}
-                        </div>`;
-                }).join('') || '<div class="chat-online-item">// Tidak ada yang online</div>';
+const brandIcons = ['fa-android','fa-apple','fa-windows','fa-linux'];
+listEl.innerHTML = ids.map(key => {
+    const d = map[key];
+    const rawIcon = (d.device && d.device.icon) ? d.device.icon : 'fa-mobile-screen';
+    const iconClass = brandIcons.includes(rawIcon) ? `fa-brands ${rawIcon}` : `fa-solid ${rawIcon}`;
+    const isYou = d.isYou;
+    const ipDisplay = isYou ? this.myIp : this._maskIp(d.ip);
+    const tag = isYou
+        ? '<span class="you-tag">ANDA</span>'
+        : '<span class="you-tag" style="background:var(--glitch-red);box-shadow:0 0 8px rgba(255,0,60,0.5);">ANON</span>';
+    return `
+        <div class="chat-online-item">
+            <span class="chat-online-avatar"><i class="${iconClass}"></i></span>
+            <span class="label">
+                <span>${this._esc(ipDisplay || 'Perangkat')}${d.count > 1 ? ` <small>(${d.count} tab)</small>` : ''}</span>
+                <small>${this._esc(d.device ? d.device.label : 'Perangkat')} • live</small>
+            </span>
+            ${tag}
+        </div>`;
+}).join('') || '<div class="chat-online-item">// Tidak ada yang online</div>';
             },
 
             toggleOnlineList() {
@@ -2434,7 +2467,6 @@
                 const chatBtn = document.getElementById('chat-btn');
                 if (chatBtn) {
                     chatBtn.classList.remove('pulse-alert');
-                    // restart animasi
                     void chatBtn.offsetWidth;
                     chatBtn.classList.add('pulse-alert');
                 }
@@ -2465,15 +2497,19 @@
             _detectDevice() {
                 const ua = navigator.userAgent || '';
                 let os = 'Unknown OS';
-                let icon = 'fa-mobile-screen';
-                if (/android/i.test(ua)) { os = 'Android'; icon = 'fa-mobile-screen'; }
-                else if (/iphone|ipad|ipod/i.test(ua)) { os = 'iOS'; icon = 'fa-mobile-screen'; }
-                else if (/windows/i.test(ua)) { os = 'Windows'; icon = 'fa-desktop'; }
-                else if (/macintosh|mac os/i.test(ua)) { os = 'MacOS'; icon = 'fa-desktop'; }
-                else if (/linux/i.test(ua)) { os = 'Linux'; icon = 'fa-desktop'; }
+                let icon = 'fa-question-circle';
+                // Urutan penting: Android sebelum Linux, iOS sebelum Macintosh
+                if (/android/i.test(ua)) { os = 'Android'; icon = 'fa-android'; }
+                else if (/iphone/i.test(ua)) { os = 'iPhone (iOS)'; icon = 'fa-apple'; }
+                else if (/ipad/i.test(ua)) { os = 'iPad (iOS)'; icon = 'fa-apple'; }
+                else if (/ipod/i.test(ua)) { os = 'iPod (iOS)'; icon = 'fa-apple'; }
+                else if (/windows/i.test(ua)) { os = 'Windows'; icon = 'fa-windows'; }
+                else if (/macintosh|mac os x/i.test(ua)) { os = 'MacOS'; icon = 'fa-apple'; }
+                else if (/linux/i.test(ua)) { os = 'Linux'; icon = 'fa-linux'; }
 
                 let browser = 'Browser';
                 if (/edg\//i.test(ua)) browser = 'Edge';
+                else if (/opr\//i.test(ua)) browser = 'Opera';
                 else if (/chrome|crios/i.test(ua)) browser = 'Chrome';
                 else if (/firefox|fxios/i.test(ua)) browser = 'Firefox';
                 else if (/safari/i.test(ua)) browser = 'Safari';
@@ -2595,8 +2631,6 @@
                 };
                 tick();
             },
-
-            // Klik tombol saat masih cooldown → beri getaran/feedback kecil tanpa reset timer.
             _flashCooldown(btn) {
                 if (!btn) return;
                 btn.classList.add('cooldown');
