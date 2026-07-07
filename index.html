@@ -2511,21 +2511,28 @@ listEl.innerHTML = ids.map(key => {
                 if (typeof AudioFX !== 'undefined') AudioFX.click();
             },
 
-            // ── NOTIFIKASI HP ──
+// ── NOTIFIKASI HP ──
             async toggleNotif() {
                 if (typeof AudioFX !== 'undefined') AudioFX.click();
                 if (!this.notifEnabled) {
-                    // Minta izin OS Notification kalau didukung — tapi ini cuma bonus (lapis 4).
-
                     if ('Notification' in window && Notification.permission === 'default') {
-                        try { await Notification.requestPermission(); } catch (e) {}
+                        const permission = await Notification.requestPermission();
+                        if (permission !== 'granted') {
+                            this._showToast({ ip: 'SYSTEM', text: '⚠ Izin notifikasi ditolak browser.' });
+                            return;
+                        }
+                    }
+                    if (Notification.permission !== 'granted') {
+                        this._showToast({ ip: 'SYSTEM', text: '⚠ Izin notifikasi diblokir — aktifkan manual di pengaturan browser.' });
+                        return;
                     }
                     this.notifEnabled = true;
                     localStorage.setItem('nufa_chat_notif', 'on');
-                    this._showToast({ ip: 'SYSTEM', text: 'Notifikasi aktif — Anda akan dapat alert untuk setiap chat baru.' });
+                    this._showToast({ ip: 'SYSTEM', text: '🔔 Notifikasi aktif — kamu akan dapat alert untuk setiap chat baru.' });
                 } else {
                     this.notifEnabled = false;
                     localStorage.setItem('nufa_chat_notif', 'off');
+                    this._showToast({ ip: 'SYSTEM', text: '🔕 Notifikasi dimatikan.' });
                 }
                 this._updateNotifBtn();
             },
@@ -2537,16 +2544,16 @@ listEl.innerHTML = ids.map(key => {
                 btn.innerHTML = this.notifEnabled ? '<i class="fa-solid fa-bell"></i>' : '<i class="fa-solid fa-bell-slash"></i>';
             },
 
-            notify(m) {
+            async notify(m) {
                 if (!this.notifEnabled) return;
 
-                // Lapis 1: Toast in-app — JALAN DI SEMUA DEVICE, gak tergantung izin OS
-                
+                // Lapis 1: Toast in-app — jalan di semua device
                 this._showToast(m);
 
-                // Lapis 2: Vibrasi HP (kalau didukung), kerasa walau HP di saku
+                // Lapis 2: Vibrasi HP
                 if (navigator.vibrate) { try { navigator.vibrate([180, 80, 180]); } catch (e) {} }
 
+                // Lapis 3: Pulse tombol chat
                 const chatBtn = document.getElementById('chat-btn');
                 if (chatBtn) {
                     chatBtn.classList.remove('pulse-alert');
@@ -2554,12 +2561,18 @@ listEl.innerHTML = ids.map(key => {
                     chatBtn.classList.add('pulse-alert');
                 }
 
-                if ('Notification' in window && Notification.permission === 'granted') {
+                // Lapis 4: OS Notification via Service Worker (bekerja di Android)
+                if (Notification.permission === 'granted' && 'serviceWorker' in navigator) {
                     try {
-                        const n = new Notification('💬 ' + this._maskIp(m.ip || 'Anonim') + ' • Global Chat SMK Nufa', {
-                            body: m.text, tag: 'nufa-global-chat', renotify: true
+                        const reg = await navigator.serviceWorker.ready;
+                        reg.showNotification('💬 ' + this._maskIp(m.ip || 'Anonim') + ' • Global Chat SMK Nufa', {
+                            body: WordFilter.clean(m.text),
+                            tag: 'nufa-global-chat',
+                            renotify: true,
+                            icon: '/appcover.jpg',
+                            badge: '/notif.png',
+                            vibrate: [200, 100, 200],
                         });
-                        n.onclick = () => { window.focus(); this.toggle(true); n.close(); };
                     } catch (e) { console.warn('Gagal kirim OS notification:', e); }
                 }
             },
