@@ -21,15 +21,15 @@ const CONFIG = {
   STATIC_ASSETS: [
     '/',
     '/index.html',
-    '/Logo Smk.png',
+    '/notif.png',
   ],
   // Tag untuk background sync antrian pesan chat
   SYNC_TAG_CHAT: 'nufa-sync-chat',
   // Nama channel BroadcastChannel (harus sama dengan di index.html)
   BC_NAME: 'nufa-realtime',
   // Ikon untuk push notification
-  ICON: '/Logo Smk.png',
-  BADGE: '/Logo Smk.png',
+  ICON: '/appcover.jpg',
+  BADGE: '/notif.png',
   // Nama Firestore endpoint (tidak dipakai langsung SW, hanya referensi)
   TAG: 'nufa-global-chat',
 };
