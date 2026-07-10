@@ -5,16 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SMK NURUL FALAH - THE GLIMPSE OF FUTURE</title>
 <meta name="google-site-verification" content="bcu4uRS7dTLeJExZS1IX56ZkOeI4F5Wu1O48GXmes8Y" />
-<meta name="description" content="Portal Kreatif Informasi Digital dan Galeri Highlight kegiatan SMK Nurul Falah.
-NOMOR NPSN	:	10814959
-TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
+<meta name="description" content="Website Resmi Sistem Informasi Digital dan Galeri Highlight kegiatan SMK Nurul Falah. Berlokasi di jalan raya kauman, Desa Gedung wani timur, Margatiga, Lampung Timur.">
     <meta name="keywords" content="SMK Nurul Falah, SMK Nufa, smks, Gedung wani timur, kauman, SMK Lampung Timur, GWT, DESA, HACKER, gedung wani, biner, code matrix, matrix, NUFA BASE, Margatiga, website cyberpunk, masa depan, sekilas pandang,">
     <meta name="author" content="SMK Nurul Falah">
     <meta name="robots" content="index, follow">
 
  <meta property="og:type" content="website" />
     <meta property="og:title" content="SMK NURUL FALAH - THE GLIMPSE OF FUTURE" />
-    <meta property="og:description" content="Situs Portal Kreatif Sistem Informasi Digital dan Galeri Highlight kegiatan SMK Nurul Falah. 
+    <meta property="og:description" content="Situs Portal Kreatif Sistem Informasi Digital dan Galeri Highlight kegiatan SMK Nurul Falah. Berlokasi di jalan raya kauman, Desa Gedung wani timur, Margatiga, Lampung Timur, Provinsi LAMPUNG.
         NOMOR NPSN	:	10814959
         TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022" />
     <meta property="og:image" content="https://raw.githubusercontent.com/smknufagwt/SMKNUFAGWT/main/appcover.jpg" />
@@ -27,7 +25,10 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
     <meta name="twitter:description" content="Situs Resmi Sistem Informasi Digital dan Galeri Highlight kegiatan SMK Nurul Falah. Berlokasi di jalan raya kauman, Desa Gedung wani timur, Margatiga, Lampung Timur, Provinsi LAMPUNG.
         NOMOR NPSN	:	10814959
         TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022" />
-    <meta name="twitter:image" content="https://raw.githubusercontent.com/smknufagwt/SMKNUFAGWT/main/appcover.jpg" />    
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/smknufagwt/SMKNUFAGWT/main/appcover.jpg" />
+    
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        
     <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="black" stroke="white" stroke-width="4"/%3E%3Cline x1="5" y1="50" x2="95" y2="50" stroke="white" stroke-width="2"/%3E%3Cline x1="50" y1="5" x2="50" y2="95" stroke="white" stroke-width="2"/%3E%3Cellipse cx="50" cy="50" rx="10" ry="45" fill="none" stroke="white" stroke-width="3"%3E%3Canimate attributeName="rx" values="0;44;0" dur="2s" repeatCount="indefinite"/%3E%3C/ellipse%3E%3C/svg%3E'>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -248,7 +249,7 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
         .author-link:hover { background: var(--neon); color: black; box-shadow: 0 0 15px var(--neon); transform: translateY(-3px); }
         
         .control-btn {
-            position: fixed; bottom: 28px; width: 45px; height: 45px;
+            position: fixed; bottom: 29px; width: 45px; height: 45px;
             border: 1px solid var(--neon); background: rgba(0, 0, 0, 0.8); color: var(--neon);
             display: none; justify-content: center; align-items: center; border-radius: 50%;
             cursor: pointer; z-index: 1000; box-shadow: 0 0 10px var(--neon-dim); transition: 0.3s; font-size: 1.2rem;
@@ -370,97 +371,20 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
         .chat-icon-btn:hover { border-color: var(--neon); box-shadow: 0 0 8px var(--neon); }
         .chat-icon-btn.notif-on { color: #000; background: var(--neon); box-shadow: 0 0 10px var(--neon); border-color: var(--neon); }
 
-  /* ── HEADLINE SCRAMBLER BAR (pengganti #chat-myip-bar) ── */
-  #chat-headline-bar {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 5px 14px;
-      border-bottom: 1px solid rgba(0, 240, 255, 0.15);
-      background: rgba(0, 240, 255, 0.04);
-      font-family: var(--font-main);
-      font-size: 0.6rem;
-      letter-spacing: 1.5px;
-      color: var(--glitch-blue);
-      overflow: hidden;
-      position: relative;
-      min-height: 22px;
-      cursor: default;
-  }
+        /* ── MY IP BAR: tampil di bawah header, selalu terlihat ── */
+        #chat-myip-bar {
+            display: flex; align-items: center; gap: 6px;
+            padding: 5px 14px; border-bottom: 1px solid rgba(0,240,255,0.15);
+            background: rgba(0, 240, 255, 0.04);
+            font-family: var(--font-main); font-size: 0.6rem; color: var(--neon);
+            letter-spacing: 1px; flex-wrap: wrap; gap: 8px;
+        }
+        #chat-myip-bar .myip-segment {
+            display: flex; align-items: center; gap: 4px; opacity: 0.85;
+        }
+        #chat-myip-bar .myip-segment i { font-size: 0.62rem; }
+        #chat-myip-bar .myip-val { color: var(--neon); opacity: 1; font-weight: bold; }
 
-  /* Scanline geser kiri-kanan di belakang teks */
-  #chat-headline-bar::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-          90deg,
-          transparent 0%,
-          rgba(0, 240, 255, 0.07) 50%,
-          transparent 100%
-      );
-      background-size: 200% 100%;
-      animation: headline-sweep 3s linear infinite;
-      pointer-events: none;
-  }
-
-  #chat-headline-text {
-      position: relative;
-      z-index: 1;
-      text-shadow: 0 0 8px var(--glitch-blue);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 100%;
-  }
-
-  /* State: sedang scramble → warna campur neon + biru */
-  #chat-headline-text.scrambling {
-      color: var(--neon);
-      text-shadow: 0 0 10px var(--neon);
-  }
-
-  /* State: teks baru muncul → fade-in slide dari bawah */
-  @keyframes headline-reveal {
-      0%   { opacity: 0; transform: translateY(4px); }
-      100% { opacity: 1; transform: translateY(0); }
-  }
-
-  /* Glow pulse setelah teks settle */
-  @keyframes headline-glow-pulse {
-      0%, 100% { text-shadow: 0 0 6px var(--glitch-blue); }
-      50%       { text-shadow: 0 0 14px var(--glitch-blue), 0 0 28px rgba(0,240,255,0.4); }
-  }
-
-  /* Sweep cahaya latar */
-  @keyframes headline-sweep {
-      0%   { background-position: -100% 0; }
-      100% { background-position: 200% 0; }
-  }
-
-  /* Glitch micro-shift sesekali */
-  @keyframes headline-glitch {
-      0%   { clip-path: inset(0 0 100% 0); transform: translateX(0); }
-      10%  { clip-path: inset(10% 0 60% 0); transform: translateX(-3px); }
-      20%  { clip-path: inset(40% 0 20% 0); transform: translateX(3px); }
-      30%  { clip-path: inset(0 0 100% 0); transform: translateX(0); }
-      100% { clip-path: inset(0 0 100% 0); transform: translateX(0); }
-  }
-
-  /* Pseudo-element untuk efek glitch layer kedua */
-  #chat-headline-text::after {
-      content: attr(data-text);
-      position: absolute;
-      inset: 0;
-      color: var(--neon);
-      opacity: 0;
-      pointer-events: none;
-  }
-
-  #chat-headline-text.glitch-fire::after {
-      opacity: 0.6;
-      animation: headline-glitch 0.4s steps(1) forwards;
-  }
         #chat-dashboard {
             position: relative; display: flex; align-items: center; justify-content: space-between; gap: 8px;
             padding: 9px 14px; border-bottom: 1px solid var(--neon-dim);
@@ -834,21 +758,6 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
     margin-bottom: 2px; 
 }
 
-@import "tailwindcss";
-.bumi-muter-3d {
-  display: inline-block !important;
-  transform-style: preserve-3d;
-  animation: spin3d 4s linear infinite;
-}
-
-@keyframes spin3d {
-  0% {
-    transform: rotateY(0deg);
-  }
-  100% {
-    transform: rotateY(360deg);
-  }
-}
     </style>
 </head>
 <body>
@@ -896,19 +805,17 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
 
     <div id="chat-panel">
         <div id="chat-panel-head">
-
-<span class="bumi-muter-3d">
-    <i class="fa-solid fa-earth"></i>
-</span>
-            <span>   GLOBAL LIVE CHAT ANONIM </span>
+            <span><i class="fa-solid fa-satellite-dish"></i> GLOBAL LIVE CHAT ANONIM</span>
             <div id="chat-head-right">
                 <button id="chat-notif-toggle" class="chat-icon-btn" onclick="GlobalChat.toggleNotif()" title="Toggle Notifikasi"><i class="fa-solid fa-bell-slash"></i></button>
                 <button id="chat-close" onclick="GlobalChat.toggle()">✕</button>
             </div>
         </div>
-          <div id="chat-headline-bar">
-    <span id="chat-headline-text"></span>
-  </div>
+        <!-- MY IP + DEVICE BAR — selalu terlihat di bawah header -->
+        <div id="chat-myip-bar">
+            <span class="myip-segment"><i class="fa-solid fa-network-wired"></i> IP: <span class="myip-val" id="chat-myip-display">...</span></span>
+            <span class="myip-segment"><i id="chat-device-icon" class="fa-solid fa-mobile-screen"></i> <span class="myip-val" id="chat-device-label">Memuat...</span></span>
+        </div>
         <div id="chat-dashboard" onclick="GlobalChat.toggleOnlineList()">
             <div id="chat-online-left">
                 <span class="dot-online"></span>
@@ -978,7 +885,7 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             <div class="upload-panel">
                 <button id="upload-close" onclick="UploadSystem.close()">✕</button>
                 <h3><i class="fa-solid fa-satellite-dish"></i> UPLINK FOTO</h3>
-                <span class="upload-sub">⚠️ Masukan kode akses untuk mengirimkan foto ke server</span>
+                <span class="upload-sub">⚠️ Masukan kode enkripsi untuk mengirimkan foto ke server</span>
 
                 <div class="upload-field">
                     <label for="upload-password">Kode Akses</label>
@@ -1017,7 +924,7 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
         <i class="fa-solid fa-gamepad"></i> GAME WEB
     </a>
 
-    <a id="btn-pembuat" href="https://wa.me/6283199753711?text=halo%2c%20Arlingga" target="_blank" class="author-link" onclick="AudioFX.click()"
+    <a id="btn-pembuat" href="https://wa.me/6283199753711?text=halo" target="_blank" class="author-link" onclick="AudioFX.click()"
        style="border-color: #25D366 !important; color: #25D366 !important; box-shadow: 0 0 10px rgba(37, 211, 102, 0.3);">
         <i class="fa-brands fa-whatsapp"></i> PEMBUAT
     </a>
@@ -1045,7 +952,7 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
     </span>
     <div id="privacy-board">
         <h4><i class="fa-solid fa-lock"></i> KEBIJAKAN PRIVASI</h4>
-        <ul >
+        <ul class="list-disc pl-5">
             <li>Penggunaan alamat IP (Internet Protocol) hanya  untuk keperluan identifikasi (ID) pengunjung, bukan untuk mencuri ataupun menyalahgunakan data pribadi.</li>
             <li>Dengan menggunakan website ini, Anda setuju bahwa tampilan data merupakan bagian dari konsep estetika "hacker" untuk mempresentasikan transparansi proses transfer data, bukan untuk tujuan pengintaian.</li>
             <li>Data yang dikumpulkan tidak akan dijual, dibagikan, atau dipindahtangankan ke pihak ketiga mana pun untuk tujuan komersial.</li>
@@ -1073,10 +980,7 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
                 <h2>PROFIL SEKOLAH</h2>
                 <p>Selamat datang di Sistem Informasi Digital <strong>SMK NURUL FALAH</strong>. Website ini didedikasikan sebagai media dokumentasi, informasi, dan portofolio digital siswa-siswi <strong>SMK Nurul Falah</strong>.</p>
                 <br>
-                <p style="flex">SMK Nurul Falah Berlokasi di jalan raya kauman, Desa Gedung wani timur, Margatiga, Lampung Timur, Provinsi LAMPUNG. </p>
-<p style="center">NOMOR NPSN	:	10814959.</p>
-<p style="center">TERAKREDITASI  :   BAN-SM Nomor : 1857/BAN-SM/SK/2022.</p>
-<p>Di bawah naungan Yayasan Pendidikan Islam Nurul Falah, berkomitmen mencetak generasi muda yang kompeten,terampil dan bertanggung jawab serta memiliki akhlak mulia sesuai nilai pancasila.</p>
+                <p>SMK Nurul Falah berlokasi di <strong>Desa Gedung Wani Timur, Kecamatan Margatiga, Kabupaten Lampung Timur</strong>. Di bawah naungan Yayasan Pendidikan Islam Nurul Falah, berkomitmen mencetak generasi muda yang kompeten,terampil dan bertanggung jawab serta memiliki akhlak mulia sesuai nilai pancasila.</p>
                 <div class="marquee-container">
                     <div class="marquee-content">SMK NUFA JAYA &nbsp;///&nbsp; BISA - HEBAT - DISIPLIN - KOMPETEN - SIAP KERJA &nbsp;///&nbsp; SYSTEM ONLINE &nbsp;///&nbsp; SMK NUFA JAYA</div>
                 </div>
@@ -1084,7 +988,7 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             visi: `
                 <h2>VISI DAN MISI</h2>
                 <p> <strong>MENJADI LEMBAGA PENDIDIKAN YANG BERKUALITAS DAN DINAMIS DALAM BIDANG KEJURUAN DAN BISNIS</strong> </p>
-                <ol>
+                <ol class="list-disc pl-5">
                     <li>MELAKSANAKAN PEMBELAJARAN YANG PRODUKTIF, KREATIF, DAN INOVATIF.</li>
                     <li>MENYELENGGARAKAN PENDIDIKAN DAN PELATIHAN SESUAI DENGAN KEBUTUHAN MASYARAKAT DUNIA KERJA SEKTOR SWASTA/PEMERINTAH, BAIK NASIONAL MAUPUN INTERNASIONAL.</li>
                     <li>MEMBERDAYAKAN SEKOLAH UNTUK MEWUJUDKAN PELAYANAN BAGI MASYARAKAT.</li>
@@ -1094,7 +998,15 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
                     <li>MENINGKATKAN KERJA SAMA DENGAN DINAS PENDIDIKAN KABUPATEN SERTA DINAS PENDIDIKAN PROVINSI SERTA PEMERINTAH PUSAT.</li>
                 </ol>
                 <br><br>
-          
+                <p style="color:white; font-weight:bold; margin-bottom:5px;">VISI:</p>
+                <p>"Terwujudnya Lulusan SMK Nurul Falah yang Beriman, Bertakwa, Kompeten, Mandiri, dan Berwawasan Global di Kabupaten Lampung Timur."</p>
+                <hr style="border: 0; border-top: 1px dashed var(--neon); margin: 20px 0;">
+                <p style="color:white; font-weight:bold; margin-bottom:5px;">MISI:</p>
+                <ul style="padding-left: 20px;">
+                    <li style="margin-bottom: 10px;">Menyelenggarakan pendidikan vokasi yang terintegrasi dengan nilai-nilai pancasila dan teknologi terkini.</li>
+                    <li style="margin-bottom: 10px;">Membekali peserta didik dengan keterampilan <em>Digital Marketing</em> dan <em>E-Commerce</em> yang relevan dengan kebutuhan industri.</li>
+                    <li>Membangun jiwa kewirausahaan (Entrepreneurship) agar siswa mampu mendapatkan pekerjaan atau menciptakan lapangan kerja mandiri.</li>
+                </ul>
             `
         };
 
@@ -2279,7 +2191,7 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
                 }
                 
                 this.renderMessages([
-                    { ip: 'SYSTEM', text: '⚠️ — chat ini cuma lokal di browser kamu sendiri. aktifkan internet untuk mengaktifkan global live chat sungguhan.', ts: Date.now() }
+                    { ip: 'SYSTEM', text: '⚠️ Firebase belum dikonfigurasi — chat ini cuma lokal di browser kamu sendiri. Isi FIREBASE_CONFIG di kode untuk mengaktifkan global live chat sungguhan.', ts: Date.now() }
                 ]);
                 this.renderOnlineList({ [this.presenceId]: { device: this.myDevice, ts: Date.now() } });
             },
@@ -2527,7 +2439,7 @@ listEl.innerHTML = ids.map(key => {
                 if (Notification.permission === 'granted' && 'serviceWorker' in navigator) {
                     try {
                         const reg = await navigator.serviceWorker.ready;
-                        reg.showNotification('💬 ' + this._maskIp(m.ip || 'Anonim') + ' • Global Live Chat', {
+                        reg.showNotification('💬 ' + this._maskIp(m.ip || 'Anonim') + ' • Global Chat SMK Nufa', {
                             body: WordFilter.clean(m.text),
                             tag: 'nufa-global-chat',
                             renotify: true,
@@ -2695,123 +2607,6 @@ listEl.innerHTML = ids.map(key => {
                 if (navigator.vibrate) { try { navigator.vibrate(60); } catch (e) {} }
             }
         };
-(function () {
-    'use strict';
-
-    // ── Daftar headline yang akan bergantian ──────────────────
-    const HEADLINES = [
-        '🔥💯 mahaKarya anak bangsa 🇮🇩',
-        '⚡ Terhubung hanya dengan satu klik ke semua orang',
-        '🔒 Data & identitas Anda terenkripsi penuh',
-        '🌐 Akses percakapan lintas perangkat, kapan saja',
-        '⚙️ Terminal system canggih berbasis realtime',
-        '👁 Pantau siapa saja yang sedang online live',
-        '🛡 Koneksi aman — tanpa login, tanpa jejak',
-        '🔥💯 mahaKarya anak bangsa 🇮🇩',
-        '🚀 Latensi ultra-rendah, pesan terkirim instan',
-        '🔑 Identitas anonim — hanya IP terenkripsi yang terlihat',
-        '📡  Akses siapapun, dimanapun, sekarang',
-        '💬 Ruang obrolan Publik, Bertemakan siber',
-        '🖥️ Fullstack Development, murni vanila kode',
-
-    ];
-
-    // ── Karakter pool untuk efek scramble ────────────────────
-    const POOL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*<>[]{}|';
-
-    // ── Timing (ms) ───────────────────────────────────────────
-    const SCRAMBLE_DURATION = 500;   // durasi fase scramble
-    const HOLD_DURATION     = 3800;  // berapa lama teks diam sebelum ganti
-    const GLOW_DELAY        = 200;   // delay sebelum pulse glow menyala
-    const GLITCH_INTERVAL   = 5000;  // seberapa sering glitch micro-shift
-
-    let currentIndex = 0;
-    let scrambleRaf  = null;
-    let glitchTimer  = null;
-
-    // ── Tunggu DOM siap ───────────────────────────────────────
-    function init() {
-        const el = document.getElementById('chat-headline-text');
-        if (!el) return; // elemen belum ada, skip
-
-        cycleHeadline(el);
-        scheduleGlitch(el);
-    }
-
-    // ── Satu siklus: scramble → settle → tahan → ganti ───────
-    function cycleHeadline(el) {
-        const target = HEADLINES[currentIndex];
-        currentIndex = (currentIndex + 1) % HEADLINES.length;
-
-        // Set data-text untuk layer glitch pseudo-element
-        el.setAttribute('data-text', target);
-
-        // Fase scramble
-        el.classList.add('scrambling');
-        el.style.animation = 'none';
-
-        const start = performance.now();
-
-        function scrambleFrame(now) {
-            const elapsed  = now - start;
-            const progress = Math.min(elapsed / SCRAMBLE_DURATION, 1);
-
-            // Karakter yang sudah "terkunci" dari kiri = semakin banyak seiring progress
-            const lockedCount = Math.floor(progress * target.length);
-            let display = '';
-
-            for (let i = 0; i < target.length; i++) {
-                if (i < lockedCount || target[i] === ' ') {
-                    display += target[i]; // karakter asli
-                } else {
-                    display += POOL[Math.floor(Math.random() * POOL.length)]; // karakter acak
-                }
-            }
-
-            el.textContent = display;
-
-            if (progress < 1) {
-                scrambleRaf = requestAnimationFrame(scrambleFrame);
-            } else {
-                // Teks final sudah settle
-                el.textContent = target;
-                el.classList.remove('scrambling');
-
-                // Reveal animation
-                el.style.animation = 'none';
-                void el.offsetWidth; // reflow paksa
-                el.style.animation =
-                    `headline-reveal 0.35s ease forwards, ` +
-                    `headline-glow-pulse 2.5s ease-in-out ${GLOW_DELAY}ms infinite`;
-
-                // Jadwalkan siklus berikutnya
-                setTimeout(() => cycleHeadline(el), HOLD_DURATION);
-            }
-        }
-
-        scrambleRaf = requestAnimationFrame(scrambleFrame);
-    }
-
-    // ── Glitch micro-shift acak ───────────────────────────────
-    function scheduleGlitch(el) {
-        glitchTimer = setInterval(() => {
-            // Hanya glitch kalau tidak sedang scramble
-            if (!el.classList.contains('scrambling')) {
-                el.classList.remove('glitch-fire');
-                void el.offsetWidth;
-                el.classList.add('glitch-fire');
-                setTimeout(() => el.classList.remove('glitch-fire'), 400);
-            }
-        }, GLITCH_INTERVAL);
-    }
-
-    // ── Kick-off ──────────────────────────────────────────────
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
-})();
     
 (function () {
   'use strict';
