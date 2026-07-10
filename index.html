@@ -5,14 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SMK NURUL FALAH - THE GLIMPSE OF FUTURE</title>
 <meta name="google-site-verification" content="bcu4uRS7dTLeJExZS1IX56ZkOeI4F5Wu1O48GXmes8Y" />
-<meta name="description" content="Website Resmi Sistem Informasi Digital dan Galeri Highlight kegiatan SMK Nurul Falah. Berlokasi di jalan raya kauman, Desa Gedung wani timur, Margatiga, Lampung Timur.">
+<meta name="description" content="Portal Kreatif Informasi Digital dan Galeri Highlight kegiatan SMK Nurul Falah.
+NOMOR NPSN	:	10814959
+TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
     <meta name="keywords" content="SMK Nurul Falah, SMK Nufa, smks, Gedung wani timur, kauman, SMK Lampung Timur, GWT, DESA, HACKER, gedung wani, biner, code matrix, matrix, NUFA BASE, Margatiga, website cyberpunk, masa depan, sekilas pandang,">
     <meta name="author" content="SMK Nurul Falah">
     <meta name="robots" content="index, follow">
 
  <meta property="og:type" content="website" />
     <meta property="og:title" content="SMK NURUL FALAH - THE GLIMPSE OF FUTURE" />
-    <meta property="og:description" content="Situs Portal Kreatif Sistem Informasi Digital dan Galeri Highlight kegiatan SMK Nurul Falah. Berlokasi di jalan raya kauman, Desa Gedung wani timur, Margatiga, Lampung Timur, Provinsi LAMPUNG.
+    <meta property="og:description" content="Situs Portal Kreatif Sistem Informasi Digital dan Galeri Highlight kegiatan SMK Nurul Falah. 
         NOMOR NPSN	:	10814959
         TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022" />
     <meta property="og:image" content="https://raw.githubusercontent.com/smknufagwt/SMKNUFAGWT/main/appcover.jpg" />
@@ -371,20 +373,97 @@
         .chat-icon-btn:hover { border-color: var(--neon); box-shadow: 0 0 8px var(--neon); }
         .chat-icon-btn.notif-on { color: #000; background: var(--neon); box-shadow: 0 0 10px var(--neon); border-color: var(--neon); }
 
-        /* ── MY IP BAR: tampil di bawah header, selalu terlihat ── */
-        #chat-myip-bar {
-            display: flex; align-items: center; gap: 6px;
-            padding: 5px 14px; border-bottom: 1px solid rgba(0,240,255,0.15);
-            background: rgba(0, 240, 255, 0.04);
-            font-family: var(--font-main); font-size: 0.6rem; color: var(--neon);
-            letter-spacing: 1px; flex-wrap: wrap; gap: 8px;
-        }
-        #chat-myip-bar .myip-segment {
-            display: flex; align-items: center; gap: 4px; opacity: 0.85;
-        }
-        #chat-myip-bar .myip-segment i { font-size: 0.62rem; }
-        #chat-myip-bar .myip-val { color: var(--neon); opacity: 1; font-weight: bold; }
+  /* ── HEADLINE SCRAMBLER BAR (pengganti #chat-myip-bar) ── */
+  #chat-headline-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 14px;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+      background: rgba(0, 240, 255, 0.04);
+      font-family: var(--font-main);
+      font-size: 0.6rem;
+      letter-spacing: 1.5px;
+      color: var(--glitch-blue);
+      overflow: hidden;
+      position: relative;
+      min-height: 22px;
+      cursor: default;
+  }
 
+  /* Scanline geser kiri-kanan di belakang teks */
+  #chat-headline-bar::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(0, 240, 255, 0.07) 50%,
+          transparent 100%
+      );
+      background-size: 200% 100%;
+      animation: headline-sweep 3s linear infinite;
+      pointer-events: none;
+  }
+
+  #chat-headline-text {
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 0 8px var(--glitch-blue);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+  }
+
+  /* State: sedang scramble → warna campur neon + biru */
+  #chat-headline-text.scrambling {
+      color: var(--neon);
+      text-shadow: 0 0 10px var(--neon);
+  }
+
+  /* State: teks baru muncul → fade-in slide dari bawah */
+  @keyframes headline-reveal {
+      0%   { opacity: 0; transform: translateY(4px); }
+      100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Glow pulse setelah teks settle */
+  @keyframes headline-glow-pulse {
+      0%, 100% { text-shadow: 0 0 6px var(--glitch-blue); }
+      50%       { text-shadow: 0 0 14px var(--glitch-blue), 0 0 28px rgba(0,240,255,0.4); }
+  }
+
+  /* Sweep cahaya latar */
+  @keyframes headline-sweep {
+      0%   { background-position: -100% 0; }
+      100% { background-position: 200% 0; }
+  }
+
+  /* Glitch micro-shift sesekali */
+  @keyframes headline-glitch {
+      0%   { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+      10%  { clip-path: inset(10% 0 60% 0); transform: translateX(-3px); }
+      20%  { clip-path: inset(40% 0 20% 0); transform: translateX(3px); }
+      30%  { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+      100% { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+  }
+
+  /* Pseudo-element untuk efek glitch layer kedua */
+  #chat-headline-text::after {
+      content: attr(data-text);
+      position: absolute;
+      inset: 0;
+      color: var(--neon);
+      opacity: 0;
+      pointer-events: none;
+  }
+
+  #chat-headline-text.glitch-fire::after {
+      opacity: 0.6;
+      animation: headline-glitch 0.4s steps(1) forwards;
+  }
         #chat-dashboard {
             position: relative; display: flex; align-items: center; justify-content: space-between; gap: 8px;
             padding: 9px 14px; border-bottom: 1px solid var(--neon-dim);
@@ -758,6 +837,21 @@
     margin-bottom: 2px; 
 }
 
+@import "tailwindcss";
+.bumi-muter-3d {
+  display: inline-block !important;
+  transform-style: preserve-3d;
+  animation: spin3d 4s linear infinite;
+}
+
+@keyframes spin3d {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(360deg);
+  }
+}
     </style>
 </head>
 <body>
@@ -805,17 +899,19 @@
 
     <div id="chat-panel">
         <div id="chat-panel-head">
-            <span><i class="fa-solid fa-satellite-dish"></i> GLOBAL LIVE CHAT ANONIM</span>
+            <span><i class="fa-solid fa-satellite-dish"></i> GLOBAL LIVE CHAT ANONIM
+ <span class="bumi-muter-3d">
+    <i class="fa-solid fa-earth"></i>
+</span>
+</span>
             <div id="chat-head-right">
                 <button id="chat-notif-toggle" class="chat-icon-btn" onclick="GlobalChat.toggleNotif()" title="Toggle Notifikasi"><i class="fa-solid fa-bell-slash"></i></button>
                 <button id="chat-close" onclick="GlobalChat.toggle()">✕</button>
             </div>
         </div>
-        <!-- MY IP + DEVICE BAR — selalu terlihat di bawah header -->
-        <div id="chat-myip-bar">
-            <span class="myip-segment"><i class="fa-solid fa-network-wired"></i> IP: <span class="myip-val" id="chat-myip-display">...</span></span>
-            <span class="myip-segment"><i id="chat-device-icon" class="fa-solid fa-mobile-screen"></i> <span class="myip-val" id="chat-device-label">Memuat...</span></span>
-        </div>
+          <div id="chat-headline-bar">
+    <span id="chat-headline-text"></span>
+  </div>
         <div id="chat-dashboard" onclick="GlobalChat.toggleOnlineList()">
             <div id="chat-online-left">
                 <span class="dot-online"></span>
@@ -924,7 +1020,7 @@
         <i class="fa-solid fa-gamepad"></i> GAME WEB
     </a>
 
-    <a id="btn-pembuat" href="https://wa.me/6283199753711?text=halo" target="_blank" class="author-link" onclick="AudioFX.click()"
+    <a id="btn-pembuat" href="https://wa.me/6283199753711?text=halo%2%20Arlingga" target="_blank" class="author-link" onclick="AudioFX.click()"
        style="border-color: #25D366 !important; color: #25D366 !important; box-shadow: 0 0 10px rgba(37, 211, 102, 0.3);">
         <i class="fa-brands fa-whatsapp"></i> PEMBUAT
     </a>
@@ -980,7 +1076,10 @@
                 <h2>PROFIL SEKOLAH</h2>
                 <p>Selamat datang di Sistem Informasi Digital <strong>SMK NURUL FALAH</strong>. Website ini didedikasikan sebagai media dokumentasi, informasi, dan portofolio digital siswa-siswi <strong>SMK Nurul Falah</strong>.</p>
                 <br>
-                <p>SMK Nurul Falah berlokasi di <strong>Desa Gedung Wani Timur, Kecamatan Margatiga, Kabupaten Lampung Timur</strong>. Di bawah naungan Yayasan Pendidikan Islam Nurul Falah, berkomitmen mencetak generasi muda yang kompeten,terampil dan bertanggung jawab serta memiliki akhlak mulia sesuai nilai pancasila.</p>
+                <p style="flex">SMK Nurul Falah Berlokasi di jalan raya kauman, Desa Gedung wani timur, Margatiga, Lampung Timur, Provinsi LAMPUNG. </p>
+<p style="bold">NOMOR NPSN	:	10814959.</p>
+<p style="bold">TERAKREDITASI  :   BAN-SM Nomor : 1857/BAN-SM/SK/2022.</p>
+<p>Di bawah naungan Yayasan Pendidikan Islam Nurul Falah, berkomitmen mencetak generasi muda yang kompeten,terampil dan bertanggung jawab serta memiliki akhlak mulia sesuai nilai pancasila.</p>
                 <div class="marquee-container">
                     <div class="marquee-content">SMK NUFA JAYA &nbsp;///&nbsp; BISA - HEBAT - DISIPLIN - KOMPETEN - SIAP KERJA &nbsp;///&nbsp; SYSTEM ONLINE &nbsp;///&nbsp; SMK NUFA JAYA</div>
                 </div>
@@ -2191,7 +2290,7 @@
                 }
                 
                 this.renderMessages([
-                    { ip: 'SYSTEM', text: '⚠️ Firebase belum dikonfigurasi — chat ini cuma lokal di browser kamu sendiri. Isi FIREBASE_CONFIG di kode untuk mengaktifkan global live chat sungguhan.', ts: Date.now() }
+                    { ip: 'SYSTEM', text: '⚠️ — chat ini cuma lokal di browser kamu sendiri. aktifkan internet untuk mengaktifkan global live chat sungguhan.', ts: Date.now() }
                 ]);
                 this.renderOnlineList({ [this.presenceId]: { device: this.myDevice, ts: Date.now() } });
             },
@@ -2439,7 +2538,7 @@ listEl.innerHTML = ids.map(key => {
                 if (Notification.permission === 'granted' && 'serviceWorker' in navigator) {
                     try {
                         const reg = await navigator.serviceWorker.ready;
-                        reg.showNotification('💬 ' + this._maskIp(m.ip || 'Anonim') + ' • Global Chat SMK Nufa', {
+                        reg.showNotification('💬 ' + this._maskIp(m.ip || 'Anonim') + ' • Global Live Chat', {
                             body: WordFilter.clean(m.text),
                             tag: 'nufa-global-chat',
                             renotify: true,
@@ -2607,6 +2706,123 @@ listEl.innerHTML = ids.map(key => {
                 if (navigator.vibrate) { try { navigator.vibrate(60); } catch (e) {} }
             }
         };
+(function () {
+    'use strict';
+
+    // ── Daftar headline yang akan bergantian ──────────────────
+    const HEADLINES = [
+        '🔥💯 mahaKarya anak bangsa 🇮🇩',
+        '⚡ Terhubung hanya dengan satu klik ke semua orang',
+        '🔒 Data & identitas Anda terenkripsi penuh',
+        '🌐 Akses percakapan lintas perangkat, kapan saja',
+        '⚙️ Terminal system canggih berbasis realtime',
+        '👁 Pantau siapa saja yang sedang online live',
+        '🛡 Koneksi aman — tanpa login, tanpa jejak',
+        '🔥💯 mahaKarya anak bangsa 🇮🇩',
+        '🚀 Latensi ultra-rendah, pesan terkirim instan',
+        '🔑 Identitas anonim — hanya IP terenkripsi yang terlihat',
+        '📡  Akses siapapun, dimanapun, sekarang',
+        '💬 Ruang obrolan Publik, Bertemakan siber',
+        '🖥️ Fullstack Development, murni vanila kode',
+
+    ];
+
+    // ── Karakter pool untuk efek scramble ────────────────────
+    const POOL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*<>[]{}|';
+
+    // ── Timing (ms) ───────────────────────────────────────────
+    const SCRAMBLE_DURATION = 500;   // durasi fase scramble
+    const HOLD_DURATION     = 3800;  // berapa lama teks diam sebelum ganti
+    const GLOW_DELAY        = 200;   // delay sebelum pulse glow menyala
+    const GLITCH_INTERVAL   = 5000;  // seberapa sering glitch micro-shift
+
+    let currentIndex = 0;
+    let scrambleRaf  = null;
+    let glitchTimer  = null;
+
+    // ── Tunggu DOM siap ───────────────────────────────────────
+    function init() {
+        const el = document.getElementById('chat-headline-text');
+        if (!el) return; // elemen belum ada, skip
+
+        cycleHeadline(el);
+        scheduleGlitch(el);
+    }
+
+    // ── Satu siklus: scramble → settle → tahan → ganti ───────
+    function cycleHeadline(el) {
+        const target = HEADLINES[currentIndex];
+        currentIndex = (currentIndex + 1) % HEADLINES.length;
+
+        // Set data-text untuk layer glitch pseudo-element
+        el.setAttribute('data-text', target);
+
+        // Fase scramble
+        el.classList.add('scrambling');
+        el.style.animation = 'none';
+
+        const start = performance.now();
+
+        function scrambleFrame(now) {
+            const elapsed  = now - start;
+            const progress = Math.min(elapsed / SCRAMBLE_DURATION, 1);
+
+            // Karakter yang sudah "terkunci" dari kiri = semakin banyak seiring progress
+            const lockedCount = Math.floor(progress * target.length);
+            let display = '';
+
+            for (let i = 0; i < target.length; i++) {
+                if (i < lockedCount || target[i] === ' ') {
+                    display += target[i]; // karakter asli
+                } else {
+                    display += POOL[Math.floor(Math.random() * POOL.length)]; // karakter acak
+                }
+            }
+
+            el.textContent = display;
+
+            if (progress < 1) {
+                scrambleRaf = requestAnimationFrame(scrambleFrame);
+            } else {
+                // Teks final sudah settle
+                el.textContent = target;
+                el.classList.remove('scrambling');
+
+                // Reveal animation
+                el.style.animation = 'none';
+                void el.offsetWidth; // reflow paksa
+                el.style.animation =
+                    `headline-reveal 0.35s ease forwards, ` +
+                    `headline-glow-pulse 2.5s ease-in-out ${GLOW_DELAY}ms infinite`;
+
+                // Jadwalkan siklus berikutnya
+                setTimeout(() => cycleHeadline(el), HOLD_DURATION);
+            }
+        }
+
+        scrambleRaf = requestAnimationFrame(scrambleFrame);
+    }
+
+    // ── Glitch micro-shift acak ───────────────────────────────
+    function scheduleGlitch(el) {
+        glitchTimer = setInterval(() => {
+            // Hanya glitch kalau tidak sedang scramble
+            if (!el.classList.contains('scrambling')) {
+                el.classList.remove('glitch-fire');
+                void el.offsetWidth;
+                el.classList.add('glitch-fire');
+                setTimeout(() => el.classList.remove('glitch-fire'), 400);
+            }
+        }, GLITCH_INTERVAL);
+    }
+
+    // ── Kick-off ──────────────────────────────────────────────
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
     
 (function () {
   'use strict';
