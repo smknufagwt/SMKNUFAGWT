@@ -248,7 +248,7 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
         .author-link:hover { background: var(--neon); color: black; box-shadow: 0 0 15px var(--neon); transform: translateY(-3px); }
         
         .control-btn {
-            position: fixed; bottom: 28px; width: 45px; height: 45px;
+            position: fixed; bottom: 29px; width: 45px; height: 45px;
             border: 1px solid var(--neon); background: rgba(0, 0, 0, 0.8); color: var(--neon);
             display: none; justify-content: center; align-items: center; border-radius: 50%;
             cursor: pointer; z-index: 1000; box-shadow: 0 0 10px var(--neon-dim); transition: 0.3s; font-size: 1.2rem;
@@ -850,6 +850,54 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
   }
 }
     </style>
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+    (function () {
+      'use strict';
+      const NOTIFY_ENDPOINT = '/api/notify';
+      const NOTIFY_SECRET   = '%%NOTIFY_SECRET%%';
+      let lastTriggeredTs   = 0;
+
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function (OneSignal) {
+        await OneSignal.init({
+          appId:         '24018ed8-5d9e-4e5e-b651-f8e94bf58a53',
+          safari_web_id: 'web.onesignal.auto.5a4f7f6e-eec9-48b6-8a5c-3683e8870b3c',
+          notifyButton:  { enable: false },
+          serviceWorkerParam: { scope: '/' },
+        });
+      });
+
+      window.NufaNotify = {
+        async trigger(m) {
+          if (!m || !m.text || !m.ts) return;
+          if (m.ts <= lastTriggeredTs) return;
+          lastTriggeredTs = m.ts;
+          try {
+            const res = await fetch(NOTIFY_ENDPOINT, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'x-notify-secret': NOTIFY_SECRET },
+              body: JSON.stringify({ ip: m.ip, text: m.text, ts: m.ts }),
+            });
+            if (!res.ok) console.warn('[NufaNotify] api/notify:', res.status);
+          } catch (e) {
+            console.warn('[NufaNotify] OneSignal unreachable, BC only:', e.message);
+          }
+          try {
+            const bc = new BroadcastChannel('nufa-realtime');
+            bc.postMessage({ type: 'NEW_CHAT_MESSAGE', payload: m });
+            bc.close();
+          } catch (_) {}
+        },
+        async requestPermission() {
+          try {
+            await OneSignal.Notifications.requestPermission();
+            return OneSignal.Notifications.permission;
+          } catch (e) { return false; }
+        },
+      };
+    })();
+    </script>
 </head>
 <body>
 
@@ -898,9 +946,8 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
         <div id="chat-panel-head">
 
 <span class="bumi-muter-3d">
-    <i class="fa-solid fa-earth"></i>
-</span>
-            <span>   GLOBAL LIVE CHAT ANONIM </span>
+    <i class="fa-solid fa-earth"></i></span>
+            <span>GLOBAL LIVE CHAT ANONIM </span>
             <div id="chat-head-right">
                 <button id="chat-notif-toggle" class="chat-icon-btn" onclick="GlobalChat.toggleNotif()" title="Toggle Notifikasi"><i class="fa-solid fa-bell-slash"></i></button>
                 <button id="chat-close" onclick="GlobalChat.toggle()">✕</button>
@@ -1855,7 +1902,7 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
         const UploadSystem = {
             // ⚠️ GANTI password ini sesuai keinginanmu
             
-            ACCESS_CODE_B64: "c21rczIwMjY=",
+            ACCESS_CODE_B64: "%%ACCESS_CODE_B64%%",
             get ACCESS_CODE() { return atob(this.ACCESS_CODE_B64); },
 
             selectedFile: null,
@@ -2119,13 +2166,13 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
         //  GLOBAL LIVE CHAT — semua pengunjung (tanpa login), IP terlihat    
 
         const FIREBASE_CONFIG = {
-            apiKey: "AIzaSyDZuEeW24yyBKJ-dpJyiBMJ6HH5od15L40",
+            apiKey: "%%FIREBASE_API_KEY%%",
             authDomain: "server-nufa.firebaseapp.com",
             projectId: "server-nufa",
             storageBucket: "server-nufa.firebasestorage.app",
             messagingSenderId: "168660687360",
             appId: "1:168660687360:web:bdb56f6ea15e3cd44756e5",
-            databaseURL: "https://server-nufa-default-rtdb.asia-southeast1.firebasedatabase.app"
+            databaseURL: "%%FIREBASE_DATABASE_URL%%"
         };
         //  KONFIGURASI SENSOR IP   
         const IP_MASK_LEVEL = 1;
@@ -2305,6 +2352,7 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
                             if (m.ts && m.ts < this.initTime) return; // pesan lama saat load awal
                             if (m.uid ? m.uid === this.presenceId : m.ip === this.myIp) return; // jangan notif pesan sendiri
                             this.notify(m);
+                            if (window.NufaNotify) window.NufaNotify.trigger(m);
                         });
 
                         if (!this.isOpen && msgs.length > this.lastCount) {
@@ -2491,6 +2539,7 @@ listEl.innerHTML = ids.map(key => {
                     this.notifEnabled = true;
                     localStorage.setItem('nufa_chat_notif', 'on');
                     this._showToast({ ip: 'SYSTEM', text: '🔔 Notifikasi aktif — kamu akan dapat alert untuk setiap chat baru.' });
+                    if (window.NufaNotify) window.NufaNotify.requestPermission();
                 } else {
                     this.notifEnabled = false;
                     localStorage.setItem('nufa_chat_notif', 'off');
@@ -2720,7 +2769,7 @@ listEl.innerHTML = ids.map(key => {
     const POOL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*<>[]{}|';
 
     // ── Timing (ms) ───────────────────────────────────────────
-    const SCRAMBLE_DURATION = 500;   // durasi fase scramble
+    const SCRAMBLE_DURATION = 800;   // durasi fase scramble
     const HOLD_DURATION     = 3800;  // berapa lama teks diam sebelum ganti
     const GLOW_DELAY        = 200;   // delay sebelum pulse glow menyala
     const GLITCH_INTERVAL   = 5000;  // seberapa sering glitch micro-shift
