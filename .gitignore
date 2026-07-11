@@ -1,0 +1,4 @@
+# Jangan pernah commit file ini
+.env
+.env.local
+.env.production
