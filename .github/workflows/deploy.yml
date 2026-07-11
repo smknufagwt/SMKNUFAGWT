@@ -20,9 +20,7 @@ jobs:
           sed -i "s|%%NOTIFY_SECRET%%|${{ secrets.NOTIFY_SECRET }}|g"                 index.html
 
       - name: Deploy ke Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token:      ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id:     team_WAxjsLFh79gZzZGqIxczIcz8
-          vercel-project-id: prj_gCEeSO4IqIbjEs0oK99EyRIORx8A
-          vercel-args:       '--prod'
+        run: npx vercel --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
+        env:
+          VERCEL_ORG_ID:     team_WAxjsLFh79gZzZGqIxczIcz8
+          VERCEL_PROJECT_ID: prj_gCEeSO4IqIbjEs0oK99EyRIORx8A
