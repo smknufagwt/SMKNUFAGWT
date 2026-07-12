@@ -35,6 +35,7 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
     <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
@@ -258,6 +259,81 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
         #color-btn { left: 5px; }
         #chat-btn { left: 50%; transform: translateX(-50%); }
         #chat-btn:hover { transform: translateX(-50%) scale(1.1); }
+        #weather-btn { left: 60px; }
+
+        /* ── Confirm popup (radar/cuaca) ── */
+        #wx-confirm {
+            display: none; position: fixed; inset: 0; z-index: 1250;
+            background: rgba(0,0,0,0.7); justify-content: center; align-items: center;
+            backdrop-filter: blur(4px); animation: fadeIn 0.2s ease;
+        }
+        #wx-confirm.open { display: flex; }
+        #wx-confirm .box {
+            width: min(88vw, 320px); background: var(--glass); border: 1px solid var(--neon);
+            border-radius: 8px; padding: 22px 20px; text-align: center;
+            box-shadow: 0 0 30px rgba(0,255,65,0.25);
+        }
+        #wx-confirm .box i { font-size: 2rem; color: var(--neon); filter: drop-shadow(0 0 8px var(--neon)); }
+        #wx-confirm .box p { color: #fff; font-size: 0.85rem; letter-spacing: 1px; margin: 12px 0 18px; }
+        #wx-confirm .box .row { display: flex; gap: 10px; }
+        #wx-confirm .box button {
+            flex: 1; padding: 10px; font-family: var(--font-main); font-size: 0.8rem; letter-spacing: 2px;
+            border-radius: 4px; cursor: pointer; text-transform: uppercase;
+        }
+        #wx-yes { background: var(--neon); color: #000; border: 1px solid var(--neon); font-weight: bold; }
+        #wx-yes:hover { box-shadow: 0 0 15px var(--neon); }
+        #wx-no { background: transparent; color: var(--neon); border: 1px solid var(--neon-dim); }
+        #wx-no:hover { border-color: var(--neon); }
+
+        /* ── Weather dashboard modal (compact) ── */
+        #weather-modal {
+            display: none; position: fixed; inset: 0; z-index: 1200;
+            background: rgba(0,0,0,0.92); justify-content: center; align-items: center;
+            backdrop-filter: blur(8px); padding: 12px; animation: fadeIn 0.25s ease;
+        }
+        #weather-modal.open { display: flex; }
+        .wx-panel {
+            width: 96vw; height: 94vh; max-width: 1400px; overflow-y: auto;
+            background: rgba(0,12,6,0.9); border: 1px solid var(--neon); border-radius: 10px;
+            padding: 20px clamp(16px, 4vw, 60px); box-shadow: 0 0 50px rgba(0,255,65,0.25);
+        }
+        .wx-panel-head span { font-size: clamp(0.95rem, 2vw, 1.4rem); }
+        .wx-temp-row .t { font-size: clamp(3rem, 8vw, 6rem); }
+        .wx-temp-row .ic { font-size: clamp(2rem, 5vw, 4rem); }
+        .wx-stat-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+        .wx-stat .v { font-size: clamp(0.9rem, 1.6vw, 1.3rem); }
+        .wx-forecast-row .wx-fday { min-width: 90px; }
+        #wx-map { height: clamp(220px, 45vh, 520px); }
+        @media (min-width: 900px) {
+            .wx-panel-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; align-items: start; }
+        }
+        .wx-panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .wx-panel-head span { color: #fff; letter-spacing: 2px; font-size: 0.85rem; }
+        #wx-close { background: none; border: none; color: var(--neon); font-size: 1.3rem; cursor: pointer; }
+        .wx-loc-row { font-size: 0.75rem; color: var(--neon); opacity: 0.85; margin-bottom: 4px; }
+        .wx-temp-row { display: flex; align-items: center; gap: 12px; }
+        .wx-temp-row .t { font-size: 2.4rem; color: var(--neon); text-shadow: 0 0 10px var(--neon); line-height: 1; }
+        .wx-temp-row .ic { font-size: 2rem; }
+        .wx-desc { font-size: 0.7rem; opacity: 0.7; letter-spacing: 1px; text-transform: uppercase; }
+        .wx-stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+        .wx-stat { border: 1px solid var(--neon-dim); border-radius: 4px; padding: 6px; text-align: center; background: rgba(0,255,65,0.03); }
+        .wx-stat .v { font-size: 0.8rem; color: #fff; }
+        .wx-stat .l { font-size: 0.55rem; opacity: 0.6; letter-spacing: 1px; margin-top: 2px; }
+        .wx-forecast-row { display: flex; gap: 6px; margin-top: 10px; overflow-x: auto; }
+        .wx-fday { flex: 1; min-width: 58px; text-align: center; border: 1px solid var(--neon-dim); border-radius: 4px; padding: 5px 2px; }
+        .wx-fday .d { font-size: 0.55rem; opacity: 0.6; }
+        .wx-fday .ic { font-size: 1rem; margin: 2px 0; }
+        .wx-fday .t { font-size: 0.6rem; color: var(--neon); }
+        .wx-aqi { margin-top: 10px; border-top: 1px solid var(--neon-dim); padding-top: 8px; }
+        .wx-aqi-badge { display: inline-block; padding: 3px 8px; border-radius: 3px; font-size: 0.7rem; letter-spacing: 1px; background: rgba(0,255,65,0.15); color: var(--neon); border: 1px solid var(--neon-dim); }
+        .wx-aqi-detail { font-size: 0.6rem; opacity: 0.6; margin-top: 4px; }
+        .wx-map-controls { display: flex; gap: 6px; margin: 10px 0 6px; }
+        .wx-map-controls button { flex: 1; background: rgba(0,255,65,0.05); border: 1px solid var(--neon-dim); color: var(--neon);
+            font-family: var(--font-main); font-size: 0.6rem; letter-spacing: 1px; padding: 6px 4px; border-radius: 4px; cursor: pointer; }
+        .wx-map-controls button.active { background: rgba(0,255,65,0.2); border-color: var(--neon); }
+        #wx-map { width: 100%; height: 180px; border-radius: 4px; border: 1px solid var(--neon-dim); filter: hue-rotate(60deg) saturate(1.3) brightness(0.9); }
+        .wx-status { font-size: 0.6rem; opacity: 0.5; margin-top: 8px; }
+        .wx-status.err { color: var(--glitch-red); opacity: 0.9; }
         #chat-btn .chat-dot {
             position: absolute; top: -2px; right: -2px; width: 10px; height: 10px;
             background: var(--glitch-red); border-radius: 50%; box-shadow: 0 0 8px var(--glitch-red);
@@ -933,6 +1009,65 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
         <i class="fa-solid fa-comments"></i>
         <span class="chat-dot" id="chat-dot"></span>
     </div>
+    <div id="weather-btn" class="control-btn" onclick="NufaWeather.askOpen()" title="Radar & Cuaca">
+        <i class="fa-solid fa-cloud-bolt"></i>
+    </div>
+
+    <div id="wx-confirm">
+        <div class="box">
+            <i class="fa-solid fa-satellite-dish"></i>
+            <p>BUKA TOOLS RADAR &amp; CUACA?</p>
+            <div class="row">
+                <button id="wx-yes" onclick="NufaWeather.confirmYes()">YA</button>
+                <button id="wx-no" onclick="NufaWeather.confirmNo()">KEMBALI</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="weather-modal">
+        <div class="wx-panel">
+            <div class="wx-panel-head">
+                <span><i class="fa-solid fa-cloud-bolt"></i> NUFA WEATHER DASHBOARD</span>
+                <button id="wx-close" onclick="NufaWeather.close()">✕</button>
+            </div>
+
+            <div class="wx-panel-body">
+            <div class="wx-col-left">
+            <div class="wx-loc-row" id="wxLoc">MENCARI LOKASI...</div>
+            <div class="wx-temp-row">
+                <span class="ic" id="wxIcon">❔</span>
+                <span class="t" id="wxTemp">--°</span>
+            </div>
+            <div class="wx-desc" id="wxDesc">STANDBY</div>
+
+            <div class="wx-stat-grid">
+                <div class="wx-stat"><div class="v" id="wxHum">--%</div><div class="l">LEMBAP</div></div>
+                <div class="wx-stat"><div class="v" id="wxWindSpeed">--</div><div class="l">ANGIN</div></div>
+                <div class="wx-stat"><div class="v" id="wxWindDir">--</div><div class="l">ARAH</div></div>
+                <div class="wx-stat"><div class="v" id="wxFeels">--°</div><div class="l">TERASA</div></div>
+                <div class="wx-stat"><div class="v" id="wxPressure">--</div><div class="l">TEKANAN</div></div>
+                <div class="wx-stat"><div class="v" id="wxUV">--</div><div class="l">UV</div></div>
+            </div>
+
+            <div class="wx-forecast-row" id="wxForecast"></div>
+            </div>
+
+            <div class="wx-col-right">
+            <div class="wx-aqi">
+                <span class="wx-aqi-badge" id="aqiBadge">MEMUAT...</span>
+                <div class="wx-aqi-detail" id="aqiDetail"></div>
+            </div>
+
+            <div class="wx-map-controls">
+                <button id="btnLocate">📍 LOKASI SAYA</button>
+                <button id="btnRadar">🌧 RADAR HUJAN</button>
+            </div>
+            <div id="wx-map"></div>
+            <div class="wx-status" id="wxStatus">Menunggu izin lokasi...</div>
+            </div>
+            </div>
+        </div>
+    </div>
 
     <div id="chat-marquee-bar">
         <div id="chat-marquee-track">
@@ -1412,6 +1547,8 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
                 this.colorBtn.style.display = 'flex';
                 const chatBtn = document.getElementById('chat-btn');
                 if (chatBtn) chatBtn.style.display = 'flex';
+                const weatherBtn = document.getElementById('weather-btn');
+                if (weatherBtn) weatherBtn.style.display = 'flex';
                 if (typeof GlobalChat !== 'undefined') GlobalChat.start();
 
                 this.fetchGallery(); 
@@ -2989,6 +3126,189 @@ window.addEventListener('load', async () => {
   });
 
 })();
+    </script>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+    const NufaWeather = (function () {
+        'use strict';
+        const FALLBACK = { lat: -5.3971, lon: 105.2668 }; // Bandar Lampung
+        let booted = false, map, marker, radarLayer, radarOn = false;
+
+        const WMO = {
+            0:['☀','Cerah'],1:['🌤','Cerah Berawan'],2:['⛅','Berawan Sebagian'],3:['☁','Mendung'],
+            45:['🌫','Berkabut'],48:['🌫','Kabut Es'],
+            51:['🌦','Gerimis Ringan'],53:['🌦','Gerimis'],55:['🌧','Gerimis Lebat'],
+            61:['🌧','Hujan Ringan'],63:['🌧','Hujan'],65:['⛈','Hujan Lebat'],
+            71:['🌨','Salju Ringan'],73:['🌨','Salju'],75:['❄','Salju Lebat'],
+            80:['🌦','Hujan Lokal'],81:['🌧','Hujan Lokal Lebat'],82:['⛈','Hujan Sangat Lebat'],
+            95:['⛈','Badai Petir'],96:['⛈','Badai + Hujan Es'],99:['⛈','Badai Hebat']
+        };
+        const wmoInfo = code => WMO[code] || ['❔','Tidak Diketahui'];
+        const dayNames = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+        const degToCompass = deg => {
+            const dirs=['U','UTL','TL','TTL','T','TTG','TG','STG','S','SBD','BD','BBD','B','BBL','BL','UBL'];
+            return dirs[Math.round(deg/22.5)%16];
+        };
+
+        function askOpen() {
+            document.getElementById('wx-confirm').classList.add('open');
+        }
+        function confirmNo() {
+            document.getElementById('wx-confirm').classList.remove('open');
+        }
+        function confirmYes() {
+            document.getElementById('wx-confirm').classList.remove('open');
+            open();
+        }
+
+        function open() {
+            // auto-close chat panel pakai transisi translateY(100%) yang sudah ada
+            const chatPanel = document.getElementById('chat-panel');
+            if (chatPanel && chatPanel.classList.contains('open')) {
+                chatPanel.classList.remove('open');
+            }
+            document.getElementById('weather-modal').classList.add('open');
+            if (!booted) { boot(); booted = true; }
+        }
+        function close() {
+            document.getElementById('weather-modal').classList.remove('open');
+        }
+
+        function boot() {
+            if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    pos => init(pos.coords.latitude, pos.coords.longitude),
+                    () => {
+                        setStatus('Izin lokasi ditolak, pakai lokasi default.', true);
+                        init(FALLBACK.lat, FALLBACK.lon);
+                    },
+                    { timeout: 8000 }
+                );
+            } else {
+                init(FALLBACK.lat, FALLBACK.lon);
+            }
+        }
+
+        function setStatus(text, isErr) {
+            const el = document.getElementById('wxStatus');
+            el.textContent = text;
+            el.classList.toggle('err', !!isErr);
+        }
+
+        function init(lat, lon) {
+            loadLocationName(lat, lon);
+            loadWeather(lat, lon);
+            loadAirQuality(lat, lon);
+            initMap(lat, lon);
+        }
+
+        async function loadLocationName(lat, lon) {
+            const el = document.getElementById('wxLoc');
+            try {
+                const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=id`);
+                const data = await res.json();
+                const name = [data.city || data.locality, data.principalSubdivision].filter(Boolean).join(', ');
+                el.textContent = name || `${lat.toFixed(3)}, ${lon.toFixed(3)}`;
+            } catch (e) {
+                el.textContent = `${lat.toFixed(3)}, ${lon.toFixed(3)}`;
+            }
+        }
+
+        async function loadWeather(lat, lon) {
+            setStatus('Mengambil data cuaca...');
+            try {
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`+
+                    `&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,weather_code,apparent_temperature,pressure_msl,uv_index`+
+                    `&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=5`;
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('API cuaca gagal: ' + res.status);
+                const data = await res.json();
+                const cur = data.current;
+
+                document.getElementById('wxTemp').textContent = Math.round(cur.temperature_2m) + '°C';
+                document.getElementById('wxHum').textContent = cur.relative_humidity_2m + '%';
+                document.getElementById('wxWindSpeed').textContent = Math.round(cur.wind_speed_10m) + ' km/j';
+                document.getElementById('wxWindDir').textContent = degToCompass(cur.wind_direction_10m);
+                document.getElementById('wxFeels').textContent = Math.round(cur.apparent_temperature) + '°C';
+                document.getElementById('wxPressure').textContent = Math.round(cur.pressure_msl) + ' hPa';
+                document.getElementById('wxUV').textContent = cur.uv_index.toFixed(1);
+
+                const [emoji, desc] = wmoInfo(cur.weather_code);
+                document.getElementById('wxIcon').textContent = emoji;
+                document.getElementById('wxDesc').textContent = desc;
+
+                const fc = document.getElementById('wxForecast');
+                fc.innerHTML = '';
+                data.daily.time.forEach((t, i) => {
+                    const d = new Date(t);
+                    const [ic] = wmoInfo(data.daily.weather_code[i]);
+                    fc.innerHTML += `<div class="wx-fday">
+                        <div class="d">${dayNames[d.getDay()]}</div>
+                        <div class="ic">${ic}</div>
+                        <div class="t">${Math.round(data.daily.temperature_2m_max[i])}/${Math.round(data.daily.temperature_2m_min[i])}</div>
+                    </div>`;
+                });
+
+                setStatus('Live — Open-Meteo API');
+            } catch (e) {
+                setStatus('Gagal ambil cuaca: ' + e.message, true);
+            }
+        }
+
+        async function loadAirQuality(lat, lon) {
+            const badge = document.getElementById('aqiBadge');
+            const detail = document.getElementById('aqiDetail');
+            try {
+                const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=pm2_5,pm10,us_aqi`;
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('AQI gagal');
+                const data = await res.json();
+                const aqi = data.current.us_aqi;
+                let label = 'BAIK';
+                if (aqi > 150) label = 'TIDAK SEHAT';
+                else if (aqi > 50) label = 'SEDANG';
+                badge.textContent = `AQI ${Math.round(aqi)} — ${label}`;
+                detail.textContent = `PM2.5: ${data.current.pm2_5} · PM10: ${data.current.pm10} µg/m³`;
+            } catch (e) {
+                badge.textContent = 'AQI TIDAK TERSEDIA';
+                detail.textContent = '';
+            }
+        }
+
+        function initMap(lat, lon) {
+            if (map) { map.setView([lat, lon], 13); marker.setLatLng([lat, lon]); return; }
+            map = L.map('wx-map', { zoomControl: true, attributionControl: true }).setView([lat, lon], 13);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19
+            }).addTo(map);
+            marker = L.marker([lat, lon]).addTo(map).bindPopup('Lokasi Anda').openPopup();
+
+            document.getElementById('btnLocate').onclick = () => {
+                map.setView(marker.getLatLng(), 13);
+                marker.openPopup();
+            };
+            document.getElementById('btnRadar').onclick = async () => {
+                const btn = document.getElementById('btnRadar');
+                if (radarOn) {
+                    map.removeLayer(radarLayer);
+                    radarOn = false; btn.classList.remove('active');
+                    return;
+                }
+                try {
+                    const res = await fetch('https://api.rainviewer.com/public/weather-maps.json');
+                    const data = await res.json();
+                    const frame = data.radar.past[data.radar.past.length - 1];
+                    radarLayer = L.tileLayer(`https://tilecache.rainviewer.com${frame.path}/256/{z}/{x}/{y}/2/1_1.png`, {
+                        opacity: 0.6, attribution: 'RainViewer'
+                    }).addTo(map);
+                    radarOn = true; btn.classList.add('active');
+                } catch (e) { alert('Radar tidak tersedia: ' + e.message); }
+            };
+        }
+
+        return { askOpen, confirmYes, confirmNo, close };
+    })();
     </script>
 </body>
 </html>
