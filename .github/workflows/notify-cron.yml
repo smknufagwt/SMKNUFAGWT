@@ -4,7 +4,7 @@ on:
   schedule:
     # Setiap 2 menit (minimum GitHub Actions = 5 menit per spec,
     # tapi kita pakai 2 job staggered untuk simulasi ~2 menit)
-    - cron: '*/5 * * * *'
+    - cron: '*/11 * * * *'
   workflow_dispatch: # Bisa trigger manual dari GitHub
 
 jobs:
