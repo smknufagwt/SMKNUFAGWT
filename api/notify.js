@@ -34,7 +34,7 @@ export default async function handler(req, res) {
       method: 'POST',
       headers: {
         'Content-Type':  'application/json',
-        'Authorization': `Basic ${process.env.ONESIGNAL_REST_API_KEY}`,
+        'Authorization': `Key ${process.env.ONESIGNAL_REST_API_KEY}`,
       },
       body: JSON.stringify({
         app_id:              process.env.ONESIGNAL_APP_ID,
