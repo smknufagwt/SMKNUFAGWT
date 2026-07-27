@@ -12,6 +12,7 @@
  *  5. MESSAGE_MODULE   — komunikasi dua arah SW ↔ halaman
  *  6. INSTALL/ACTIVATE — lifecycle SW
  */
+importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 
 // ============================================================
 // [1] CONFIG — Ubah sesuai kebutuhan
