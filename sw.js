@@ -73,45 +73,6 @@ const CacheModule = {
     }
   }
 };
-
-
-// ============================================================
-// [3] PUSH_MODULE — Terima push notification dari server
-//     (Butuh VAPID key + backend untuk kirim push)
-// ============================================================
-const PushModule = {
-  /**
-   * Handle event 'push' yang dikirim dari server.
-   * Payload JSON yang diharapkan:
-   *  { title, body, ip, ts, tag, url }
-   */
-  async handlePush(event) {
-    let data = {};
-    try {
-      data = event.data ? event.data.json() : {};
-    } catch (_) {
-      data = { title: 'Pesan Baru', body: event.data ? event.data.text() : '' };
-    }
-
-    const title  = data.title || '💬 Global Chat SMK Nufa';
-    const body   = data.body  || '(pesan baru masuk)';
-    const tag    = data.tag   || CONFIG.TAG;
-    const url    = data.url   || '/';
-
-    const options = {
-      body,
-      icon:    CONFIG.ICON,
-      badge:   CONFIG.BADGE,
-      tag,
-      renotify: true,
-      vibrate: [200, 100, 200],
-      data: { url },
-      actions: [
-        { action: 'open',    title: '📂 Buka Chat' },
-        { action: 'dismiss', title: '✖ Tutup' },
-      ],
-    };
-
     await self.registration.showNotification(title, options);
 
     // Broadcast ke halaman aktif bahwa ada pesan baru (realtime sync)
