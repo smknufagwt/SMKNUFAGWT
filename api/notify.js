@@ -51,6 +51,7 @@ export default async function handler(req, res) {
         web_buttons: [
           { id: 'open', text: '📂 Buka Chat', url: 'https://smknufagwt.vercel.app/' },
         ],
+      }),
     });
 
     const result = await response.json();
