@@ -47,8 +47,10 @@ export default async function handler(req, res) {
         // Collapse key — notif lama diganti notif baru (tidak numpuk)
         collapse_id:         'nufa-global-chat',
         // Data ekstra untuk SW handle klik
-        data: { ts, ip },
-      }),
+       data: { ts, ip },
+        web_buttons: [
+          { id: 'open', text: '📂 Buka Chat', url: 'https://smknufagwt.vercel.app/' },
+        ],
     });
 
     const result = await response.json();
