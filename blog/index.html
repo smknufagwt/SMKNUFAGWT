@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>JURNAL // SMK NURUL FALAH - Perkembangan Situs</title>
-<meta name="description" content="Jurnal perkembangan dan roadmap pembangunan situs SMK Nurul Falah.">
+<meta name="description" content="Jurnal resmi perkembangan situs SMK Nurul Falah: roadmap fitur, catatan update, dan cerita di balik pembuatannya oleh developer muda asal Lampung Timur.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://smknufa-bdp.vercel.app/blog">
 <meta name="color-scheme" content="light dark">
 
 <meta property="og:type" content="website" />
 <meta property="og:title" content="JURNAL // SMK NURUL FALAH" />
-<meta property="og:description" content="Jurnal perkembangan dan roadmap pembangunan situs SMK Nurul Falah." />
+<meta property="og:description" content="Jurnal resmi perkembangan situs SMK Nurul Falah: roadmap fitur, catatan update, dan cerita di balik pembuatannya." />
 <meta property="og:image" content="https://raw.githubusercontent.com/smknufagwt/SMKNUFAGWT/main/appcover.jpg" />
 
 <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="black" stroke="white" stroke-width="4"/%3E%3Cline x1="5" y1="50" x2="95" y2="50" stroke="white" stroke-width="2"/%3E%3Cline x1="50" y1="5" x2="50" y2="95" stroke="white" stroke-width="2"/%3E%3C/svg%3E'>
@@ -101,13 +101,60 @@
     }
     .intro strong { color: var(--text); font-weight: normal; }
 
+    /* switch antar tampilan JURNAL <-> UPDATE, fungsi terpisah dari filter tag jurnal */
+    .view-switch { display: flex; gap: 10px; justify-content: center; margin: 28px 0 4px; }
+    .view-btn {
+        background: transparent; border: 1px solid var(--border); color: var(--muted);
+        font-family: var(--font-main); padding: 7px 18px; border-radius: 6px; cursor: pointer;
+        font-size: 0.82rem; letter-spacing: 1px; text-transform: uppercase; transition: all .2s;
+    }
+    .view-btn.active {
+        color: var(--bg); background: linear-gradient(90deg, var(--accent), #ffffff, var(--accent));
+        background-size: 200% auto; border-color: transparent;
+    }
+    .view { display: none; }
+    .view.active { display: block; }
+
     .filter-bar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 26px 0 8px; }
     .tag-btn {
         background: transparent; border: 1px solid var(--border); color: var(--muted);
         font-family: var(--font-main); padding: 5px 12px; border-radius: 4px; cursor: pointer;
         font-size: 0.78rem; text-transform: uppercase; transition: all .2s;
     }
+    .filter-bar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 26px 0 8px; }
+.filter-bar::before {
+    content: 'FILTER KATEGORI:'; width: 100%; text-align: center;
+    font-size: 0.68rem; color: var(--muted); letter-spacing: 1px; margin-bottom: 4px;
+        }
     .tag-btn.active, .tag-btn:hover { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+
+    /* ===== TAB UPDATE ===== */
+    .update-card {
+        background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px;
+        padding: 18px 20px; margin: 22px 0; backdrop-filter: blur(6px);
+    }
+    .update-card h2 { font-size: 1.05rem; margin: 0 0 12px; color: var(--text); }
+    .update-list { list-style: none; margin: 0; padding: 0; }
+    .update-list li {
+        display: flex; gap: 10px; align-items: flex-start; padding: 8px 0;
+        border-top: 1px solid var(--border); font-size: 0.9rem; line-height: 1.55; color: var(--text);
+    }
+    .update-list li:first-child { border-top: none; }
+    .update-list li::before { content: '✓'; color: var(--accent); font-weight: bold; flex-shrink: 0; }
+
+    .about-card p { font-size: 0.9rem; line-height: 1.7; color: var(--text); margin: 0 0 14px; }
+    .about-card p:last-child { margin-bottom: 0; }
+    .about-card a { color: var(--accent); text-decoration: underline; }
+
+    /* teks bergradasi merah-putih: shine berjalan kiri ke kanan, teks asli tetap terbaca crawler */
+    .grad-text {
+        background: linear-gradient(90deg, var(--accent) 0%, #ff8a93 30%, #ffffff 50%, #ff8a93 70%, var(--accent) 100%);
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+        background-size: 300% auto; animation: gradRun 4s linear infinite;
+        font-weight: bold; display: inline;
+    }
+    @keyframes gradRun { 0% { background-position: 100% center; } 100% { background-position: -100% center; } }
+    @media (prefers-reduced-motion: reduce) { .grad-text, .view-btn.active, h1.title { animation: none; } }
 
     /* ===== ROADMAP ===== */
     .road { position: relative; margin-top: 30px; }
@@ -162,12 +209,39 @@
         <a href="/" class="back-link">&larr; KEMBALI KE BERANDA</a>
         <h1 class="title">Jurnal Situs</h1>
         <span class="subtitle">Roadmap &amp; Catatan Perkembangan // SMK Nurul Falah (BDP)</span>
-        <p class="intro">Bukan sekadar sorotan kegiatan — ini catatan jujur proses di baliknya: <strong>apa yang dibangun, apa yang diperbaiki, dan kenapa</strong>. Diperbarui setiap ada perkembangan berarti.</p>
+        <p class="intro">Bukan sekadar sorotan kegiatan — ini catatan jujur proses di baliknya: <strong>apa yang dibangun, apa yang diperbaiki, dan kenapa</strong>, sekaligus roadmap fitur dan cerita di balik pembuatan situsnya.</p>
     </header>
 
-    <div class="filter-bar" id="filter-bar"></div>
+    <div class="view-switch" id="view-switch" role="tablist" aria-label="Pilih tampilan">
+        <button class="view-btn active" data-view="jurnal" role="tab" aria-selected="true">Jurnal</button>
+        <button class="view-btn" data-view="update" role="tab" aria-selected="false">Update</button>
+    </div>
 
-    <div class="road" id="timeline"></div>
+    <section id="view-jurnal" class="view active">
+        <div class="filter-bar" id="filter-bar"></div>
+        <div class="road" id="timeline"></div>
+    </section>
+
+    <section id="view-update" class="view">
+        <div class="update-card">
+            <h2>Update Fungsional Terbaru</h2>
+            <ul class="update-list">
+                <li>Notifikasi dikembangkan secara bertahap dan kini sudah berjalan stabil.</li>
+                <li>Kemampuan sinkronisasi data telah ditingkatkan.</li>
+                <li>Klasifikasi data user yang masuk kini lebih aman.</li>
+                <li>Tombol on/off notifikasi berfungsi normal.</li>
+            </ul>
+        </div>
+
+        <div class="update-card about-card">
+            <h2>Tentang Situs Ini</h2>
+            <p>Situs ini dikembangkan oleh <span class="grad-text">developer muda asal Indonesia</span>, tepatnya dari Desa Gedung Wani Timur, Kecamatan Margatiga, Kabupaten Lampung Timur, Lampung.</p>
+            <p>Seluruh proses pembuatan murni dari HP Android Xiaomi Redmi A8 Pro (3GB RAM / 32GB ROM) — tanpa PC maupun laptop. Kodenya <span class="grad-text">vanilla murni</span>, tanpa framework berat seperti Bootstrap, dengan setiap baris disusun runut dan mengikuti alur logika agar fungsinya optimal sekaligus menjaga keamanan data pengguna yang masuk.</p>
+            <p>Hasil dedikasi berbulan-bulan ini membuahkan hasil yang memuaskan: situs mampu menampung ribuan pengunjung tanpa down berkat optimasi server berkala.</p>
+            <p>Situs ini diperuntukkan sebagai portofolio bagi keluarga besar SMK Nurul Falah — dibuat dengan dedikasi, integritas, dan pemahaman teknis coding.</p>
+            <p>Ada pertanyaan lebih lanjut? Hubungi <a href="mailto:smknufagwt@gmail.com">smknufagwt@gmail.com</a>.</p>
+        </div>
+    </section>
 </div>
 
 <footer>
@@ -203,10 +277,9 @@ let activeTag = 'SEMUA';
 let observer;
 
 function render() {
-    const tags = ['SEMUA', ...new Set(POSTS.map(p => p.tag))];
-    filterBar.innerHTML = tags.map(t =>
-        `<button class="tag-btn ${t === activeTag ? 'active' : ''}" data-tag="${t}">${t}</button>`
-    ).join('');
+   filterBar.innerHTML = tags.map(t =>
+    `<button class="tag-btn ${t === activeTag ? 'active' : ''}" data-tag="${t}">${t === 'SEMUA' ? t : '#' + t}</button>`
+).join('');
 
     const sorted = [...POSTS].sort((a, b) => new Date(b.date) - new Date(a.date));
     const filtered = activeTag === 'SEMUA' ? sorted : sorted.filter(p => p.tag === activeTag);
@@ -263,6 +336,22 @@ filterBar.addEventListener('click', (e) => {
 
 document.getElementById('year').textContent = new Date().getFullYear();
 render();
+
+/* Switch tab Jurnal <-> Update — fungsi berdiri sendiri, tidak terkait filter tag jurnal */
+document.getElementById('view-switch').addEventListener('click', (e) => {
+    const btn = e.target.closest('.view-btn');
+    if (!btn) return;
+    const target = btn.dataset.view;
+
+    document.querySelectorAll('.view-btn').forEach(b => {
+        const on = b === btn;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-selected', on);
+    });
+    document.querySelectorAll('.view').forEach(section => {
+        section.classList.toggle('active', section.id === `view-${target}`);
+    });
+});
 </script>
 </body>
 </html>
