@@ -121,11 +121,6 @@
         font-family: var(--font-main); padding: 5px 12px; border-radius: 4px; cursor: pointer;
         font-size: 0.78rem; text-transform: uppercase; transition: all .2s;
     }
-    .filter-bar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 26px 0 8px; }
-.filter-bar::before {
-    content: 'FILTER KATEGORI:'; width: 100%; text-align: center;
-    font-size: 0.68rem; color: var(--muted); letter-spacing: 1px; margin-bottom: 4px;
-        }
     .tag-btn.active, .tag-btn:hover { color: var(--bg); background: var(--accent); border-color: var(--accent); }
 
     /* ===== TAB UPDATE ===== */
@@ -277,9 +272,10 @@ let activeTag = 'SEMUA';
 let observer;
 
 function render() {
-   filterBar.innerHTML = tags.map(t =>
-    `<button class="tag-btn ${t === activeTag ? 'active' : ''}" data-tag="${t}">${t === 'SEMUA' ? t : '#' + t}</button>`
-).join('');
+    const tags = ['SEMUA', ...new Set(POSTS.map(p => p.tag))];
+    filterBar.innerHTML = tags.map(t =>
+        `<button class="tag-btn ${t === activeTag ? 'active' : ''}" data-tag="${t}">${t}</button>`
+    ).join('');
 
     const sorted = [...POSTS].sort((a, b) => new Date(b.date) - new Date(a.date));
     const filtered = activeTag === 'SEMUA' ? sorted : sorted.filter(p => p.tag === activeTag);
