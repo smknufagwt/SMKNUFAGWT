@@ -40,4 +40,4 @@ By leveraging **AI-assisted orchestration (Claude)** directly from a mobile term
 The project implements a fallback broadcast matrix ensuring message delivery across various user network states.
 
 
-**contacts** = [email](smkmufagwt@gmail.com)
+**contacts for more** = smkmufagwt@gmail.com
