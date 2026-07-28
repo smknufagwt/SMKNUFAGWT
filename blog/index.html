@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>JURNAL // SMK NURUL FALAH - Perkembangan Situs</title>
+<meta name="description" content="Jurnal perkembangan dan roadmap pembangunan situs SMK Nurul Falah.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://smknufa-bdp.vercel.app/blog">
+<meta name="color-scheme" content="light dark">
+
+<meta property="og:type" content="website" />
+<meta property="og:title" content="JURNAL // SMK NURUL FALAH" />
+<meta property="og:description" content="Jurnal perkembangan dan roadmap pembangunan situs SMK Nurul Falah." />
+<meta property="og:image" content="https://raw.githubusercontent.com/smknufagwt/SMKNUFAGWT/main/appcover.jpg" />
+
+<link rel="icon" type="image/svg+xml" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="black" stroke="white" stroke-width="4"/%3E%3Cline x1="5" y1="50" x2="95" y2="50" stroke="white" stroke-width="2"/%3E%3Cline x1="50" y1="5" x2="50" y2="95" stroke="white" stroke-width="2"/%3E%3C/svg%3E'>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        color-scheme: dark;
+        --bg: #0a0607;
+        --blob-a: rgba(255, 40, 60, 0.18);
+        --blob-b: rgba(255, 255, 255, 0.06);
+        --text: #f5eeee;
+        --muted: #a88b8c;
+        --accent: #ff2b3d;
+        --card-bg: rgba(26, 18, 19, 0.55);
+        --border: rgba(255, 43, 61, 0.25);
+        --font-main: 'Share Tech Mono', monospace;
+    }
+    @media (prefers-color-scheme: light) {
+        :root {
+            color-scheme: light;
+            --bg: #0e3a6b;
+            --blob-a: rgba(255, 60, 75, 0.18);
+            --blob-b: rgba(255, 255, 255, 0.14);
+            --text: #f7fbff;
+            --muted: #b8cfe6;
+            --accent: #ff3b4a;
+            --card-bg: rgba(255, 255, 255, 0.10);
+            --border: rgba(255, 255, 255, 0.25);
+        }
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    html { background: var(--bg); }
+    body {
+        margin: 0; padding: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-main);
+        min-height: 100vh;
+        font-size: 16px;
+        transition: background .4s ease, color .4s ease;
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    /* background adaptif: dua blob gradien lembut, bergerak pelan — bukan matrix */
+    .ambient { position: fixed; inset: 0; z-index: -1; overflow: hidden; }
+    .ambient span {
+        position: absolute; border-radius: 50%; filter: blur(70px);
+        animation: drift 22s ease-in-out infinite alternate;
+    }
+    .ambient span:nth-child(1) { width: 55vw; height: 55vw; background: var(--blob-a); top: -15%; left: -10%; }
+    .ambient span:nth-child(2) { width: 45vw; height: 45vw; background: var(--blob-b); bottom: -10%; right: -10%; animation-delay: -8s; }
+    @keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(4%, 6%) scale(1.08); } }
+    @media (prefers-reduced-motion: reduce) { .ambient span { animation: none; } }
+
+    .container { max-width: 760px; margin: 0 auto; padding: 20px 16px 70px; }
+
+    header { text-align: center; padding: 26px 0 6px; }
+    .back-link {
+        display: inline-block; margin-bottom: 16px; color: var(--muted);
+        text-decoration: none; font-size: 0.82rem; border: 1px solid var(--border);
+        padding: 4px 10px; border-radius: 4px; transition: color .25s, border-color .25s;
+    }
+    .back-link:hover { color: var(--accent); border-color: var(--accent); }
+
+    h1.title {
+        font-size: 1.7rem; letter-spacing: 2px; margin: 0; text-transform: uppercase;
+        background: linear-gradient(90deg, var(--accent) 0%, #ffffff 50%, var(--accent) 100%);
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+        background-size: 200% auto; animation: titleShine 6s linear infinite;
+    }
+    @keyframes titleShine { 0% { background-position: 0% center; } 100% { background-position: -200% center; } }
+    @media (prefers-reduced-motion: reduce) { h1.title { animation: none; } }
+    .subtitle { display: block; color: var(--muted); font-size: 0.88rem; margin-top: 6px; }
+    .intro {
+        max-width: 540px; margin: 14px auto 0; text-align: center;
+        font-size: 0.88rem; line-height: 1.6; color: var(--muted);
+    }
+    .intro strong { color: var(--text); font-weight: normal; }
+
+    .filter-bar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 26px 0 8px; }
+    .tag-btn {
+        background: transparent; border: 1px solid var(--border); color: var(--muted);
+        font-family: var(--font-main); padding: 5px 12px; border-radius: 4px; cursor: pointer;
+        font-size: 0.78rem; text-transform: uppercase; transition: all .2s;
+    }
+    .tag-btn.active, .tag-btn:hover { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+
+    /* ===== ROADMAP ===== */
+    .road { position: relative; margin-top: 30px; }
+
+    .entry { display: flex; gap: 16px; position: relative; }
+    .rail { width: 20px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; }
+    .rail .seg {
+        width: 2px; flex: 1; background: var(--border);
+        transform: scaleY(0); transform-origin: top;
+        transition: transform .7s ease;
+    }
+    .entry:first-child .rail .seg.top { visibility: hidden; }
+    .rail .dot {
+        width: 12px; height: 12px; border-radius: 50%; background: var(--bg);
+        border: 2px solid var(--border); flex-shrink: 0;
+        transition: border-color .4s, box-shadow .4s, background .4s;
+    }
+    .entry.visible .rail .seg { transform: scaleY(1); }
+    .entry.visible .rail .dot { border-color: var(--accent); background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+
+    .card {
+        flex: 1; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px;
+        margin-bottom: 26px; overflow: hidden; backdrop-filter: blur(6px);
+        opacity: 0; transform: translateY(16px);
+        transition: opacity .6s ease, transform .6s ease;
+    }
+    .entry.visible .card { opacity: 1; transform: translateY(0); }
+
+    .banner { width: 100%; aspect-ratio: 16/7; object-fit: cover; display: block; background: var(--border); }
+    .card-body { padding: 16px 18px; }
+
+    .entry-meta { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 8px; font-size: 0.76rem; color: var(--muted); }
+    .entry-date::before { content: '> '; }
+    .entry-tag { border: 1px solid var(--border); border-radius: 3px; padding: 1px 8px; }
+
+    .entry-title { font-size: 1.1rem; margin: 0 0 10px; color: var(--text); }
+    .entry-content { font-size: 0.92rem; line-height: 1.65; color: var(--text); white-space: pre-line; }
+    .entry-content img { max-width: 100%; border-radius: 8px; margin: 10px 0; display: block; }
+    .entry-content ul { margin: 6px 0; padding-left: 20px; }
+
+    .empty-state { text-align: center; padding: 60px 0; color: var(--muted); }
+
+    footer { text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.72rem; }
+</style>
+</head>
+<body>
+
+<div class="ambient"><span></span><span></span></div>
+
+<div class="container">
+    <header>
+        <a href="/" class="back-link">&larr; KEMBALI KE BERANDA</a>
+        <h1 class="title">Jurnal Situs</h1>
+        <span class="subtitle">Roadmap &amp; Catatan Perkembangan // SMK Nurul Falah (BDP)</span>
+        <p class="intro">Bukan sekadar sorotan kegiatan — ini catatan jujur proses di baliknya: <strong>apa yang dibangun, apa yang diperbaiki, dan kenapa</strong>. Diperbarui setiap ada perkembangan berarti.</p>
+    </header>
+
+    <div class="filter-bar" id="filter-bar"></div>
+
+    <div class="road" id="timeline"></div>
+</div>
+
+<footer>
+    &copy; <span id="year"></span> SMK NURUL FALAH — GEDUNG WANI TIMUR, MARGATIGA, LAMPUNG TIMUR
+</footer>
+
+<script>
+/* ==========================================================================
+   DATA JURNAL
+   Tambah entri baru = tambah 1 object di array POSTS. Urut otomatis (terbaru di atas).
+
+   Field:
+     date   : "YYYY-MM-DD"
+     tag    : kategori singkat, contoh "UPDATE", "FIX", "FITUR", "DESAIN"
+     title  : judul entri
+     banner : { src: "url-gambar.jpg", alt: "deskripsi gambar untuk pembaca/SEO" } -> opsional, hapus field ini kalau tak ada gambar
+     body   : isi catatan. Bisa multi-baris (\n), bisa <ul><li>, bisa juga sisipkan
+              gambar tambahan di tengah teks pakai: <img src="url.jpg" alt="deskripsi">
+   ========================================================================== */
+const POSTS = [
+    {
+        date: "2026-07-28",
+        tag: "UPDATE",
+        title: "Blog jurnal resmi diluncurkan",
+        banner: { src: "https://raw.githubusercontent.com/smknufagwt/SMKNUFAGWT/main/appcover.jpg", alt: "Cuplikan tampilan situs SMK Nurul Falah" },
+        body: "Halaman /blog ini dibuat sebagai catatan perjalanan pengembangan situs SMK Nurul Falah — dari satu file HTML cyberpunk sampai jadi platform dengan galeri, chat, dan panel kontrol.\n\nMulai sekarang setiap update dicatat di sini sebagai roadmap."
+    }
+];
+
+const timeline = document.getElementById('timeline');
+const filterBar = document.getElementById('filter-bar');
+let activeTag = 'SEMUA';
+let observer;
+
+function render() {
+    const tags = ['SEMUA', ...new Set(POSTS.map(p => p.tag))];
+    filterBar.innerHTML = tags.map(t =>
+        `<button class="tag-btn ${t === activeTag ? 'active' : ''}" data-tag="${t}">${t}</button>`
+    ).join('');
+
+    const sorted = [...POSTS].sort((a, b) => new Date(b.date) - new Date(a.date));
+    const filtered = activeTag === 'SEMUA' ? sorted : sorted.filter(p => p.tag === activeTag);
+
+    if (filtered.length === 0) {
+        timeline.innerHTML = `<div class="empty-state">// belum ada entri untuk kategori ini</div>`;
+        return;
+    }
+
+    timeline.innerHTML = filtered.map(p => `
+        <div class="entry">
+            <div class="rail"><span class="seg top"></span><span class="dot"></span></div>
+            <article class="card">
+                ${p.banner ? `<img class="banner" src="${p.banner.src}" alt="${p.banner.alt || ''}" loading="lazy">` : ''}
+                <div class="card-body">
+                    <div class="entry-meta">
+                        <span class="entry-date">${formatDate(p.date)}</span>
+                        <span class="entry-tag">${p.tag}</span>
+                    </div>
+                    <h2 class="entry-title">${p.title}</h2>
+                    <div class="entry-content">${p.body}</div>
+                </div>
+            </article>
+        </div>
+    `).join('');
+
+    observeEntries();
+}
+
+function formatDate(iso) {
+    const d = new Date(iso + "T00:00:00");
+    return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+}
+
+function observeEntries() {
+    if (observer) observer.disconnect();
+    observer = new IntersectionObserver((items) => {
+        items.forEach(item => {
+            if (item.isIntersecting) {
+                item.target.classList.add('visible');
+                observer.unobserve(item.target);
+            }
+        });
+    }, { threshold: 0.25 });
+    document.querySelectorAll('.entry').forEach(el => observer.observe(el));
+}
+
+filterBar.addEventListener('click', (e) => {
+    const btn = e.target.closest('.tag-btn');
+    if (!btn) return;
+    activeTag = btn.dataset.tag;
+    render();
+});
+
+document.getElementById('year').textContent = new Date().getFullYear();
+render();
+</script>
+</body>
+</html>
