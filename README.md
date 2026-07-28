@@ -41,3 +41,5 @@ The project implements a fallback broadcast matrix ensuring message delivery acr
 
 
 **contacts for more** = smkmufagwt@gmail.com
+
+**contacts developer** = [Arlingga Ainul yakin WhatsApp](wa.me/6283199753711)
