@@ -20,9 +20,9 @@ FULLSTACK DEV ENGINER | BACKEND | DevOps | fronted | AI ENGINERING
 ## 🚀 Real-Time Centralized Notification & Communication System
 ### 🏫 Portfolio Network for SMK Nurul Falah (BDP)
 *acces website on*
-[main page](https://smknufa-bdp.vercel.app/)
+[main page](https://smknufa-bdp.vercel.app/) and
+[blog about](https://smkmufa-bdp.vercel.app/blog).
 
-[blog about](https://smkmufa-bdp.vercel.app/blog)
 A high-performance, edge-optimized communication hub built for **SMK Nurul Falah**. This production system delivers real-time notifications, unified central announcements, and dynamic client synchronization to thousands of active school users without relying on heavy frontend frameworks or traditional computer-based development environments.
 
 ---
