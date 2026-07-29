@@ -242,14 +242,6 @@
 /* ==========================================================================
    DATA JURNAL
    Tambah entri baru = tambah 1 object di array POSTS. Urut otomatis (terbaru di atas).
-
-   Field:
-     date   : "YYYY-MM-DD"
-     tag    : kategori singkat, contoh "UPDATE", "FIX", "FITUR", "DESAIN"
-     title  : judul entri
-     banner : { src: "url-gambar.jpg", alt: "deskripsi gambar untuk pembaca/SEO" } -> opsional, hapus field ini kalau tak ada gambar
-     body   : isi catatan. Bisa multi-baris (\n), bisa <ul><li>, bisa juga sisipkan
-              gambar tambahan di tengah teks pakai: <img src="url.jpg" alt="deskripsi">
    ========================================================================== */
 const POSTS = [
     {
@@ -260,13 +252,11 @@ const POSTS = [
         body: "Halaman blog ini dibuat sebagai catatan perjalanan pengembangan situs SMK Nurul Falah — dari satu file HTML cyberpunk sampai jadi platform dengan galeri, chat, dan panel kontrol.\n\nMulai sekarang setiap update dicatat di sini sebagai roadmap."
     },
     {
-       date: "2026-01-13"
-       tag: "DESAIN"
-       title: "PELUNCURAN SITUS"
-       body: "Awal januari bertepatan tanggal 13 Januari 2026 situs pertam diluncurkan dengan nama domain https://smk-nufa-11-pemasaran.netlify.app \n\n
-masih tahap awal dan masih fragile (rentan), dengan seriring berkembangnya waktu dan feedback di improvisasi berkala hingga dipindahkan ke https://smknufa-bdp.vercel.app/ dan munculnya inovasi karya baru yang jenius seperti public live chat dan sejenisnya."
+        date: "2026-01-13",
+        tag: "DESAIN",
+        title: "PELUNCURAN SITUS",
+        body: "Awal januari bertepatan tanggal 13 Januari 2026 situs pertama diluncurkan dengan nama domain https://smk-nufa-11-pemasaran.netlify.app \n\nMasih tahap awal dan masih fragile (rentan), dengan seiring berkembangnya waktu dan feedback diimprovisasi berkala hingga dipindahkan ke https://smknufa-bdp.vercel.app/ dan munculnya inovasi karya baru yang jenius seperti public live chat dan sejenisnya."
     }
-        
 ];
 
 const timeline = document.getElementById('timeline');
@@ -336,7 +326,7 @@ filterBar.addEventListener('click', (e) => {
 document.getElementById('year').textContent = new Date().getFullYear();
 render();
 
-/* Switch tab Jurnal <-> Update — fungsi berdiri sendiri, tidak terkait filter tag jurnal */
+/* Switch tab Jurnal <-> Update */
 document.getElementById('view-switch').addEventListener('click', (e) => {
     const btn = e.target.closest('.view-btn');
     if (!btn) return;
