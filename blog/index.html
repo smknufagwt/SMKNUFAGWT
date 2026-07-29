@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>JURNAL // SMK NURUL FALAH - Perkembangan Situs</title>
-<meta name="description" content="Jurnal resmi perkembangan situs SMK Nurul Falah: roadmap fitur, catatan update, dan cerita di balik pembuatannya oleh developer muda asal Lampung Timur.">
+<title>JURNAL - Perkembangan Situs</title>
+<meta name="description" content="Jurnal perkembangan situs SMK Nurul Falah: roadmap fitur, catatan update, dan cerita di balik pembuatannya oleh developer muda asal Lampung Timur.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://smknufa-bdp.vercel.app/blog">
 <meta name="color-scheme" content="light dark">
 
 <meta property="og:type" content="website" />
-<meta property="og:title" content="JURNAL // SMK NURUL FALAH" />
+<meta property="og:title" content="JURNAL - SMK NURUL FALAH" />
 <meta property="og:description" content="Jurnal resmi perkembangan situs SMK Nurul Falah: roadmap fitur, catatan update, dan cerita di balik pembuatannya." />
 <meta property="og:image" content="https://raw.githubusercontent.com/smknufagwt/SMKNUFAGWT/main/appcover.jpg" />
 
@@ -65,7 +65,6 @@
         overflow-x: hidden;
     }
 
-    /* background adaptif: dua blob gradien lembut, bergerak pelan — bukan matrix */
     .ambient { position: fixed; inset: 0; z-index: -1; overflow: hidden; }
     .ambient span {
         position: absolute; border-radius: 50%; filter: blur(70px);
@@ -101,7 +100,6 @@
     }
     .intro strong { color: var(--text); font-weight: normal; }
 
-    /* switch antar tampilan JURNAL <-> UPDATE, fungsi terpisah dari filter tag jurnal */
     .view-switch { display: flex; gap: 10px; justify-content: center; margin: 28px 0 4px; }
     .view-btn {
         background: transparent; border: 1px solid var(--border); color: var(--muted);
@@ -123,7 +121,6 @@
     }
     .tag-btn.active, .tag-btn:hover { color: var(--bg); background: var(--accent); border-color: var(--accent); }
 
-    /* ===== TAB UPDATE ===== */
     .update-card {
         background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px;
         padding: 18px 20px; margin: 22px 0; backdrop-filter: blur(6px);
@@ -141,7 +138,6 @@
     .about-card p:last-child { margin-bottom: 0; }
     .about-card a { color: var(--accent); text-decoration: underline; }
 
-    /* teks bergradasi merah-putih: shine berjalan kiri ke kanan, teks asli tetap terbaca crawler */
     .grad-text {
         background: linear-gradient(90deg, var(--accent) 0%, #ff8a93 30%, #ffffff 50%, #ff8a93 70%, var(--accent) 100%);
         -webkit-background-clip: text; background-clip: text; color: transparent;
@@ -151,7 +147,6 @@
     @keyframes gradRun { 0% { background-position: 100% center; } 100% { background-position: -100% center; } }
     @media (prefers-reduced-motion: reduce) { .grad-text, .view-btn.active, h1.title { animation: none; } }
 
-    /* ===== ROADMAP ===== */
     .road { position: relative; margin-top: 30px; }
 
     .entry { display: flex; gap: 16px; position: relative; }
@@ -264,6 +259,14 @@ const POSTS = [
         banner: { src: "https://raw.githubusercontent.com/smknufagwt/SMKNUFAGWT/main/appcover.jpg", alt: "Cuplikan tampilan situs SMK Nurul Falah" },
         body: "Halaman blog ini dibuat sebagai catatan perjalanan pengembangan situs SMK Nurul Falah — dari satu file HTML cyberpunk sampai jadi platform dengan galeri, chat, dan panel kontrol.\n\nMulai sekarang setiap update dicatat di sini sebagai roadmap."
     }
+    {
+       date: "2026-01-13"
+       tag: "INFORMASI"
+       title: "PELUNCURAN SITUS"
+       body: "Awal januari bertepatan tanggal 13 Januari 2026 situs pertam diluncurkan dengan nama domain https://smk-nufa-11-pemasaran.netlify.app \n
+masih tahap awal dan masih fragile (rentan), dengan seriring berkembangnya waktu dan feedback di improvisasi berkala hingga dipindahkan ke https://smknufa-bdp.vercel.app/ dan munculnya inovasi karya baru yang jenius.
+}
+        
 ];
 
 const timeline = document.getElementById('timeline');
