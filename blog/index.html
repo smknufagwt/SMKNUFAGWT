@@ -187,6 +187,24 @@
 
     .empty-state { text-align: center; padding: 60px 0; color: var(--muted); }
 
+    .property-credit {
+    font-size: 12px;
+    color: #888888;
+    margin-top: 10px;
+    text-align: center;
+    font-style: italic; /* Membuat teks sedikit miring agar terlihat formal */
+}
+
+.property-credit a {
+    color: #0088cc; /* Warna biru khas Telegram */
+    text-decoration: none;
+    font-style: normal; /* Menjaga nama Anda tetap tegak */
+    font-weight: bold;
+}
+
+.property-credit a:hover {
+    text-decoration: underline;
+}
     footer { text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.72rem; }
 </style>
 </head>
@@ -236,6 +254,10 @@
 
 <footer>
     &copy; <span id="year"></span> SMK NURUL FALAH — GEDUNG WANI TIMUR, MARGATIGA, LAMPUNG TIMUR
+    <div class="property-credit">
+    Intellectual Property of <a href="https://tiktok.com/@arlingkin" target="_blank" rel="noopener noreferrer">arlingkin</a>
+</div>
+
 </footer>
 
 <script>
