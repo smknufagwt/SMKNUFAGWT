@@ -32,6 +32,7 @@
         --card-bg: rgba(26, 18, 19, 0.55);
         --border: rgba(255, 43, 61, 0.25);
         --font-main: 'Share Tech Mono', monospace;
+        --ease: cubic-bezier(.22, 1, .36, 1);
     }
     @media (prefers-color-scheme: light) {
         :root {
@@ -52,7 +53,7 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
-    html { background: var(--bg); }
+    html { background: var(--bg); scroll-behavior: smooth; }
     body {
         margin: 0; padding: 0;
         background: var(--bg);
@@ -68,11 +69,12 @@
     .ambient { position: fixed; inset: 0; z-index: -1; overflow: hidden; }
     .ambient span {
         position: absolute; border-radius: 50%; filter: blur(70px);
-        animation: drift 22s ease-in-out infinite alternate;
+        will-change: transform;
+        animation: drift 24s var(--ease) infinite alternate;
     }
     .ambient span:nth-child(1) { width: 55vw; height: 55vw; background: var(--blob-a); top: -15%; left: -10%; }
-    .ambient span:nth-child(2) { width: 45vw; height: 45vw; background: var(--blob-b); bottom: -10%; right: -10%; animation-delay: -8s; }
-    @keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(4%, 6%) scale(1.08); } }
+    .ambient span:nth-child(2) { width: 45vw; height: 45vw; background: var(--blob-b); bottom: -10%; right: -10%; animation-delay: -9s; }
+    @keyframes drift { from { transform: translate3d(0,0,0) scale(1); } to { transform: translate3d(4%, 6%, 0) scale(1.08); } }
     @media (prefers-reduced-motion: reduce) { .ambient span { animation: none; } }
 
     .container { max-width: 760px; margin: 0 auto; padding: 20px 16px 70px; }
@@ -81,7 +83,7 @@
     .back-link {
         display: inline-block; margin-bottom: 16px; color: var(--muted);
         text-decoration: none; font-size: 0.82rem; border: 1px solid var(--border);
-        padding: 4px 10px; border-radius: 4px; transition: color .25s, border-color .25s;
+        padding: 4px 10px; border-radius: 4px; transition: color .25s var(--ease), border-color .25s var(--ease);
     }
     .back-link:hover { color: var(--accent); border-color: var(--accent); }
 
@@ -89,7 +91,7 @@
         font-size: 1.7rem; letter-spacing: 2px; margin: 0; text-transform: uppercase;
         background: linear-gradient(90deg, var(--accent) 0%, #ffffff 50%, var(--accent) 100%);
         -webkit-background-clip: text; background-clip: text; color: transparent;
-        background-size: 200% auto; animation: titleShine 6s linear infinite;
+        background-size: 200% auto; animation: titleShine 7s linear infinite;
     }
     @keyframes titleShine { 0% { background-position: 0% center; } 100% { background-position: -200% center; } }
     @media (prefers-reduced-motion: reduce) { h1.title { animation: none; } }
@@ -104,20 +106,31 @@
     .view-btn {
         background: transparent; border: 1px solid var(--border); color: var(--muted);
         font-family: var(--font-main); padding: 7px 18px; border-radius: 6px; cursor: pointer;
-        font-size: 0.82rem; letter-spacing: 1px; text-transform: uppercase; transition: all .2s;
+        font-size: 0.82rem; letter-spacing: 1px; text-transform: uppercase;
+        transition: color .3s var(--ease), background .3s var(--ease), border-color .3s var(--ease);
     }
     .view-btn.active {
         color: var(--bg); background: linear-gradient(90deg, var(--accent), #ffffff, var(--accent));
         background-size: 200% auto; border-color: transparent;
     }
-    .view { display: none; }
+
+    /* Crossfade between Jurnal / Update views instead of an instant swap */
+    .view {
+        display: none;
+        opacity: 0;
+        transform: translateY(8px);
+        transition: opacity .32s var(--ease), transform .32s var(--ease);
+        will-change: opacity, transform;
+    }
     .view.active { display: block; }
+    .view.active.entered { opacity: 1; transform: translateY(0); }
+    .view.leaving { display: block; opacity: 0; transform: translateY(-8px); }
 
     .filter-bar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 26px 0 8px; }
     .tag-btn {
         background: transparent; border: 1px solid var(--border); color: var(--muted);
         font-family: var(--font-main); padding: 5px 12px; border-radius: 4px; cursor: pointer;
-        font-size: 0.78rem; text-transform: uppercase; transition: all .2s;
+        font-size: 0.78rem; text-transform: uppercase; transition: all .25s var(--ease);
     }
     .tag-btn.active, .tag-btn:hover { color: var(--bg); background: var(--accent); border-color: var(--accent); }
 
@@ -141,7 +154,7 @@
     .grad-text {
         background: linear-gradient(90deg, var(--accent) 0%, #ff8a93 30%, #ffffff 50%, #ff8a93 70%, var(--accent) 100%);
         -webkit-background-clip: text; background-clip: text; color: transparent;
-        background-size: 300% auto; animation: gradRun 4s linear infinite;
+        background-size: 300% auto; animation: gradRun 4.5s linear infinite;
         font-weight: bold; display: inline;
     }
     @keyframes gradRun { 0% { background-position: 100% center; } 100% { background-position: -100% center; } }
@@ -149,18 +162,23 @@
 
     .road { position: relative; margin-top: 30px; }
 
-    .entry { display: flex; gap: 16px; position: relative; }
+    .entry {
+        display: flex; gap: 16px; position: relative;
+        transition-delay: calc(var(--i, 0) * 70ms);
+    }
     .rail { width: 20px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; }
     .rail .seg {
         width: 2px; flex: 1; background: var(--border);
         transform: scaleY(0); transform-origin: top;
-        transition: transform .7s ease;
+        transition: transform .7s var(--ease);
+        transition-delay: calc(var(--i, 0) * 70ms);
     }
     .entry:first-child .rail .seg.top { visibility: hidden; }
     .rail .dot {
         width: 12px; height: 12px; border-radius: 50%; background: var(--bg);
         border: 2px solid var(--border); flex-shrink: 0;
-        transition: border-color .4s, box-shadow .4s, background .4s;
+        transition: border-color .45s var(--ease), box-shadow .45s var(--ease), background .45s var(--ease);
+        transition-delay: calc(var(--i, 0) * 70ms);
     }
     .entry.visible .rail .seg { transform: scaleY(1); }
     .entry.visible .rail .dot { border-color: var(--accent); background: var(--accent); box-shadow: 0 0 10px var(--accent); }
@@ -168,8 +186,10 @@
     .card {
         flex: 1; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px;
         margin-bottom: 26px; overflow: hidden; backdrop-filter: blur(6px);
-        opacity: 0; transform: translateY(16px);
-        transition: opacity .6s ease, transform .6s ease;
+        opacity: 0; transform: translateY(18px);
+        transition: opacity .65s var(--ease), transform .65s var(--ease);
+        transition-delay: calc(var(--i, 0) * 70ms);
+        will-change: opacity, transform;
     }
     .entry.visible .card { opacity: 1; transform: translateY(0); }
 
@@ -185,26 +205,37 @@
     .entry-content img { max-width: 100%; border-radius: 8px; margin: 10px 0; display: block; }
     .entry-content ul { margin: 6px 0; padding-left: 20px; }
 
-    .empty-state { text-align: center; padding: 60px 0; color: var(--muted); }
+    .empty-state {
+        text-align: center; padding: 60px 0; color: var(--muted);
+        opacity: 0; animation: fadeIn .5s var(--ease) forwards;
+    }
+    @keyframes fadeIn { to { opacity: 1; } }
 
     .property-credit {
-    font-size: 12px;
-    color: #888888;
-    margin-top: 10px;
-    text-align: center;
-    font-style: italic; 
+        font-size: 12px;
+        color: #888888;
+        margin-top: 10px;
+        text-align: center;
+        font-style: italic;
+    }
 
-.property-credit a {
-    color: #0088cc; 
-    text-decoration: none;
-    font-style: normal; 
-    font-weight: bold;
-}
+    .property-credit a {
+        color: #0088cc;
+        text-decoration: none;
+        font-style: normal;
+        font-weight: bold;
+        transition: color .25s var(--ease);
+    }
 
-.property-credit a:hover {
-    text-decoration: underline;
-}
+    .property-credit a:hover {
+        text-decoration: underline;
+    }
+
     footer { text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.72rem; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .card, .rail .seg, .rail .dot, .view, .empty-state { transition: none !important; animation: none !important; }
+    }
 </style>
 </head>
 <body>
@@ -224,7 +255,7 @@
         <button class="view-btn" data-view="update" role="tab" aria-selected="false">Update</button>
     </div>
 
-    <section id="view-jurnal" class="view active">
+    <section id="view-jurnal" class="view active entered">
         <div class="filter-bar" id="filter-bar"></div>
         <div class="road" id="timeline"></div>
     </section>
@@ -254,9 +285,8 @@
 <footer>
     &copy; <span id="year"></span> SMK NURUL FALAH — GEDUNG WANI TIMUR, MARGATIGA, LAMPUNG TIMUR
     <div class="property-credit">
-    Intellectual Property of <a href="https://tiktok.com/@arlingkin" target="_blank" rel="noopener noreferrer">arlingkin</a>
-</div>
-
+        Intellectual Property of <a href="https://tiktok.com/@arlingkin" target="_blank" rel="noopener noreferrer">arlingkin</a>
+    </div>
 </footer>
 
 <script>
@@ -276,7 +306,7 @@ const POSTS = [
         date: "2026-01-16",
         tag: "DESAIN",
         title: "PELUNCURAN SITUS",
-        body: "Awal januari bertepatan tanggal 16 Januari 2026 situs pertama diluncurkan dan diumumkan di grup smk kelas 11 pemasaran karena ide, dengan nama domain\n https://smk-nufa-11-pemasaran.netlify.app \n\nMasih tahap awal dan masih fragile (rentan), dengan seiring berkembangnya waktu dan feedback diimprovisasi berkala hingga dipindahkan ke <a href="https://smknufa-bdp.vercel.app/">Link</a>dan munculnya integrasi karya baru yang out of the box seperti public live chat dan sejenisnya."
+        body: "Awal januari bertepatan tanggal 16 Januari 2026 situs pertama diluncurkan dan diumumkan di grup smk kelas 11 pemasaran karena ide, dengan nama domain\n https://smk-nufa-11-pemasaran.netlify.app \n\nMasih tahap awal dan masih fragile (rentan), dengan seiring berkembangnya waktu dan feedback diimprovisasi berkala hingga dipindahkan ke <a href=\"https://smknufa-bdp.vercel.app/\">Link</a> dan munculnya integrasi karya baru yang out of the box seperti public live chat dan sejenisnya."
     }
 ];
 
@@ -299,8 +329,8 @@ function render() {
         return;
     }
 
-    timeline.innerHTML = filtered.map(p => `
-        <div class="entry">
+    timeline.innerHTML = filtered.map((p, i) => `
+        <div class="entry" style="--i:${i}">
             <div class="rail"><span class="seg top"></span><span class="dot"></span></div>
             <article class="card">
                 ${p.banner ? `<img class="banner" src="${p.banner.src}" alt="${p.banner.alt || ''}" loading="lazy">` : ''}
@@ -339,7 +369,7 @@ function observeEntries() {
 
 filterBar.addEventListener('click', (e) => {
     const btn = e.target.closest('.tag-btn');
-    if (!btn) return;
+    if (!btn || btn.classList.contains('active')) return;
     activeTag = btn.dataset.tag;
     render();
 });
@@ -347,10 +377,10 @@ filterBar.addEventListener('click', (e) => {
 document.getElementById('year').textContent = new Date().getFullYear();
 render();
 
-/* Switch tab Jurnal <-> Update */
+/* Switch tab Jurnal <-> Update, with a smooth crossfade instead of an instant cut */
 document.getElementById('view-switch').addEventListener('click', (e) => {
     const btn = e.target.closest('.view-btn');
-    if (!btn) return;
+    if (!btn || btn.classList.contains('active')) return;
     const target = btn.dataset.view;
 
     document.querySelectorAll('.view-btn').forEach(b => {
@@ -358,9 +388,22 @@ document.getElementById('view-switch').addEventListener('click', (e) => {
         b.classList.toggle('active', on);
         b.setAttribute('aria-selected', on);
     });
-    document.querySelectorAll('.view').forEach(section => {
-        section.classList.toggle('active', section.id === `view-${target}`);
-    });
+
+    const current = document.querySelector('.view.active');
+    const next = document.getElementById(`view-${target}`);
+    if (!current || current === next) return;
+
+    current.classList.remove('entered');
+    current.classList.add('leaving');
+    current.classList.remove('active');
+
+    window.setTimeout(() => {
+        current.classList.remove('leaving');
+        next.classList.add('active');
+        // force reflow so the transition actually plays
+        void next.offsetWidth;
+        requestAnimationFrame(() => next.classList.add('entered'));
+    }, 320);
 });
 </script>
 </body>
