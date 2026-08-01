@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- ARLINGGA creator -->
     <title>SMK NURUL FALAH - THE GLIMPSE OF FUTURE</title>
 <meta name="google-site-verification" content="bcu4uRS7dTLeJExZS1IX56ZkOeI4F5Wu1O48GXmes8Y" />
 <meta name="description" content="Portal Kreatif Informasi Digital dan Galeri Highlight kegiatan SMK Nurul Falah.
@@ -21,6 +22,7 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
     <meta property="og:image:width" content="612" />
     <meta property="og:image:height" content="612" />
     <meta property="og:image:type" content="image/jpeg" />
+    <link rel="canonical" href="/" />
 
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="SMK NURUL FALAH - THE GLIMPSE OF FUTURE" />
@@ -34,7 +36,6 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
@@ -173,11 +174,43 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
         }
         .nav-btn:hover { background: rgba(0, 255, 65, 0.15); text-shadow: 0 0 8px var(--neon); }
         .nav-btn.active { background: var(--neon); color: black; box-shadow: 0 0 15px var(--neon); border-color: var(--neon); }
+        .nav-btn-secondary {
+            text-decoration: none; display: inline-flex; align-items: center; justify-content: center;
+            border-style: dashed; opacity: 0.85;
+        }
+        .nav-btn-secondary:hover { opacity: 1; }
 
         .marquee-container {
             border-top: 2px solid var(--neon); border-bottom: 2px solid var(--neon);
-            margin-top: 25px; background: rgba(0, 20, 0, 0.9); overflow: hidden;
-            white-space: nowrap; padding: 10px 0; transition: border-color 0.5s;
+            margin-top: 25px; background: rgba(0, 20, 0, 0.9); overflow: visible;
+            padding: 10px 0; transition: border-color 0.5s;
+            position: relative;
+        }
+        .marquee-clip { overflow: hidden; white-space: nowrap; }
+        .petir-fx {
+            position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%);
+            width: 70%; max-width: 260px; height: 20px;
+            display: flex; align-items: flex-start; justify-content: center; gap: 18px;
+            pointer-events: none; z-index: 3;
+        }
+        .petir-bolt {
+            width: 4px; height: 100%;
+            background: linear-gradient(180deg, transparent, var(--neon) 35%, #fff 55%, var(--neon) 100%);
+            clip-path: polygon(50% 0%, 100% 18%, 55% 42%, 100% 58%, 35% 100%, 45% 58%, 0% 42%, 45% 18%);
+            filter: drop-shadow(0 0 4px var(--neon)) drop-shadow(0 0 10px var(--neon));
+            opacity: 0;
+            animation-name: petir-flash;
+            animation-timing-function: ease-in-out;
+            animation-iteration-count: infinite;
+            animation-duration: var(--petir-dur, 3.2s);
+            animation-delay: var(--petir-delay, 0s);
+        }
+        @keyframes petir-flash {
+            0%, 90%, 100% { opacity: 0; }
+            91% { opacity: 1; }
+            92.5% { opacity: 0.15; }
+            94% { opacity: 0.9; }
+            96% { opacity: 0; }
         }
         .marquee-content {
             display: inline-block; padding-left: 100%;
@@ -316,15 +349,45 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             color: var(--premium-platinum); font-size: 0.68rem; opacity: 0.75; display: block;
         }
         .chat-msg .chat-text { color: var(--neon); word-break: break-word; }
-        #chat-input-row { display: flex; gap: 6px; padding: 10px; border-top: 1px solid var(--neon-dim); }
+        .chat-text .chat-media {
+            display: block; max-width: 100%; max-height: 220px; margin-top: 6px;
+            border: 1px solid var(--neon-dim); border-radius: 6px; object-fit: cover;
+        }
+        .chat-text iframe.chat-yt {
+            width: 100%; max-width: 260px; height: auto; aspect-ratio: 16 / 9;
+            max-height: none; object-fit: initial; border: 1px solid var(--neon-dim);
+        }
+        .chat-text .chat-quote {
+            display: block; border-left: 2px solid var(--neon); padding-left: 8px;
+            margin: 3px 0; opacity: 0.8; font-style: italic;
+        }
+        .chat-text .chat-inline-quote {
+            font-style: italic; opacity: 0.85; quotes: none;
+        }
+        .chat-text a { color: var(--premium-gold); text-decoration: underline; }
+        #chat-input-row { display: flex; align-items: flex-end; gap: 6px; padding: 10px; border-top: 1px solid var(--neon-dim); }
+        #chat-format-bar {
+            display: flex; gap: 6px; padding: 8px 10px 6; overflow-x: auto;
+            -webkit-overflow-scrolling: touch; scrollbar-width: none; touch-action: pan-x;
+        }
+        #chat-format-bar::-webkit-scrollbar { display: none; }
+        .fmt-btn {
+            flex: 0 0 auto; width: 30px; height: 29px; background: #000;
+            border: 1px solid var(--neon-dim); color: var(--neon); border-radius: 6px;
+            cursor: pointer; font-family: var(--font-main); font-size: 0.8rem;
+            display: flex; align-items: center; justify-content: center; transition: 0.15s;
+        }
+        .fmt-btn:active, .fmt-btn:hover { background: var(--neon); color: #000; border-color: var(--neon); }
         #chat-input {
             flex: 1; background: #000; border: 1px solid var(--neon-dim); color: var(--neon);
-            font-family: var(--font-main); padding: 8px 10px; border-radius: 6px; outline: none; font-size: 0.85rem;
+            font-family: var(--font-main); padding: 8px 10px; border-radius: 14px; outline: none; font-size: 0.85rem;
+            resize: none; overflow-y: auto; max-height: 110px; min-height: 36px; line-height: 1.35;
+            white-space: pre-wrap; word-wrap: break-word; transition: border-color 0.2s, box-shadow 0.2s;
         }
         #chat-input:focus { border-color: var(--neon); box-shadow: 0 0 8px var(--neon-dim); }
         #chat-send {
             background: var(--neon-dim); border: none; color: #000; font-weight: bold;
-            padding: 0 14px; border-radius: 6px; cursor: pointer; transition: 0.2s;
+            padding: 0 14px; height: 36px; border-radius: 18px; cursor: pointer; transition: 0.2s; flex-shrink: 0;
         }
         #chat-send:hover { background: var(--neon); box-shadow: 0 0 10px var(--neon); }
         #chat-send:disabled, #chat-send.cooldown {
@@ -849,6 +912,28 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
     transform: rotateY(360deg);
   }
 }
+
+
+    .property-credit {
+        font-size: 12px;
+        color: #888888;
+        margin-top: 10px;
+        text-align: center;
+        font-style: italic;
+    }
+
+    .property-credit a {
+        color: #0088cc;
+        text-decoration: none;
+        font-style: normal;
+        font-weight: bold;
+        transition: color .25s var(--ease);
+    }
+
+    .property-credit a:hover {
+        text-decoration: underline;
+    }
+
     </style>
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
@@ -1050,8 +1135,17 @@ serviceWorkerPath:  '/sw.js',
         </div>
         <div id="chat-online-list"></div>
         <div id="chat-messages"><div class="chat-msg"><span class="chat-text">// Memuat pesan...</span></div></div>
+        <div id="chat-format-bar">
+            <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('bold')" title="Tebal"><b>B</b></button>
+            <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('underline')" title="Garis bawah"><u>U</u></button>
+            <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('strike')" title="Coret"><s>S</s></button>
+            <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('quote-inline')" title='Kutip "teks"'>&quot;</button>
+            <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('quote-line')" title="Kutipan baris (&gt;)">&gt;</button>
+            <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('link')" title="Tautan [teks](url)"><i class="fa-solid fa-link"></i></button>
+            <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('media')" title="Gambar/GIF/Video [alt]{url}"><i class="fa-solid fa-image"></i></button>
+        </div>
         <div id="chat-input-row">
-            <input id="chat-input" type="text" maxlength="1024" placeholder="Tulis pesan ke semua orang..." onkeydown="if(event.key==='Enter')GlobalChat.send()">
+            <textarea id="chat-input" rows="1" maxlength="1024" placeholder="Tulis pesan ke semua orang..." oninput="GlobalChat.autoGrow(this)"></textarea>
             <button id="chat-send" onclick="GlobalChat.send()"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
     </div>
@@ -1069,6 +1163,7 @@ serviceWorkerPath:  '/sw.js',
             <button class="nav-btn" onclick="System.nav('visi', this)">VISI & MISI</button>
             <button class="nav-btn" onclick="System.nav('prodi', this)">MATERI</button>
             <button class="nav-btn" onclick="System.nav('gallery', this)">GALERI</button>
+            <a class="nav-btn nav-btn-secondary" href="https://smknufa.bdp.vercel.app/blog" target="_blank" rel="noopener noreferrer" onclick="AudioFX.click()">BLOG</a>
         </nav>
 
         <div id="home" class="slide active">
@@ -1190,8 +1285,10 @@ serviceWorkerPath:  '/sw.js',
 <div style="text-align: center; color: var(--neon); font-family: var(--font-main); margin-top: 16px; font-size: 0.85rem; letter-spacing: 1px;">
     &copy; 2026 SMK NURUL FALAH. All Rights Reserved.
 </div>
-
-        </footer>
+<div class="property-credit">
+        Intellectual Property of <a href="https://tiktok.com/@arlingkin" target="_blank" rel="noopener noreferrer">arlingkin</a>
+    </div>
+    </footer>
 
     <script>
         
@@ -1208,7 +1305,14 @@ serviceWorkerPath:  '/sw.js',
 <p style="center">TERAKREDITASI  :   BAN-SM Nomor : 1857/BAN-SM/SK/2022.</p>
 <p>Di bawah naungan Yayasan Pendidikan Islam Nurul Falah, berkomitmen mencetak generasi muda yang kompeten,terampil dan bertanggung jawab serta memiliki akhlak mulia sesuai nilai pancasila.</p>
                 <div class="marquee-container">
-                    <div class="marquee-content">SMK NUFA JAYA &nbsp;///&nbsp; BISA - HEBAT - DISIPLIN - KOMPETEN - SIAP KERJA &nbsp;///&nbsp; SYSTEM ONLINE &nbsp;///&nbsp; SMK NUFA JAYA</div>
+                    <div class="marquee-clip">
+                        <div class="marquee-content">SMK NUFA JAYA &nbsp;///&nbsp; BISA - HEBAT - DISIPLIN - KOMPETEN - SIAP KERJA &nbsp;///&nbsp; SYSTEM ONLINE &nbsp;///&nbsp; SMK NUFA JAYA</div>
+                    </div>
+                    <div class="petir-fx" id="petir-fx">
+                        <div class="petir-bolt"></div>
+                        <div class="petir-bolt"></div>
+                        <div class="petir-bolt"></div>
+                    </div>
                 </div>
             `,
             visi: `
@@ -1235,23 +1339,27 @@ serviceWorkerPath:  '/sw.js',
             'kwu': 'Implementasi mata pelajaran Produk Kreatif dan Kewirausahaan (PKK) dimana siswa dibimbing untuk merancang, memproduksi, dan memasarkan produk inovatif serta menyusun rencana bisnis (Business Plan) yang layak jual.'
         };
 
-        class AudioEngine {
-            constructor() { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); }
-            resume() { if (this.ctx.state === 'suspended') this.ctx.resume(); }
-            hover() {
-                this.resume(); const o = this.ctx.createOscillator(); const g = this.ctx.createGain();
-                o.type = 'sine'; o.frequency.setValueAtTime(800, this.ctx.currentTime);
-                g.gain.setValueAtTime(0.02, this.ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
-                o.connect(g); g.connect(this.ctx.destination); o.start(); o.stop(this.ctx.currentTime + 0.05);
-            }
-            click() {
-                this.resume(); const o = this.ctx.createOscillator(); const g = this.ctx.createGain();
-                o.type = 'square'; o.frequency.setValueAtTime(200, this.ctx.currentTime);
-                g.gain.setValueAtTime(0.3, this.ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
-                o.connect(g); g.connect(this.ctx.destination); o.start(); o.stop(this.ctx.currentTime + 0.1);
-            }
-        }
-
+      class AudioEngine {
+    constructor() { this._ctx = null; }
+    _init() {
+        if (!this._ctx) this._ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (this._ctx.state === 'suspended') this._ctx.resume();
+    }
+    hover() {
+        this._init();
+        const o = this._ctx.createOscillator(); const g = this._ctx.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(800, this._ctx.currentTime);
+        g.gain.setValueAtTime(0.02, this._ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, this._ctx.currentTime + 0.05);
+        o.connect(g); g.connect(this._ctx.destination); o.start(); o.stop(this._ctx.currentTime + 0.05);
+    }
+    click() {
+        this._init();
+        const o = this._ctx.createOscillator(); const g = this._ctx.createGain();
+        o.type = 'square'; o.frequency.setValueAtTime(200, this._ctx.currentTime);
+        g.gain.setValueAtTime(0.3, this._ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, this._ctx.currentTime + 0.1);
+        o.connect(g); g.connect(this._ctx.destination); o.start(); o.stop(this._ctx.currentTime + 0.1);
+    }
+}
         class ScramblerEngine {
             constructor() { this.chars = '!<>-_\\/[]{}—+*^?#________'; }
             
@@ -1426,21 +1534,19 @@ serviceWorkerPath:  '/sw.js',
             },
 
             useLocalFallback: function() {
-                let localCount = localStorage.getItem('nufa_visits_backup');
-                if(!localCount) localCount = 1;
-                else localCount = parseInt(localCount) + 1;
-                localStorage.setItem('nufa_visits_backup', localCount);
-                this.currentVisits = localCount + this.baseOffset;
-            },
-
-            loadSavedTheme: function() {
-                const savedIndex = localStorage.getItem('nufa_theme');
-                if (savedIndex !== null) {
-                    this.colorIndex = parseInt(savedIndex);
-                    this.applyTheme();
-                }
-            },
-
+    try {
+        let localCount = localStorage.getItem('nufa_visits_backup');
+        localCount = localCount ? parseInt(localCount) + 1 : 1;
+        localStorage.setItem('nufa_visits_backup', localCount);
+        this.currentVisits = localCount + this.baseOffset;
+    } catch(e) { this.currentVisits = this.baseOffset; }
+},
+          loadSavedTheme: function() {
+    try {
+        const savedIndex = localStorage.getItem('nufa_theme');
+        if (savedIndex !== null) { this.colorIndex = parseInt(savedIndex); this.applyTheme(); }
+    } catch(e) { }
+},
             applyTheme: function() {
                 const theme = this.colors[this.colorIndex];
                 document.documentElement.style.setProperty('--neon', theme.neon);
@@ -1484,11 +1590,17 @@ serviceWorkerPath:  '/sw.js',
                 const btnEnter = document.querySelector('.btn-enter');
                 const oldText = btnEnter.innerText;
                 
-                btnEnter.innerText = "LOADING..."; 
+                btnEnter.innerText = "LOADING...";
+btnEnter.disabled = true;
+try {
+    await this.syncVisitorCount();
+} catch(e) {
+    console.warn("Gagal sync visitor:", e);
+} finally {
+    btnEnter.innerText = oldText;
+    btnEnter.disabled = false;
+}
 
-                await this.syncVisitorCount();
-
-                btnEnter.innerText = oldText; 
                 this.loadSavedTheme();
 
                 this.musicBtn.style.display = 'flex'; 
@@ -1502,6 +1614,13 @@ serviceWorkerPath:  '/sw.js',
                 this.initLog(); 
 
                 Scrambler.write(document.getElementById('home-content'), DATABASE_CONTENT.home);
+                this.randomizePetir();
+                if (!document.getElementById('fa-css')) {
+    const faLink = document.createElement('link');
+    faLink.id = 'fa-css'; faLink.rel = 'stylesheet';
+    faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css';
+    document.head.appendChild(faLink);
+}
 
                 document.getElementById('overlay').style.opacity = '0';
                 setTimeout(() => {
@@ -1515,25 +1634,53 @@ serviceWorkerPath:  '/sw.js',
             toggleColor: function() {
                 AudioFX.click();
                 this.colorIndex = (this.colorIndex + 1) % this.colors.length;
-                localStorage.setItem('nufa_theme', this.colorIndex);
+                try { localStorage.setItem('nufa_theme', this.colorIndex); } catch(e) {}
                 this.applyTheme();
             },
 
-            renderGallery: function(photos) {
-                const container = document.getElementById('gallery-container');
-                if (!photos || photos.length === 0) {
-                    container.innerHTML = `<div style="color:var(--neon);opacity:0.5;grid-column:1/-1;text-align:center;padding:40px 0;font-size:0.85rem;letter-spacing:2px;">// GALERI KOSONG — BELUM ADA FOTO DI FOLDER DRIVE</div>`;
-                    return;
-                }
-                container.innerHTML = photos.map(item => `
-                    <div class="gallery-item" onclick="AudioFX.click(); GalleryViewer.open('${item.file}', '${item.caption}')">
-                        <img src="${item.file}" alt="${item.caption}" loading="lazy"
-                             onerror="this.src='https://placehold.co/300x200/000000/00ff00?text=FOTO+TIDAK+ADA'">
-                        <div class="caption">${item.caption}</div>
-                    </div>
-                `).join('');
+            // Acak variabel CSS tiap bolt petir biar polanya gak keliatan monoton/looping sama
+            randomizePetir: function() {
+                document.querySelectorAll('#petir-fx .petir-bolt').forEach(el => {
+                    el.style.setProperty('--petir-dur', (2.5 + Math.random() * 3).toFixed(2) + 's');
+                    el.style.setProperty('--petir-delay', (Math.random() * 4).toFixed(2) + 's');
+                });
             },
 
+   renderGallery: function(photos) {
+    const container = document.getElementById('gallery-container');
+    container.innerHTML = '';
+
+    if (!photos || photos.length === 0) {
+        const empty = document.createElement('div');
+        empty.style.cssText = 'color:var(--neon);opacity:0.5;grid-column:1/-1;text-align:center;padding:40px 0;font-size:0.85rem;letter-spacing:2px;';
+        empty.textContent = '// GALERI KOSONG — BELUM ADA FOTO DI FOLDER DRIVE';
+        container.appendChild(empty);
+        return;
+    }
+
+    photos.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'gallery-item';
+        div.onclick = () => { AudioFX.click(); GalleryViewer.open(item.file, item.caption); };
+
+        const img = document.createElement('img');
+        img.src = item.file;
+        img.alt = item.caption;
+        img.loading = 'lazy';
+        img.onerror = function() {
+            this.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='200'%3E%3Crect width='300' height='200' fill='%23000'/%3E%3Ctext x='50%25' y='50%25' fill='%2300ff00' font-family='monospace' font-size='14' text-anchor='middle' dy='.3em'%3EFOTO TIDAK ADA%3C/text%3E%3C/svg%3E";
+            this.onerror = null;
+        };
+
+        const caption = document.createElement('div');
+        caption.className = 'caption';
+        caption.textContent = item.caption; 
+
+        div.appendChild(img);
+        div.appendChild(caption);
+        container.appendChild(div);
+    });
+},
             fetchGallery: async function() {
                 const container = document.getElementById('gallery-container');
 
@@ -1586,25 +1733,23 @@ serviceWorkerPath:  '/sw.js',
                 }
             }, // Batas akhir fetchGallery
 
-            _lastLatency: '--',
-
-            startLatency: function() {
-                // Re-query setiap pengukuran agar elemen baru (setelah render galeri) ikut terupdate
-                const updateAll = (val) => {
-                    this._lastLatency = val;
-                    document.querySelectorAll('.lat-val').forEach(el => el.innerText = val);
-                };
-
-                const measure = () => {
-                    const start = performance.now();
-                    fetch(window.location.href + '?ping=' + Date.now(), { method: 'HEAD', cache: 'no-store' })
-                        .then(() => updateAll(Math.round(performance.now() - start)))
-                        .catch(() => updateAll('ERR'));
-                };
-
-                measure(); // langsung ukur pertama kali
-                setInterval(measure, 4000);
-            },
+            
+_latencyTimer: null,
+startLatency: function() {
+    if (this._latencyTimer) clearInterval(this._latencyTimer);
+    const updateAll = (val) => {
+        this._lastLatency = val;
+        document.querySelectorAll('.lat-val').forEach(el => el.innerText = val);
+    };
+    const measure = () => {
+        const start = performance.now();
+        fetch(window.location.href + '?ping=' + Date.now(), { method: 'HEAD', cache: 'no-store' })
+            .then(() => updateAll(Math.round(performance.now() - start)))
+            .catch(() => updateAll('ERR'));
+    };
+    measure();
+    this._latencyTimer = setInterval(measure, 4000);
+},
 
             toggleMusic: function() {
                 AudioFX.click();
@@ -1634,6 +1779,7 @@ serviceWorkerPath:  '/sw.js',
 
                 if(id === 'home') {
                     Scrambler.write(document.getElementById('home-content'), DATABASE_CONTENT.home);
+                    this.randomizePetir();
                 } else if (id === 'visi') {
                     Scrambler.write(document.getElementById('visi-content'), DATABASE_CONTENT.visi);
                 } else if (id === 'gallery') {
@@ -2331,6 +2477,88 @@ serviceWorkerPath:  '/sw.js',
         };
         document.addEventListener('DOMContentLoaded', () => PrivacyBoard.init());
 
+        // Parser format teks chat ala WhatsApp/Telegram: *bold* _underline_ ~coret~ "kutip"
+        // > kutipan-baris, [label](url), dan [alt]{url-gambar/gif/video}.
+        // PENTING: escape HTML dilakukan LEBIH DULU, baru token diubah jadi tag —
+        // jadi user tidak bisa menyuntik HTML/JS lewat pesan (aman untuk global chat).
+        const ChatFormat = {
+            esc(s) {
+                return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+            },
+            isSafeUrl(url) { return /^https?:\/\//i.test(url); },
+            parseYouTubeId(url) {
+                const m = url.match(/(?:youtube(?:-nocookie)?\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{6,15})/i);
+                return m ? m[1] : null;
+            },
+            parseDriveId(url) {
+                const m = url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([A-Za-z0-9_-]{10,})/i);
+                return m ? m[1] : null;
+            },
+
+            // Versi lengkap (untuk bubble chat) — boleh render gambar/video/link.
+            toHtml(raw) {
+                let text = this.esc(raw);
+
+                // [alt]{url} → media. Support: link gambar langsung, video/gif, YouTube, Google Drive.
+                // Video/gif diputar tanpa suara. Kalau gagal load / url tidak valid, elemen langsung hilang.
+                text = text.replace(/\[([^\[\]]*)\]\{([^{}]+)\}/g, (m, alt, url) => {
+                    const safe = this.isSafeUrl(url) ? url : '';
+                    if (!safe) return alt || '';
+
+                    const ytId = this.parseYouTubeId(safe);
+                    if (ytId) {
+                        return `<iframe class="chat-media chat-yt" src="https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&mute=1&loop=1&playlist=${ytId}&rel=0" title="${alt}" allow="autoplay; encrypted-media" allowfullscreen loading="lazy" onerror="this.remove()"></iframe>`;
+                    }
+
+                    const driveId = this.parseDriveId(safe);
+                    if (driveId) {
+                        if (/\.(mp4|webm|ogv)(\?.*)?$/i.test(safe)) {
+                            // Drive tidak bisa dipaksa mute lewat parameter — pemutaran & suara diatur manual oleh pengguna di preview.
+                            return `<iframe class="chat-media chat-yt" src="https://drive.google.com/file/d/${driveId}/preview" title="${alt}" allow="autoplay" loading="lazy" onerror="this.remove()"></iframe>`;
+                        }
+                        return `<img src="https://drive.google.com/uc?export=view&id=${driveId}" alt="${alt}" class="chat-media" loading="lazy" onerror="this.remove()">`;
+                    }
+
+                    if (/\.(mp4|webm|ogv)(\?.*)?$/i.test(safe)) {
+                        return `<video src="${safe}" class="chat-media" muted autoplay loop playsinline onerror="this.remove()"></video>`;
+                    }
+                    return `<img src="${safe}" alt="${alt}" class="chat-media" loading="lazy" onerror="this.remove()">`;
+                });
+
+                // [label](url) → tautan biasa
+                text = text.replace(/\[([^\[\]]+)\]\(([^()]+)\)/g, (m, label, url) => {
+                    const safe = this.isSafeUrl(url) ? url : '#';
+                    return `<a href="${safe}" target="_blank" rel="noopener noreferrer nofollow">${label}</a>`;
+                });
+
+                // > kutipan baris
+                text = text.split('\n').map(line => {
+                    const m = line.match(/^&gt;\s?(.*)$/);
+                    return m ? `<span class="chat-quote">${m[1]}</span>` : line;
+                }).join('\n');
+
+                text = text.replace(/\*([^\*\n]+)\*/g, '<b>$1</b>');           // *bold*
+                text = text.replace(/_([^_\n]+)_/g, '<u>$1</u>');             // _underline_
+                text = text.replace(/~([^~\n]+)~/g, '<s>$1</s>');             // ~coret~
+                text = text.replace(/&quot;([^&\n]+)&quot;/g, '<q class="chat-inline-quote">$1</q>'); // "kutip"
+
+                return text.replace(/\n/g, '<br>');
+            },
+
+            // Versi ringkas teks-saja (untuk marquee/toast) — tanpa tag/media biar tidak merusak layout scroll.
+            toPlain(raw) {
+                let text = String(raw);
+                text = text.replace(/\[([^\[\]]*)\]\{([^{}]+)\}/g, (m, alt) => alt ? `📷 ${alt}` : '📷');
+                text = text.replace(/\[([^\[\]]+)\]\(([^()]+)\)/g, (m, label) => label);
+                text = text.replace(/^>\s?/gm, '');
+                text = text.replace(/\*([^\*\n]+)\*/g, '$1');
+                text = text.replace(/_([^_\n]+)_/g, '$1');
+                text = text.replace(/~([^~\n]+)~/g, '$1');
+                text = text.replace(/\n/g, ' ');
+                return this.esc(text);
+            }
+        };
+
         const GlobalChat = {
             db: null,
             unsub: null,
@@ -2676,7 +2904,7 @@ listEl.innerHTML = ids.map(key => {
                 if (!stack) return;
                 const el = document.createElement('div');
                 el.className = 'chat-toast';
-                el.innerHTML = `<span class="t-ip"><i class="fa-solid fa-comment-dots"></i> ${this._esc(m.ip === 'SYSTEM' ? 'SYSTEM' : (this._maskIp(m.ip) || 'Anonim'))}</span>${this._esc(WordFilter.clean(m.text))}`;
+                el.innerHTML = `<span class="t-ip"><i class="fa-solid fa-comment-dots"></i> ${this._esc(m.ip === 'SYSTEM' ? 'SYSTEM' : (this._maskIp(m.ip) || 'Anonim'))}</span>${ChatFormat.toPlain(WordFilter.clean(m.text))}`;
                 el.onclick = () => { this.toggle(true); el.remove(); };
                 stack.appendChild(el);
                 setTimeout(() => el.remove(), 4100);
@@ -2712,7 +2940,7 @@ listEl.innerHTML = ids.map(key => {
                 box.innerHTML = msgs.map(m => `
                     <div class="chat-msg">
                         <span class="chat-ip">${this._esc(m.ip === 'SYSTEM' ? 'SYSTEM' : (this._maskIp(m.ip) || 'ANONIM'))} • ${this._time(m.ts)}</span>
-                        <span class="chat-text">${this._esc(WordFilter.clean(m.text))}</span>
+                        <span class="chat-text">${ChatFormat.toHtml(WordFilter.clean(m.text))}</span>
                     </div>
                 `).join('');
                 box.scrollTop = box.scrollHeight;
@@ -2725,7 +2953,7 @@ listEl.innerHTML = ids.map(key => {
                 if (!msgs.length) { bar.classList.remove('live'); return; }
                 const recent = msgs.slice(-15);
                 const html = recent.map(m =>
-                    `<span class="mq-item"><span class="mq-ip">[${this._esc(m.ip === 'SYSTEM' ? 'SYSTEM' : (this._maskIp(m.ip) || 'ANONIM'))}]</span>${this._esc(WordFilter.clean(m.text))}</span>`
+                    `<span class="mq-item"><span class="mq-ip">[${this._esc(m.ip === 'SYSTEM' ? 'SYSTEM' : (this._maskIp(m.ip) || 'ANONIM'))}]</span>${ChatFormat.toPlain(WordFilter.clean(m.text))}</span>`
                 ).join('');
                 // duplikat agar scroll infinite mulus
                 track.innerHTML = html + html;
@@ -2751,6 +2979,54 @@ listEl.innerHTML = ids.map(key => {
     }) + ' ' + d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 },
 
+            // Textarea melebar otomatis mengikuti isi (ala WhatsApp/Telegram), dibatasi max-height (CSS)
+            autoGrow(el) {
+                el.style.height = 'auto';
+                el.style.height = el.scrollHeight + 'px';
+            },
+
+            // Sisip pasangan simbol format di sekitar teks yang diseleksi (atau placeholder kalau belum pilih apa-apa)
+            _wrapSelection(before, after, placeholder) {
+                const el = document.getElementById('chat-input');
+                if (!el) return;
+                el.focus();
+                const start = el.selectionStart, end = el.selectionEnd;
+                const val = el.value;
+                const sel = val.slice(start, end) || placeholder;
+                el.value = val.slice(0, start) + before + sel + after + val.slice(end);
+                const from = start + before.length;
+                el.setSelectionRange(from, from + sel.length);
+                this.autoGrow(el);
+            },
+
+            // Sisip prefix di awal baris tempat kursor berada (untuk kutipan baris ">")
+            _prefixLine(prefix) {
+                const el = document.getElementById('chat-input');
+                if (!el) return;
+                el.focus();
+                const start = el.selectionStart;
+                const val = el.value;
+                const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+                el.value = val.slice(0, lineStart) + prefix + val.slice(lineStart);
+                const pos = start + prefix.length;
+                el.setSelectionRange(pos, pos);
+                this.autoGrow(el);
+            },
+
+            // Dipanggil dari tombol helper format di atas kolom kirim
+            insertFormat(type) {
+                if (typeof AudioFX !== 'undefined') AudioFX.click();
+                switch (type) {
+                    case 'bold':         this._wrapSelection('*', '*', 'tebal'); break;
+                    case 'underline':    this._wrapSelection('_', '_', 'garis bawah'); break;
+                    case 'strike':       this._wrapSelection('~', '~', 'coret'); break;
+                    case 'quote-inline': this._wrapSelection('"', '"', 'kutip'); break;
+                    case 'quote-line':   this._prefixLine('> '); break;
+                    case 'link':         this._wrapSelection('[', '](https://)', 'teks link'); break;
+                    case 'media':        this._wrapSelection('[', ']{https://}', 'alt gambar'); break;
+                }
+            },
+
             toggle(forceOpen) {
                 this.isOpen = typeof forceOpen === 'boolean' ? forceOpen : !this.isOpen;
                 document.getElementById('chat-panel').classList.toggle('open', this.isOpen);
@@ -2774,6 +3050,7 @@ listEl.innerHTML = ids.map(key => {
                 const rawText = input.value.trim();
                 if (!rawText) return;
                 input.value = '';
+                this.autoGrow(input);
 
                 this.lastSendTime = now;
                 this._lockSendButton(sendBtn, SEND_COOLDOWN_MS);
@@ -2832,7 +3109,7 @@ listEl.innerHTML = ids.map(key => {
 
     // ── Daftar headline yang akan bergantian ──────────────────
     const HEADLINES = [
-        '🔥💯 mahaKarya anak bangsa 🇮🇩',
+        '🔥💯 mahaKarya anak bangsa 🇮??',
         '⚡ Terhubung hanya dengan satu klik ke semua orang',
         '🔒 Data & identitas Anda terenkripsi penuh',
         '🌐 Akses percakapan lintas perangkat, dimana saja',
@@ -3028,7 +3305,7 @@ listEl.innerHTML = ids.map(key => {
         const input   = document.getElementById('chat-input');
         const rawText = input ? input.value.trim() : '';
         if (!rawText) return;
-        if (input) input.value = '';
+        if (input) { input.value = ''; if (typeof GlobalChat.autoGrow === 'function') GlobalChat.autoGrow(input); }
 
         const payload = {
           ip:   GlobalChat._maskIp(GlobalChat.myIp || 'OFFLINE'),
