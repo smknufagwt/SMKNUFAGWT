@@ -365,14 +365,30 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             font-style: italic; opacity: 0.85; quotes: none;
         }
         .chat-text a { color: var(--premium-gold); text-decoration: underline; }
-        #chat-input-row { display: flex; align-items: flex-end; gap: 6px; padding: 10px; border-top: 1px solid var(--neon-dim); }
-        #chat-format-bar {
-            display: flex; gap: 6px; padding: 8px 10px 6; overflow-x: auto;
-            -webkit-overflow-scrolling: touch; scrollbar-width: none; touch-action: pan-x;
-        }
-        #chat-format-bar::-webkit-scrollbar { display: none; }
-        .fmt-btn {
-            flex: 0 0 auto; width: 30px; height: 29px; background: #000;
+        #chat-input-row {
+    display: flex; align-items: flex-end; gap: 6px;
+    padding: 10px; border-top: 1px solid var(--neon-dim);
+}
+
+#chat-input-wrap {
+    flex: 1;
+    min-width: 0; 
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#chat-format-bar {
+    display: flex; gap: 6px;
+    padding: 0; 
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    touch-action: pan-x;
+}
+#chat-format-bar::-webkit-scrollbar { display: none; }
+              .fmt-btn {
+            flex: 0 0 auto; width: 30px; height: 31px; background: #000;
             border: 1px solid var(--neon-dim); color: var(--neon); border-radius: 6px;
             cursor: pointer; font-family: var(--font-main); font-size: 0.8rem;
             display: flex; align-items: center; justify-content: center; transition: 0.15s;
@@ -1135,6 +1151,9 @@ serviceWorkerPath:  '/sw.js',
         </div>
         <div id="chat-online-list"></div>
         <div id="chat-messages"><div class="chat-msg"><span class="chat-text">// Memuat pesan...</span></div></div>
+        
+        <div id="chat-input-row">
+    <div id="chat-input-wrap">
         <div id="chat-format-bar">
             <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('bold')" title="Tebal"><b>B</b></button>
             <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('underline')" title="Garis bawah"><u>U</u></button>
@@ -1144,10 +1163,10 @@ serviceWorkerPath:  '/sw.js',
             <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('link')" title="Tautan [teks](url)"><i class="fa-solid fa-link"></i></button>
             <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('media')" title="Gambar/GIF/Video [alt]{url}"><i class="fa-solid fa-image"></i></button>
         </div>
-        <div id="chat-input-row">
-            <textarea id="chat-input" rows="1" maxlength="1024" placeholder="Tulis pesan ke semua orang..." oninput="GlobalChat.autoGrow(this)"></textarea>
-            <button id="chat-send" onclick="GlobalChat.send()"><i class="fa-solid fa-paper-plane"></i></button>
-        </div>
+        <textarea id="chat-input" rows="1" maxlength="1024" placeholder="Tulis pesan ke semua orang..." oninput="GlobalChat.autoGrow(this)"></textarea>
+    </div>
+    <button id="chat-send" onclick="GlobalChat.send()"><i class="fa-solid fa-paper-plane"></i></button>
+</div>
     </div>
 
     <div class="container" id="main-content">
@@ -1163,7 +1182,7 @@ serviceWorkerPath:  '/sw.js',
             <button class="nav-btn" onclick="System.nav('visi', this)">VISI & MISI</button>
             <button class="nav-btn" onclick="System.nav('prodi', this)">MATERI</button>
             <button class="nav-btn" onclick="System.nav('gallery', this)">GALERI</button>
-            <a class="nav-btn nav-btn-secondary" href="https://smknufa.bdp.vercel.app/blog" target="_blank" rel="noopener noreferrer" onclick="AudioFX.click()">BLOG</a>
+            <a class="nav-btn nav-btn-secondary" href="https://smknufa-bdp.vercel.app/blog" target="_blank" rel="noopener noreferrer" onclick="AudioFX.click()">BLOG</a>
         </nav>
 
         <div id="home" class="slide active">
