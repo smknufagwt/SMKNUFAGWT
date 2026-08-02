@@ -394,6 +394,29 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             display: flex; align-items: center; justify-content: center; transition: 0.15s;
         }
         .fmt-btn:active, .fmt-btn:hover { background: var(--neon); color: #000; border-color: var(--neon); }
+        .fmt-btn.on { background: var(--neon); color: #000; border-color: var(--neon); }
+        .media-settings-panel {
+            display: none; flex-direction: column; gap: 4px; padding: 8px;
+            border: 1px solid var(--neon-dim); border-radius: 8px; background: #000;
+            font-size: 0.72rem; color: var(--neon);
+        }
+        .media-settings-panel.open { display: flex; }
+        .media-settings-panel label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+        .chat-media-wrap { position: relative; display: inline-block; max-width: 100%; margin-top: 6px; }
+        .chat-media-wrap .chat-media { margin-top: 0; }
+        .media-mute-btn {
+            position: absolute; bottom: 6px; right: 6px; width: 24px; height: 24px;
+            border-radius: 50%; border: 1px solid var(--neon-dim); background: rgba(0,0,0,0.75);
+            color: var(--neon); font-size: 0.65rem; cursor: pointer; display: flex;
+            align-items: center; justify-content: center; z-index: 2;
+        }
+        .media-mute-btn.muted { color: var(--premium-platinum); opacity: 0.8; }
+        .chat-file-link {
+            display: flex; align-items: center; gap: 6px; margin-top: 6px; padding: 6px 10px;
+            border: 1px solid var(--neon-dim); border-radius: 6px; max-width: 100%;
+            width: fit-content; text-decoration: none !important;
+        }
+        .control-btn.sound-locked { pointer-events: none; opacity: 0.35; filter: grayscale(1); }
         #chat-input {
             flex: 1; background: #000; border: 1px solid var(--neon-dim); color: var(--neon);
             font-family: var(--font-main); padding: 8px 10px; border-radius: 14px; outline: none; font-size: 0.85rem;
@@ -1162,6 +1185,12 @@ serviceWorkerPath:  '/sw.js',
             <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('quote-line')" title="Kutipan baris (&gt;)">&gt;</button>
             <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('link')" title="Tautan [teks](url)"><i class="fa-solid fa-link"></i></button>
             <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('media')" title="Gambar/GIF/Video [alt]{url}"><i class="fa-solid fa-image"></i></button>
+            <button type="button" class="fmt-btn" id="media-settings-btn" onclick="GlobalChat.toggleMediaSettings()" title="Pengaturan pemutaran media"><i class="fa-solid fa-gear"></i></button>
+        </div>
+        <div id="media-settings-panel" class="media-settings-panel">
+            <label><input type="checkbox" id="ms-autoplay" onchange="GlobalChat.updateMediaPref('autoplay', this.checked)"> Autoplay video</label>
+            <label><input type="checkbox" id="ms-loop" onchange="GlobalChat.updateMediaPref('loop', this.checked)"> Loop video</label>
+            <label><input type="checkbox" id="ms-sound" onchange="GlobalChat.updateMediaPref('soundDefault', this.checked)"> Suara default nyala (bukan mute)</label>
         </div>
         <textarea id="chat-input" rows="1" maxlength="1024" placeholder="Tulis pesan ke semua orang..." oninput="GlobalChat.autoGrow(this)"></textarea>
     </div>
@@ -1771,6 +1800,7 @@ startLatency: function() {
 },
 
             toggleMusic: function() {
+                if (this.musicBtn && this.musicBtn.classList.contains('sound-locked')) return;
                 AudioFX.click();
                 if (this.bgm.paused) { 
                     this.bgm.play(); 
@@ -2500,7 +2530,22 @@ startLatency: function() {
         // > kutipan-baris, [label](url), dan [alt]{url-gambar/gif/video}.
         // PENTING: escape HTML dilakukan LEBIH DULU, baru token diubah jadi tag —
         // jadi user tidak bisa menyuntik HTML/JS lewat pesan (aman untuk global chat).
+        // Preferensi tampilan media per-viewer (autoplay/loop/suara default) — persist localStorage,
+        // mekanisme on/off sama seperti toggle bell notifikasi.
+        const MediaPrefs = {
+            autoplay: localStorage.getItem('nufa_media_autoplay') !== 'off',
+            loop: localStorage.getItem('nufa_media_loop') !== 'off',
+            soundDefault: localStorage.getItem('nufa_media_sound') === 'on',
+            toggle(key) {
+                this[key] = !this[key];
+                const storeKey = key === 'soundDefault' ? 'nufa_media_sound' : 'nufa_media_' + key;
+                localStorage.setItem(storeKey, this[key] ? 'on' : 'off');
+            }
+        };
+        window.MediaPrefs = MediaPrefs;
+
         const ChatFormat = {
+            _mediaSeq: 0,
             esc(s) {
                 return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
             },
@@ -2513,6 +2558,57 @@ startLatency: function() {
                 const m = url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([A-Za-z0-9_-]{10,})/i);
                 return m ? m[1] : null;
             },
+            parseSpotifyId(url) {
+                const m = url.match(/open\.spotify\.com\/(track|album|playlist|episode|show)\/([A-Za-z0-9]+)/i);
+                return m ? { type: m[1], id: m[2] } : null;
+            },
+            parseMapsQuery(url) {
+                let m = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+                if (m) return `${m[1]},${m[2]}`;
+                m = url.match(/[?&]q=([^&]+)/);
+                if (m) return decodeURIComponent(m[1]);
+                m = url.match(/maps\/place\/([^/@]+)/);
+                if (m) return decodeURIComponent(m[1].replace(/\+/g, ' '));
+                return null;
+            },
+
+            // Ekstensi Drive yang boleh ditampilkan; selain ini pesan diblok saat kirim (lihat validateEmbeds).
+            ALLOWED_DRIVE_EXT: ['png', 'jpg', 'jpeg', 'webp', 'md', 'mp3', 'mp4', 'txt', 'doc', 'docx'],
+            getUrlExt(url) {
+                const m = url.match(/\.([a-z0-9]{2,5})(?:[?#]|$)/i);
+                return m ? m[1].toLowerCase() : null;
+            },
+            // Dipanggil sebelum kirim (GlobalChat.send). Return null = aman, atau ekstensi yang diblok.
+            validateEmbeds(raw) {
+                const re = /\[([^\[\]]*)\]\{([^{}]+)\}/g;
+                let m;
+                while ((m = re.exec(raw)) !== null) {
+                    const url = m[2];
+                    if (!this.isSafeUrl(url)) continue;
+                    if (!this.parseDriveId(url)) continue; // bukan link Drive, lewati
+                    const ext = this.getUrlExt(url);
+                    if (ext && !this.ALLOWED_DRIVE_EXT.includes(ext)) return ext;
+                }
+                return null;
+            },
+            toggleMediaMute(btn, type) {
+                const willUnmute = btn.classList.contains('muted');
+                const wrap = btn.closest('.chat-media-wrap');
+                const media = wrap ? wrap.querySelector(type === 'yt' ? 'iframe' : 'video') : null;
+                if (media) {
+                    if (type === 'video') {
+                        media.muted = !willUnmute;
+                        if (willUnmute) media.play().catch(() => {});
+                    } else if (type === 'yt' && media.contentWindow) {
+                        media.contentWindow.postMessage(JSON.stringify({ event: 'command', func: willUnmute ? 'unMute' : 'mute', args: [] }), '*');
+                    }
+                }
+                btn.classList.toggle('muted', !willUnmute);
+                btn.innerHTML = `<i class="fa-solid fa-volume-${willUnmute ? 'high' : 'xmark'}"></i>`;
+                if (typeof GlobalChat !== 'undefined' && GlobalChat.handleMediaSoundToggle) {
+                    GlobalChat.handleMediaSoundToggle(willUnmute);
+                }
+            },
 
             // Versi lengkap (untuk bubble chat) — boleh render gambar/video/link.
             toHtml(raw) {
@@ -2523,23 +2619,65 @@ startLatency: function() {
                 text = text.replace(/\[([^\[\]]*)\]\{([^{}]+)\}/g, (m, alt, url) => {
                     const safe = this.isSafeUrl(url) ? url : '';
                     if (!safe) return alt || '';
+                    const mp = window.MediaPrefs || { autoplay: true, loop: true, soundDefault: false };
+                    const mid = 'med' + (this._mediaSeq++);
+                    const volIcon = mp.soundDefault ? 'high' : 'xmark';
+                    const mutedCls = mp.soundDefault ? '' : 'muted';
 
                     const ytId = this.parseYouTubeId(safe);
                     if (ytId) {
-                        return `<iframe class="chat-media chat-yt" src="https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&mute=1&loop=1&playlist=${ytId}&rel=0" title="${alt}" allow="autoplay; encrypted-media" allowfullscreen loading="lazy" onerror="this.remove()"></iframe>`;
+                        const ytParams = new URLSearchParams({
+                            autoplay: mp.autoplay ? '1' : '0',
+                            mute: mp.soundDefault ? '0' : '1',
+                            loop: mp.loop ? '1' : '0',
+                            playlist: ytId,       // wajib diisi ulang ID sendiri agar loop:1 berfungsi pada single video
+                            rel: '0',             // no related videos dari channel lain
+                            modestbranding: '1',  // sisakan logo YT kecil di pojok
+                            controls: '1',
+                            fs: '0',
+                            iv_load_policy: '3',  // sembunyikan anotasi
+                            disablekb: '1',
+                            playsinline: '1',
+                            enablejsapi: '1',     // dibutuhkan untuk toggle mute dari tombol custom
+                            origin: location.origin
+                        });
+                        return `<div class="chat-media-wrap" id="${mid}"><iframe class="chat-media chat-yt" src="https://www.youtube-nocookie.com/embed/${ytId}?${ytParams.toString()}" title="${alt}" allow="autoplay; encrypted-media" allowfullscreen loading="lazy" onerror="this.closest('.chat-media-wrap')?.remove()"></iframe><button type="button" class="media-mute-btn ${mutedCls}" onclick="ChatFormat.toggleMediaMute(this,'yt')" title="Suara"><i class="fa-solid fa-volume-${volIcon}"></i></button></div>`;
                     }
 
                     const driveId = this.parseDriveId(safe);
                     if (driveId) {
-                        if (/\.(mp4|webm|ogv)(\?.*)?$/i.test(safe)) {
-                            // Drive tidak bisa dipaksa mute lewat parameter — pemutaran & suara diatur manual oleh pengguna di preview.
+                        const ext = this.getUrlExt(safe);
+                        if (ext && !this.ALLOWED_DRIVE_EXT.includes(ext)) return ''; // jaga-jaga utk pesan lama; validasi utama di send()
+                        if (ext === 'mp4' || ext === 'webm' || (!ext && /\.(mp4|webm|ogv)(\?.*)?$/i.test(safe))) {
+                            // Drive tidak bisa dipaksa mute lewat parameter — pemutaran & suara diatur oleh kontrol bawaan preview-nya.
                             return `<iframe class="chat-media chat-yt" src="https://drive.google.com/file/d/${driveId}/preview" title="${alt}" allow="autoplay" loading="lazy" onerror="this.remove()"></iframe>`;
+                        }
+                        if (ext === 'mp3') {
+                            return `<audio class="chat-media" src="https://drive.google.com/uc?export=view&id=${driveId}" controls ${mutedCls ? 'muted' : ''} onerror="this.remove()"></audio>`;
+                        }
+                        if (ext === 'txt' || ext === 'doc' || ext === 'docx' || ext === 'md') {
+                            return `<a href="https://drive.google.com/file/d/${driveId}/view" target="_blank" rel="noopener noreferrer nofollow" class="chat-file-link"><i class="fa-solid fa-file-lines"></i> ${alt || 'Buka file'}</a>`;
                         }
                         return `<img src="https://drive.google.com/uc?export=view&id=${driveId}" alt="${alt}" class="chat-media" loading="lazy" onerror="this.remove()">`;
                     }
 
+                    // ── Spotify ──
+                    const spotify = this.parseSpotifyId(safe);
+                    if (spotify) {
+                        return `<iframe class="chat-media chat-yt" style="height:152px;" src="https://open.spotify.com/embed/${spotify.type}/${spotify.id}?utm_source=generator" title="${alt || 'Spotify'}" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" onerror="this.remove()"></iframe>`;
+                    }
+
+                    // ── Google Maps ──
+                    if (/google\.com\/maps|maps\.app\.goo\.gl|goo\.gl\/maps/i.test(safe)) {
+                        const q = this.parseMapsQuery(safe);
+                        if (q) {
+                            return `<iframe class="chat-media chat-yt" style="height:220px;" src="https://maps.google.com/maps?q=${encodeURIComponent(q)}&z=15&output=embed" title="${alt || 'Lokasi Peta'}" loading="lazy" onerror="this.remove()"></iframe>`;
+                        }
+                        return alt || '';
+                    }
+
                     if (/\.(mp4|webm|ogv)(\?.*)?$/i.test(safe)) {
-                        return `<video src="${safe}" class="chat-media" muted autoplay loop playsinline onerror="this.remove()"></video>`;
+                        return `<div class="chat-media-wrap" id="${mid}"><video src="${safe}" class="chat-media" ${mutedCls ? 'muted' : ''} ${mp.autoplay ? 'autoplay' : ''} ${mp.loop ? 'loop' : ''} playsinline onerror="this.closest('.chat-media-wrap')?.remove()"></video><button type="button" class="media-mute-btn ${mutedCls}" onclick="ChatFormat.toggleMediaMute(this,'video')" title="Suara"><i class="fa-solid fa-volume-${volIcon}"></i></button></div>`;
                     }
                     return `<img src="${safe}" alt="${alt}" class="chat-media" loading="lazy" onerror="this.remove()">`;
                 });
@@ -3051,6 +3189,44 @@ listEl.innerHTML = ids.map(key => {
                 document.getElementById('chat-panel').classList.toggle('open', this.isOpen);
                 if (this.isOpen) document.getElementById('chat-dot').style.display = 'none';
                 if (typeof AudioFX !== 'undefined') AudioFX.click();
+
+                // Chat-first: BGM utama baru dilanjutkan setelah modal chat ditutup, bukan bersamaan,
+                // dan hanya kalau tidak ada suara media chat yang lagi aktif.
+                if (!this.isOpen && typeof System !== 'undefined' && System.bgm
+                    && localStorage.getItem('nufa_music') === 'on'
+                    && System.bgm.paused && (this.activeMediaSoundCount || 0) === 0) {
+                    System.bgm.play().catch(() => {});
+                }
+            },
+
+            // ── Pengaturan tampilan media (gear, kembar dari toolbar rich-text) ──
+            activeMediaSoundCount: 0,
+            toggleMediaSettings() {
+                if (typeof AudioFX !== 'undefined') AudioFX.click();
+                const panel = document.getElementById('media-settings-panel');
+                const btn = document.getElementById('media-settings-btn');
+                const nowOpen = !panel.classList.contains('open');
+                panel.classList.toggle('open', nowOpen);
+                btn.classList.toggle('on', nowOpen);
+                if (nowOpen) {
+                    document.getElementById('ms-autoplay').checked = MediaPrefs.autoplay;
+                    document.getElementById('ms-loop').checked = MediaPrefs.loop;
+                    document.getElementById('ms-sound').checked = MediaPrefs.soundDefault;
+                }
+            },
+            updateMediaPref(key, checked) {
+                if (MediaPrefs[key] !== checked) MediaPrefs.toggle(key);
+                this._showToast({ ip: 'SYSTEM', text: `⚙ ${key === 'soundDefault' ? 'Suara default' : key === 'autoplay' ? 'Autoplay' : 'Loop'} media ${checked ? 'diaktifkan' : 'dimatikan'} — berlaku utk pesan berikutnya.` });
+            },
+
+            // Redundansi suara: kalau ada media chat yang unmute, kunci tombol BGM utama biar tidak dobel suara.
+            handleMediaSoundToggle(isPlaying) {
+                this.activeMediaSoundCount = Math.max(0, (this.activeMediaSoundCount || 0) + (isPlaying ? 1 : -1));
+                const musicBtn = document.getElementById('music-btn');
+                if (musicBtn) musicBtn.classList.toggle('sound-locked', this.activeMediaSoundCount > 0);
+                if (typeof System !== 'undefined' && System.bgm && this.activeMediaSoundCount > 0 && !System.bgm.paused) {
+                    System.bgm.pause();
+                }
             },
 
             // ── Kirim pesan, dengan cooldown anti-spam + filter kata kasar ──
@@ -3068,6 +3244,14 @@ listEl.innerHTML = ids.map(key => {
                 const input = document.getElementById('chat-input');
                 const rawText = input.value.trim();
                 if (!rawText) return;
+
+                // Ban format Drive yang tak didukung — pesan tidak ditampilkan & tidak dikirim.
+                const badExt = ChatFormat.validateEmbeds(rawText);
+                if (badExt) {
+                    this._showToast({ ip: 'SYSTEM', text: `⛔ Format .${badExt} tak didukung — pesan tidak dikirim.` });
+                    return;
+                }
+
                 input.value = '';
                 this.autoGrow(input);
 
