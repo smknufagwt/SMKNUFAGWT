@@ -164,7 +164,6 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             padding: 25px; margin-bottom: 25px; background: var(--glass);
             border-radius: 4px; box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
             transition: border-color 0.5s;
-
         }
         .subtitle { font-size: 1rem; letter-spacing: 3px; border-top: 1px solid var(--neon-dim); display: block; padding-top: 10px; color: #fff; margin-top: 10px; transition: border-color 0.5s; }
 
@@ -189,31 +188,6 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             position: relative;
         }
         .marquee-clip { overflow: hidden; white-space: nowrap; }
-        .petir-fx {
-            position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%);
-            width: 70%; max-width: 260px; height: 20px;
-            display: flex; align-items: flex-start; justify-content: center; gap: 18px;
-            pointer-events: none; z-index: 3;
-        }
-        .petir-bolt {
-            width: 4px; height: 100%;
-            background: linear-gradient(180deg, transparent, var(--neon) 35%, #fff 55%, var(--neon) 100%);
-            clip-path: polygon(50% 0%, 100% 18%, 55% 42%, 100% 58%, 35% 100%, 45% 58%, 0% 42%, 45% 18%);
-            filter: drop-shadow(0 0 4px var(--neon)) drop-shadow(0 0 10px var(--neon));
-            opacity: 0;
-            animation-name: petir-flash;
-            animation-timing-function: ease-in-out;
-            animation-iteration-count: infinite;
-            animation-duration: var(--petir-dur, 3.2s);
-            animation-delay: var(--petir-delay, 0s);
-        }
-        @keyframes petir-flash {
-            0%, 90%, 100% { opacity: 0; }
-            91% { opacity: 1; }
-            92.5% { opacity: 0.15; }
-            94% { opacity: 0.9; }
-            96% { opacity: 0; }
-        }
         .marquee-content {
             display: inline-block; padding-left: 100%;
             animation: scroll-text 13s linear infinite;
@@ -227,7 +201,6 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             padding: 30px; animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-shadow: 0 0 10px rgba(0, 255, 65, 0.05); line-height: 1.6; position: relative;
             transition: border-color 0.5s;
-
         }
         
         .slide-hud {
@@ -299,85 +272,6 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             display: none;
         }
 
-        #chat-marquee-bar {
-            position: fixed; bottom: 0; left: 0; right: 0; height: 28px;
-            background: linear-gradient(90deg, rgba(0,0,0,0.95), var(--glass), rgba(0,0,0,0.95));
-            border-top: 1px solid var(--neon-dim); border-bottom: 1px solid var(--neon-dim);
-            overflow: hidden; z-index: 999; display: none; align-items: center;
-            box-shadow: 0 0 12px rgba(0,255,0,0.15) inset;
-        }
-        #chat-marquee-bar.live { display: flex; }
-        #chat-marquee-track {
-            display: inline-flex; white-space: nowrap; will-change: transform;
-            animation: marquee-scroll 22s linear infinite;
-            font-family: var(--font-main); font-size: 0.78rem; color: var(--neon);
-            text-shadow: 0 0 6px var(--neon);
-        }
-        #chat-marquee-track .mq-item { padding: 0 28px; }
-        #chat-marquee-track .mq-ip { opacity: 0.6; color: var(--premium-gold); margin-right: 6px; }
-        @keyframes marquee-scroll {
-            0% { transform: translateX(0%); }
-            100% { transform: translateX(-50%); }
-        }
-
-        #chat-panel {
-            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%);
-            width: min(92vw, 380px); max-height: 70vh; z-index: 1100;
-            background: var(--glass); border: 1px solid var(--neon); border-bottom: none;
-            border-radius: 14px 14px 0 0; box-shadow: 0 0 30px rgba(0,255,0,0.25);
-            display: flex; flex-direction: column; transition: transform 0.35s ease;
-            backdrop-filter: blur(6px);
-        }
-        #chat-panel.open { transform: translateX(-50%) translateY(0%); }
-        #chat-panel-head {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 14px; border-bottom: 1px solid var(--neon-dim);
-            font-family: var(--font-main); color: var(--neon); letter-spacing: 1px;
-        }
-        #chat-panel-head .chat-status { font-size: 0.65rem; opacity: 0.7; }
-        #chat-panel-head .chat-status .dot {
-            display: inline-block; width: 7px; height: 7px; border-radius: 50%;
-            background: var(--neon); margin-right: 5px; box-shadow: 0 0 6px var(--neon);
-            animation: blink-cursor 1.4s step-end infinite;
-        }
-        #chat-close { background: none; border: none; color: var(--neon); font-size: 1rem; cursor: pointer; }
-        #chat-messages {
-            flex: 1; overflow-y: auto; padding: 10px 12px; font-family: var(--font-main);
-            font-size: 0.8rem; display: flex; flex-direction: column; gap: 8px; 
-            min-height: 100px;
-        }
-        .chat-msg { border-left: 2px solid var(--neon-dim); padding-left: 8px; }
-        .chat-msg .chat-ip {
-            color: var(--premium-platinum); font-size: 0.68rem; opacity: 0.75; display: block;
-        }
-        .chat-msg .chat-text { color: var(--neon); word-break: break-word; }
-        #chat-input-row { display: flex; gap: 6px; padding: 10px; border-top: 1px solid var(--neon-dim); }
-        #chat-input {
-            flex: 1; background: #000; border: 1px solid var(--neon-dim); color: var(--neon);
-            font-family: var(--font-main); padding: 8px 10px; border-radius: 6px; outline: none; font-size: 0.85rem;
-        }
-        #chat-input:focus { border-color: var(--neon); box-shadow: 0 0 8px var(--neon-dim); }
-        #chat-send {
-            background: var(--neon-dim); border: none; color: #000; font-weight: bold;
-            padding: 0 14px; border-radius: 6px; cursor: pointer; transition: 0.2s;
-        }
-        #chat-send:hover { background: var(--neon); box-shadow: 0 0 10px var(--neon); }
-        #chat-send:disabled, #chat-send.cooldown {
-            background: #222; color: var(--neon-dim); cursor: not-allowed; opacity: 0.6; box-shadow: none;
-        }
-        #chat-send.cooldown::after {
-            content: attr(data-cd); font-size: 0.6rem; margin-left: 4px;
-        }
-
-        .privacy-wrap { position: relative; display: inline-block; }
-        .privacy-link {
-            color: var(--neon); text-decoration: none; font-weight: bold;
-            border: 1px solid var(--neon); padding: 8px 15px; display: inline-block; margin-bottom: 10px;
-            transition: 0.3s; text-transform: uppercase; background: #000; font-family: var(--font-main);
-            cursor: pointer; font-size: 0.8rem;
-        }
-        .privacy-link:hover { background: var(--neon); color: black; box-shadow: 0 0 15px var(--neon); transform: translateY(-3px); }
-
         #system-log { 
             color: var(--neon) !important; 
             opacity: 0.65; 
@@ -407,12 +301,11 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
         .property-credit a:hover {
             text-decoration: underline;
         }
-
     </style>
+    
+    <!-- ⚡ PERFORMANCE: Minimal DOMContentLoaded hook for lazy Font Awesome -->
     <script>
-    // ⚡ PERFORMANCE: Defer heavy initialization until after page load
     document.addEventListener('DOMContentLoaded', () => {
-        // Lazy load Font Awesome only when needed
         if (!document.getElementById('fa-css')) {
             const faLink = document.createElement('link');
             faLink.id = 'fa-css';
@@ -420,8 +313,6 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css';
             document.head.appendChild(faLink);
         }
-
-        // Defer chaos mode and log animations
         setTimeout(() => {
             if (typeof startChaosMode === 'function') startChaosMode();
             if (typeof System !== 'undefined' && System.initLog) System.initLog();
@@ -430,7 +321,6 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
     </script>
 </head>
 <body>
-
     <audio id="bgm" src="bgm.mp3" loop></audio>
     <canvas id="matrix-bg"></canvas>
     <div class="scanlines"></div>
@@ -450,7 +340,6 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
 
         <nav id="nav-buttons"></nav>
         <div class="marquee-container" id="marquee-container"></div>
-
         <div id="slide-container"></div>
 
         <footer>
@@ -468,12 +357,10 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
     <div id="chat-marquee-bar"></div>
     <div id="chat-panel"></div>
 
-    <!-- ⚡ PERFORMANCE: Load inline essential scripts, defer heavy logic -->
+    <!-- ⚡ PERFORMANCE: Inline notifications handler with deferred OneSignal -->
     <script>
     (function() {
         'use strict';
-
-        // ⚡ PERFORMANCE: Minimal configuration for startup
         const NOTIFY_ENDPOINT = '/api/notify';
         const NOTIFY_SECRET = '%%NOTIFY_SECRET%%';
         const THROTTLE_MS = 10000;
@@ -484,7 +371,6 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
         let lastTriggerTime = 0;
         let _oneSignalReady = false;
 
-        // ⚡ PERFORMANCE: OneSignal init deferred
         window.OneSignalDeferred = window.OneSignalDeferred || [];
         OneSignalDeferred.push(async function(OneSignal) {
             try {
@@ -528,15 +414,11 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
 
                 if(navigator.onLine) {
                     try {
-                        await fetchWithRetry(
-                            NOTIFY_ENDPOINT,
-                            {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json', 'x-notify-secret': NOTIFY_SECRET },
-                                body: JSON.stringify({ ip: m.ip, text: m.text, ts: m.ts }),
-                            },
-                            MAX_RETRY
-                        );
+                        await fetchWithRetry(NOTIFY_ENDPOINT, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'x-notify-secret': NOTIFY_SECRET },
+                            body: JSON.stringify({ ip: m.ip, text: m.text, ts: m.ts }),
+                        }, MAX_RETRY);
                     } catch(e) {
                         console.warn('[NufaNotify] Failed:', e.message);
                     }
@@ -562,7 +444,7 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
     })();
     </script>
 
-    <!-- ⚡ PERFORMANCE: Load main app logic deferred -->
+    <!-- ⚡ PERFORMANCE: Defer main app logic to separate file or inline after above -->
     <script defer src="app-logic.js"></script>
 </body>
 </html>
