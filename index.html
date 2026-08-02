@@ -330,10 +330,19 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             width: min(92vw, 380px); max-height: 70vh; z-index: 1100;
             background: var(--glass); border: 1px solid var(--neon); border-bottom: none;
             border-radius: 14px 14px 0 0; box-shadow: 0 0 30px rgba(0,255,0,0.25);
-            display: flex; flex-direction: column; transition: transform 0.35s ease;
+            display: flex; flex-direction: column;
+            transition: transform 0.35s ease, width 0.4s cubic-bezier(.16,.84,.44,1), max-height 0.4s cubic-bezier(.16,.84,.44,1);
             backdrop-filter: blur(6px);
         }
         #chat-panel.open { transform: translateX(-50%) translateY(0%); }
+        /* Mode "perlebar layar" — panel melebar & tinggi mentok ke atas (bottom:0 tetap jadi anchor) */
+        #chat-panel.wide { width: min(96vw, 720px); max-height: 92vh; }
+        @keyframes chat-panel-expand {
+            0% { transform: translateX(-50%) translateY(0%) scaleY(1); }
+            55% { transform: translateX(-50%) translateY(-1.5%) scaleY(1.015); }
+            100% { transform: translateX(-50%) translateY(0%) scaleY(1); }
+        }
+        #chat-panel.expanding { animation: chat-panel-expand 0.5s ease; transform-origin: bottom center; }
         #chat-panel-head {
             display: flex; justify-content: space-between; align-items: center;
             padding: 10px 14px; border-bottom: 1px solid var(--neon-dim);
@@ -364,6 +373,11 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             width: 100%; max-width: 260px; height: auto; aspect-ratio: 16 / 9;
             max-height: none; object-fit: initial; border: 1px solid var(--neon-dim);
         }
+        /* Auto-sizing per jenis embed — jangan dipaksa 16:9 semua, tiap tipe beda proporsi asli */
+        .chat-text iframe.chat-yt-short { aspect-ratio: 9 / 16; max-width: 200px; }
+        .chat-text iframe.chat-spotify { aspect-ratio: auto; height: 152px; max-width: 300px; }
+        .chat-text iframe.chat-drive-doc { aspect-ratio: 4 / 3; max-width: 300px; }
+        .chat-text iframe.chat-maps { aspect-ratio: auto; height: 220px; max-width: 300px; }
         .chat-text .chat-quote {
             display: block; border-left: 2px solid var(--neon); padding-left: 8px;
             margin: 3px 0; opacity: 0.8; font-style: italic;
@@ -395,7 +409,7 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
 }
 #chat-format-bar::-webkit-scrollbar { display: none; }
               .fmt-btn {
-            flex: 0 0 auto; width: 30px; height: 31px; background: #000;
+            flex: 0 0 auto; width: 30px; height: 29px; background: #000;
             border: 1px solid var(--neon-dim); color: var(--neon); border-radius: 6px;
             cursor: pointer; font-family: var(--font-main); font-size: 0.8rem;
             display: flex; align-items: center; justify-content: center; transition: 0.15s;
@@ -614,8 +628,7 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
                 radial-gradient(circle at 10% 0%, rgba(0,255,65,0.05), transparent 60%),
                 rgba(0,6,0,0.92);
             border-bottom: 1px solid var(--neon-dim);
-            /* Jangan pernah mengecilkan diri (flex-shrink:0 diterapkan via class) */
-        }
+              }
         #chat-online-list.expanded { 
             max-height: 160px; 
             overflow-y: auto; 
@@ -1057,7 +1070,6 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('underline')" title="Garis bawah"><u>U</u></button>
             <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('strike')" title="Coret"><s>S</s></button>
             <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('quote-inline')" title='Kutip "teks"'>&quot;</button>
-            <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('quote-line')" title="Kutipan baris (&gt;)">&gt;</button>
             <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('link')" title="Tautan [teks](url)"><i class="fa-solid fa-link"></i></button>
             <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('media')" title="Gambar/GIF/Video [alt]{url}"><i class="fa-solid fa-image"></i></button>
             <button type="button" class="fmt-btn" id="media-settings-btn" onclick="GlobalChat.toggleMediaSettings()" title="Pengaturan pemutaran media"><i class="fa-solid fa-gear"></i></button>
@@ -1066,6 +1078,8 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             <label><input type="checkbox" id="ms-autoplay" onchange="GlobalChat.updateMediaPref('autoplay', this.checked)"> Autoplay video</label>
             <label><input type="checkbox" id="ms-loop" onchange="GlobalChat.updateMediaPref('loop', this.checked)"> Loop video</label>
             <label><input type="checkbox" id="ms-sound" onchange="GlobalChat.updateMediaPref('soundDefault', this.checked)"> Suara default </label>
+            <label><input type="checkbox" id="ms-widescreen" onchange="GlobalChat.toggleWideMode(this.checked)"> Perlebar panel chat</label>
+            <label><input type="checkbox" id="ms-matrix" onchange="GlobalChat.toggleMatrixRain(this.checked)"> Animasi rain matrix</label>
         </div>
         <textarea id="chat-input" rows="1" maxlength="1024" placeholder="Tulis pesan ke semua orang..." oninput="GlobalChat.autoGrow(this)"></textarea>
     </div>
@@ -1488,6 +1502,7 @@ serviceWorkerPath:  '/sw.js',
                 this.ctx = this.canvas.getContext("2d");
                 this.color = "#0f0";
                 this.drops = []; this.ripples = [];
+                this.enabled = true; this._running = true;
                 this.resize();
                 window.addEventListener('resize', () => this.resize());
                 ['mousemove', 'touchstart'].forEach(evt => window.addEventListener(evt, (e) => this.createRipple(e), {passive: true}));
@@ -1507,6 +1522,12 @@ serviceWorkerPath:  '/sw.js',
                 this.ripples.push({x, y, size: 0, life: 1});
             }
             setColor(c) { this.color = c; }
+            setEnabled(on) {
+                this.enabled = on;
+                this.canvas.style.display = on ? 'block' : 'none';
+                if (on && !this._running) { this._running = true; this.loop(); }
+                if (!on) this._running = false;
+            }
             draw() {
                 this.ctx.fillStyle = "rgba(0, 0, 0, 0.15)"; 
                 this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -1526,7 +1547,11 @@ serviceWorkerPath:  '/sw.js',
                     drop.y += drop.speed * 22;
                 });
             }
-            loop() { requestAnimationFrame(() => this.loop()); this.draw(); }
+            loop() {
+                if (!this._running) return;
+                requestAnimationFrame(() => this.loop());
+                this.draw();
+            }
         }
 
         const AudioFX = new AudioEngine();
@@ -1575,11 +1600,11 @@ serviceWorkerPath:  '/sw.js',
             syncVisitorCount: async function() {
                 try {
                     const response = await fetch('https://api.counterapi.dev/v1/smknufa_2026/visits/up');
+                    if (!response.ok) throw new Error('bad status ' + response.status);
                     const data = await response.json();
-                    if (data && data.count) {
-                        this.currentVisits = parseInt(data.count) + this.baseOffset;
-                        return true;
-                    }
+                    if (!data || !data.count) throw new Error('no count in response');
+                    this.currentVisits = parseInt(data.count) + this.baseOffset;
+                    return true;
                 } catch (error) {
                     this.useLocalFallback();
                     return false;
@@ -1608,21 +1633,20 @@ serviceWorkerPath:  '/sw.js',
             },
 
             initLog: function() {
-                const updateLog = () => {
-                    const logs = [
-                        "Scanning connection...", 
-                        "Encrypting connection...", 
-                        `Global Access: ${this.currentVisits} Users`, 
-                        "System stable.", 
-                        "Monitoring network..."
-                    ];
-                    let i = 0; 
-                    setInterval(() => { 
-                        this.log.innerText = ">> " + logs[i]; 
-                        i = (i + 1) % logs.length; 
-                    }, 2500); 
-                };
-                updateLog();
+                // Fungsi generator dipanggil ulang tiap tick agar baris "Global Access" selalu baca
+                // this.currentVisits versi terbaru (bukan snapshot lama sebelum syncVisitorCount() selesai).
+                const logLines = [
+                    () => "Scanning connection...",
+                    () => "Encrypting connection...",
+                    () => `Global Access: ${this.currentVisits} Users`,
+                    () => "System stable.",
+                    () => "Monitoring network..."
+                ];
+                let i = 0;
+                setInterval(() => {
+                    this.log.innerText = ">> " + logLines[i]();
+                    i = (i + 1) % logLines.length;
+                }, 2500);
             },
 
             enter: function() {
@@ -2629,7 +2653,9 @@ startLatency: function() {
                             enablejsapi: '1',     // dibutuhkan untuk toggle mute dari tombol custom
                             origin: location.origin
                         });
-                        return `<div class="chat-media-wrap" id="${mid}"><iframe class="chat-media chat-yt" src="https://www.youtube-nocookie.com/embed/${ytId}?${ytParams.toString()}" title="${alt}" allow="autoplay; encrypted-media" allowfullscreen loading="lazy" onerror="this.closest('.chat-media-wrap')?.remove()"></iframe><button type="button" class="media-mute-btn ${mutedCls}" onclick="ChatFormat.toggleMediaMute(this,'yt')" title="Suara"><i class="fa-solid fa-volume-${volIcon}"></i></button></div>`;
+                        const isShort = /\/shorts\//i.test(safe);
+                        const ytCls = isShort ? 'chat-yt-short' : 'chat-yt';
+                        return `<div class="chat-media-wrap" id="${mid}"><iframe class="chat-media ${ytCls}" src="https://www.youtube-nocookie.com/embed/${ytId}?${ytParams.toString()}" title="${alt}" allow="autoplay; encrypted-media" allowfullscreen loading="lazy" onerror="this.closest('.chat-media-wrap')?.remove()"></iframe><button type="button" class="media-mute-btn ${mutedCls}" onclick="ChatFormat.toggleMediaMute(this,'yt')" title="Suara"><i class="fa-solid fa-volume-${volIcon}"></i></button></div>`;
                     }
 
                     const driveId = this.parseDriveId(safe);
@@ -2652,14 +2678,14 @@ startLatency: function() {
                     // ── Spotify ──
                     const spotify = this.parseSpotifyId(safe);
                     if (spotify) {
-                        return `<iframe class="chat-media chat-yt" style="height:152px;" src="https://open.spotify.com/embed/${spotify.type}/${spotify.id}?utm_source=generator" title="${alt || 'Spotify'}" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" onerror="this.remove()"></iframe>`;
+                        return `<iframe class="chat-media chat-spotify" src="https://open.spotify.com/embed/${spotify.type}/${spotify.id}?utm_source=generator" title="${alt || 'Spotify'}" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" onerror="this.remove()"></iframe>`;
                     }
 
                     // ── Google Maps ──
                     if (/google\.com\/maps|maps\.app\.goo\.gl|goo\.gl\/maps/i.test(safe)) {
                         const q = this.parseMapsQuery(safe);
                         if (q) {
-                            return `<iframe class="chat-media chat-yt" style="height:220px;" src="https://maps.google.com/maps?q=${encodeURIComponent(q)}&z=15&output=embed" title="${alt || 'Lokasi Peta'}" loading="lazy" onerror="this.remove()"></iframe>`;
+                            return `<iframe class="chat-media chat-maps" src="https://maps.google.com/maps?q=${encodeURIComponent(q)}&z=15&output=embed" title="${alt || 'Lokasi Peta'}" loading="lazy" onerror="this.remove()"></iframe>`;
                         }
                         return alt || '';
                     }
@@ -2732,6 +2758,13 @@ startLatency: function() {
                 this.started = true;
                 this.notifEnabled = localStorage.getItem('nufa_chat_notif') === 'on';
                 this._updateNotifBtn();
+
+                this.wideMode = localStorage.getItem('nufa_chat_wide') === 'on';
+                if (this.wideMode) document.getElementById('chat-panel').classList.add('wide');
+
+                this.matrixOn = localStorage.getItem('nufa_matrix_on') !== 'off';
+                if (typeof MatrixFX !== 'undefined') MatrixFX.setEnabled(this.matrixOn);
+
                 this.init();
             },
 
@@ -3166,9 +3199,8 @@ listEl.innerHTML = ids.map(key => {
                     case 'underline':    this._wrapSelection('_', '_', 'garis bawah'); break;
                     case 'strike':       this._wrapSelection('~', '~', 'coret'); break;
                     case 'quote-inline': this._wrapSelection('"', '"', 'kutip'); break;
-                    case 'quote-line':   this._prefixLine('> '); break;
                     case 'link':         this._wrapSelection('[', '](https://)', 'teks link'); break;
-                    case 'media':        this._wrapSelection('[', ']{https://}', 'alt gambar'); break;
+                    case 'media':        this._wrapSelection('[', ']{https://}', 'alt gambar-video-Display'); break;
                 }
             },
 
@@ -3200,11 +3232,36 @@ listEl.innerHTML = ids.map(key => {
                     document.getElementById('ms-autoplay').checked = MediaPrefs.autoplay;
                     document.getElementById('ms-loop').checked = MediaPrefs.loop;
                     document.getElementById('ms-sound').checked = MediaPrefs.soundDefault;
+                    document.getElementById('ms-widescreen').checked = this.wideMode;
+                    document.getElementById('ms-matrix').checked = this.matrixOn;
                 }
             },
             updateMediaPref(key, checked) {
                 if (MediaPrefs[key] !== checked) MediaPrefs.toggle(key);
                 this._showToast({ ip: 'SYSTEM', text: `⚙ ${key === 'soundDefault' ? 'Suara default' : key === 'autoplay' ? 'Autoplay' : 'Loop'} media ${checked ? 'diaktifkan' : 'dimatikan'} — berlaku utk pesan berikutnya.` });
+            },
+
+            // ── A. Perlebar panel chat + animasi ke atas (default OFF) ──
+            wideMode: false,
+            toggleWideMode(checked) {
+                if (typeof AudioFX !== 'undefined') AudioFX.click();
+                this.wideMode = checked;
+                const panel = document.getElementById('chat-panel');
+                panel.classList.toggle('wide', checked);
+                panel.classList.add('expanding');
+                setTimeout(() => panel.classList.remove('expanding'), 500);
+                try { localStorage.setItem('nufa_chat_wide', checked ? 'on' : 'off'); } catch(e) {}
+                this._showToast({ ip: 'SYSTEM', text: `⚙ Panel chat ${checked ? 'diperlebar' : 'dikembalikan normal'}.` });
+            },
+
+            // ── B. Toggle rain matrix number (default ON) ──
+            matrixOn: true,
+            toggleMatrixRain(checked) {
+                if (typeof AudioFX !== 'undefined') AudioFX.click();
+                this.matrixOn = checked;
+                if (typeof MatrixFX !== 'undefined') MatrixFX.setEnabled(checked);
+                try { localStorage.setItem('nufa_matrix_on', checked ? 'on' : 'off'); } catch(e) {}
+                this._showToast({ ip: 'SYSTEM', text: `⚙ Animasi rain matrix ${checked ? 'diaktifkan' : 'dimatikan'}.` });
             },
 
             // Redundansi suara: kalau ada media chat yang unmute, kunci tombol BGM utama biar tidak dobel suara.
