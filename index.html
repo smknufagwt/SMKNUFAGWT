@@ -1,0 +1,3623 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- ARLINGGA creator -->
+    <title>SMK NURUL FALAH - THE GLIMPSE OF FUTURE</title>
+<meta name="google-site-verification" content="bcu4uRS7dTLeJExZS1IX56ZkOeI4F5Wu1O48GXmes8Y" />
+<meta name="description" content="Portal Kreatif Informasi Digital dan Galeri Highlight kegiatan SMK Nurul Falah.
+NOMOR NPSN	:	10814959
+TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
+    <meta name="keywords" content="SMK Nurul Falah, SMK Nufa, smks, Gedung wani timur, kauman, SMK Lampung Timur, GWT, DESA, HACKER, gedung wani, biner, code matrix, matrix, NUFA BASE, Margatiga, website cyberpunk, masa depan, sekilas pandang,">
+    <meta name="author" content="SMK Nurul Falah">
+    <meta name="robots" content="index, follow">
+
+ <meta property="og:type" content="website" />
+    <meta property="og:title" content="SMK NURUL FALAH - THE GLIMPSE OF FUTURE" />
+    <meta property="og:description" content="Situs Portal Kreatif Sistem Informasi Digital dan Galeri Highlight kegiatan SMK Nurul Falah. 
+        NOMOR NPSN	:	10814959
+        TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022" />
+    <meta property="og:image" content="https://raw.githubusercontent.com/smknufagwt/SMKNUFAGWT/main/appcover.jpg" />
+    <meta property="og:image:width" content="612" />
+    <meta property="og:image:height" content="612" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <link rel="canonical" href="/" />
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="SMK NURUL FALAH - THE GLIMPSE OF FUTURE" />
+    <meta name="twitter:description" content="Situs Resmi Sistem Informasi Digital dan Galeri Highlight kegiatan SMK Nurul Falah. Berlokasi di jalan raya kauman, Desa Gedung wani timur, Margatiga, Lampung Timur, Provinsi LAMPUNG.
+        NOMOR NPSN	:	10814959
+        TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022" />
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/smknufagwt/SMKNUFAGWT/main/appcover.jpg" />    
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="black" stroke="white" stroke-width="4"/%3E%3Cline x1="5" y1="50" x2="95" y2="50" stroke="white" stroke-width="2"/%3E%3Cline x1="50" y1="5" x2="50" y2="95" stroke="white" stroke-width="2"/%3E%3Cellipse cx="50" cy="50" rx="10" ry="45" fill="none" stroke="white" stroke-width="3"%3E%3Canimate attributeName="rx" values="0;44;0" dur="2s" repeatCount="indefinite"/%3E%3C/ellipse%3E%3C/svg%3E'>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <link id="fa-css" rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    </noscript>
+
+    <script defer src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --neon: #0f0;
+            --neon-dim: #008F11;
+            --glitch-red: #ff003c;
+            --glitch-blue: #00f0ff;
+            --bg-color: #050505;
+            --glass: rgba(0, 15, 0, 0.78);
+            --font-main: 'Share Tech Mono', monospace;
+
+               --premium-white: #ffffff;
+              --cyan-ringan: #b3ffff;
+            --premium-silver: #c7ccd1;
+            --premium-silver-dim: #8b9197;
+            --premium-platinum: #e4e7eb;
+            --premium-gold: #d9c089;
+            --premium-glass: rgba(20, 22, 26, 0.78);
+            --premium-shadow: rgba(199, 204, 209, 0.25);
+            --premium-gradient: linear-gradient(135deg, var(--premium-white) 0%, var(--premium-silver) 50%, var(--premium-platinum) 100%);
+        }
+
+        .typing-cursor::after {
+            content: '‎ '; 
+            display: inline-block;
+            margin-left: 2px;
+            color: var(--neon);
+            animation: blink-cursor 0.4s step-end infinite;
+        }
+        @keyframes blink-cursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; cursor: crosshair; }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--neon-dim); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon); }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg-color);
+            color: var(--neon);
+            font-family: var(--font-main);
+            overflow-x: hidden; 
+            min-height: 100vh;
+            font-size: 16px;
+            transition: color 0.3s ease-in-out;
+        }
+
+        canvas#matrix-bg { 
+            position: fixed; 
+            top: 0; left: 0; width: 100%; height: 100%; 
+            z-index: -2; opacity: 0.85; pointer-events: none;
+        }
+        .scanlines { display: none; } 
+
+        .glitch-wrapper { position: relative; display: inline-block; }
+        .glitch {
+            position: relative; color: var(--neon); font-size: 2rem; 
+            letter-spacing: 3px; font-weight: bold; text-transform: uppercase;
+            transition: color 0.5s;
+        }
+        .glitch::before, .glitch::after {
+            content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-color);
+        }
+        .glitch::before {
+            left: 2px; text-shadow: -1px 0 var(--glitch-red); clip: rect(24px, 550px, 90px, 0);
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+        .glitch::after {
+            left: -2px; text-shadow: -1px 0 var(--glitch-blue); clip: rect(85px, 550px, 140px, 0);
+            animation: glitch-anim 2.5s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(10px, 9999px, 30px, 0); transform: skew(0.5deg); }
+            20% { clip: rect(80px, 9999px, 100px, 0); transform: skew(0.3deg); }
+            40% { clip: rect(10px, 9999px, 80px, 0); transform: skew(0.8deg); }
+            60% { clip: rect(50px, 9999px, 20px, 0); transform: skew(0.2deg); }
+            80% { clip: rect(20px, 9999px, 90px, 0); transform: skew(0.6deg); }
+            100% { clip: rect(90px, 9999px, 10px, 0); transform: skew(0.4deg); }
+        }
+        @keyframes glitch-anim-2 {
+            0% { clip: rect(60px, 9999px, 10px, 0); transform: skew(0.8deg); }
+            20% { clip: rect(20px, 9999px, 40px, 0); transform: skew(0.2deg); }
+            40% { clip: rect(90px, 9999px, 30px, 0); transform: skew(0.6deg); }
+            60% { clip: rect(10px, 9999px, 80px, 0); transform: skew(0.4deg); }
+            80% { clip: rect(50px, 9999px, 20px, 0); transform: skew(0.1deg); }
+            100% { clip: rect(30px, 9999px, 70px, 0); transform: skew(0.7deg); }
+        }
+
+        .critical-error { color: red !important; text-shadow: 2px 2px 0px #000; }
+
+        #overlay {
+            position: fixed; inset: 0; background: black; z-index: 100;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.5s ease-out; padding: 20px; text-align: center;
+        }
+        .lock-icon { font-size: 5rem; margin-bottom: 20px; animation: pulse 1.5s infinite; filter: drop-shadow(0 0 10px var(--neon)); transition: filter 0.5s; }
+        
+        .btn-enter {
+            position: relative; overflow: hidden;
+            border: 2px solid var(--neon); background: rgba(0, 255, 65, 0.05); color: var(--neon);
+            padding: 15px 40px; font-size: 1.2rem; font-weight: bold; letter-spacing: 2px;
+            cursor: pointer; text-transform: uppercase; font-family: var(--font-main);
+            transition: 0.2s; margin-top: 30px;
+        }
+        .btn-enter:hover { background: var(--neon); color: black; box-shadow: 0 0 30px var(--neon); }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
+
+        .container {
+            position: relative; z-index: 10;
+            max-width: 900px; margin: 0 auto; padding: 20px;
+            display: none; padding-bottom: 100px;
+        }
+
+        header {
+            text-align: center; border: 1px solid var(--neon-dim);
+            padding: 25px; margin-bottom: 25px; background: var(--glass);
+            border-radius: 4px; box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+            transition: border-color 0.5s;
+
+        }
+        .subtitle { font-size: 1rem; letter-spacing: 3px; border-top: 1px solid var(--neon-dim); display: block; padding-top: 10px; color: #fff; margin-top: 10px; transition: border-color 0.5s; min-height: 25px; }
+
+        nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
+        .nav-btn {
+            background: #020202; color: var(--neon); border: 1px solid var(--neon-dim);
+            padding: 12px 18px; cursor: pointer; font-family: var(--font-main); font-weight: bold; font-size: 1rem;
+            transition: 0.2s; letter-spacing: 1px; min-width: 100px;
+        }
+        .nav-btn:hover { background: rgba(0, 255, 65, 0.15); text-shadow: 0 0 8px var(--neon); }
+        .nav-btn.active { background: var(--neon); color: black; box-shadow: 0 0 15px var(--neon); border-color: var(--neon); }
+        .nav-btn-secondary {
+            text-decoration: none; display: inline-flex; align-items: center; justify-content: center;
+            border-style: dashed; opacity: 0.85;
+        }
+        .nav-btn-secondary:hover { opacity: 1; }
+
+        .marquee-container {
+            border-top: 2px solid var(--neon); border-bottom: 2px solid var(--neon);
+            margin-top: 25px; background: rgba(0, 20, 0, 0.9); overflow: visible;
+            padding: 10px 0; transition: border-color 0.5s;
+            position: relative;
+        }
+        .marquee-clip { overflow: hidden; white-space: nowrap; }
+        .petir-fx {
+            position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%);
+            width: 70%; max-width: 260px; height: 20px;
+            display: flex; align-items: flex-start; justify-content: center; gap: 18px;
+            pointer-events: none; z-index: 3;
+        }
+        .petir-bolt {
+            width: 4px; height: 100%;
+            background: linear-gradient(180deg, transparent, var(--neon) 35%, #fff 55%, var(--neon) 100%);
+            clip-path: polygon(50% 0%, 100% 18%, 55% 42%, 100% 58%, 35% 100%, 45% 58%, 0% 42%, 45% 18%);
+            filter: drop-shadow(0 0 4px var(--neon)) drop-shadow(0 0 10px var(--neon));
+            opacity: 0;
+            animation-name: petir-flash;
+            animation-timing-function: ease-in-out;
+            animation-iteration-count: infinite;
+            animation-duration: var(--petir-dur, 3.2s);
+            animation-delay: var(--petir-delay, 0s);
+        }
+        @keyframes petir-flash {
+            0%, 90%, 100% { opacity: 0; }
+            91% { opacity: 1; }
+            92.5% { opacity: 0.15; }
+            94% { opacity: 0.9; }
+            96% { opacity: 0; }
+        }
+        .marquee-content {
+            display: inline-block; padding-left: 100%;
+            animation: scroll-text 13s linear infinite;
+            font-size: 1.1rem; font-weight: bold; letter-spacing: 3px; color: white;
+            text-shadow: 0 0 5px var(--neon);
+        }
+        @keyframes scroll-text { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+
+        .slide {
+            display: none; background: var(--glass); border: 1px solid var(--neon-dim);
+            padding: 30px; animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.05); line-height: 1.6; position: relative;
+            transition: border-color 0.5s;
+
+        }
+        
+        .slide-hud {
+            position: absolute; top: 5px; right: 10px;
+            font-size: 0.6rem; color: var(--neon); opacity: 0.8;
+            letter-spacing: 2px; transition: color 0.5s;
+        }
+
+        .slide.active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        
+        h2 { 
+            border-bottom: 2px solid var(--neon); padding-bottom: 10px; 
+            margin-top: 0; font-size: 1.5rem; color: white; margin-bottom: 20px;
+            text-shadow: 0 0 10px var(--neon-dim);
+            transition: border-color 0.5s, text-shadow 0.5s;
+        }
+
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-top: 20px; }
+        .gallery-item {
+            border: 1px solid var(--neon-dim); position: relative; height: 180px; overflow: hidden;
+            transition: 0.3s; background: #000; cursor: pointer;
+        }
+        .gallery-item:hover { border-color: var(--neon); transform: scale(1.02); z-index: 2; box-shadow: 0 0 20px var(--neon-dim); }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; transition: 0.3s; filter: grayscale(80%); }
+        .gallery-item:hover img { opacity: 1; filter: grayscale(0%); }
+        .caption {
+            position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.9);
+            color: var(--neon); font-size: 0.7rem; padding: 8px; text-align: center; border-top: 1px solid var(--neon-dim);
+            font-weight: bold; letter-spacing: 1px; transition: color 0.5s, border-color 0.5s;
+        }
+
+        .comp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .comp-btn {
+            padding: 15px; border: 1px solid var(--neon-dim); background: rgba(0,0,0,0.6); 
+            color: var(--neon); cursor: pointer; font-family: var(--font-main); font-weight: bold; font-size: 0.9rem;
+            transition: 0.2s; text-align: left;
+        }
+        .comp-btn:hover { background: rgba(0, 255, 65, 0.1); border-color: var(--neon); }
+        .comp-btn.active-comp { background: var(--neon); color: black; box-shadow: 0 0 15px var(--neon); }
+        .desc-box { 
+            border: 1px dashed var(--neon); padding: 20px; 
+            background: rgba(0,10,0,0.8); margin-top: 20px; color: #eee; font-size: 1rem;
+            min-height: 120px; transition: border-color 0.5s;
+        }
+
+        footer { text-align: center; margin-top: 60px; padding: 20px; border-top: 1px solid var(--neon-dim); color: #666; font-size: 0.8rem; transition: border-color 0.5s; }
+        .author-link { 
+            color: var(--neon); text-decoration: none; font-weight: bold; 
+            border: 1px solid var(--neon); padding: 8px 15px; display: inline-block; margin-bottom: 10px;
+            transition: 0.3s; text-transform: uppercase; background: #000;
+        }
+        .author-link:hover { background: var(--neon); color: black; box-shadow: 0 0 15px var(--neon); transform: translateY(-3px); }
+        
+        .control-btn {
+            position: fixed; bottom: 29px; width: 45px; height: 45px;
+            border: 1px solid var(--neon); background: rgba(0, 0, 0, 0.8); color: var(--neon);
+            display: none; justify-content: center; align-items: center; border-radius: 50%;
+            cursor: pointer; z-index: 1000; box-shadow: 0 0 10px var(--neon-dim); transition: 0.3s; font-size: 1.2rem;
+        }
+        .control-btn:hover { box-shadow: 0 0 20px var(--neon); transform: scale(1.1); }
+        #music-btn { right: 5px; }
+        #color-btn { left: 5px; }
+        #chat-btn { left: 50%; transform: translateX(-50%); }
+        #chat-btn:hover { transform: translateX(-50%) scale(1.1); }
+        #chat-btn .chat-dot {
+            position: absolute; top: -2px; right: -2px; width: 10px; height: 10px;
+            background: var(--glitch-red); border-radius: 50%; box-shadow: 0 0 8px var(--glitch-red);
+            display: none;
+        }
+
+        #chat-marquee-bar {
+            position: fixed; bottom: 0; left: 0; right: 0; height: 28px;
+            background: linear-gradient(90deg, rgba(0,0,0,0.95), var(--glass), rgba(0,0,0,0.95));
+            border-top: 1px solid var(--neon-dim); border-bottom: 1px solid var(--neon-dim);
+            overflow: hidden; z-index: 999; display: none; align-items: center;
+            box-shadow: 0 0 12px rgba(0,255,0,0.15) inset;
+        }
+        #chat-marquee-bar.live { display: flex; }
+        #chat-marquee-track {
+            display: inline-flex; white-space: nowrap; will-change: transform;
+            animation: marquee-scroll 22s linear infinite;
+            font-family: var(--font-main); font-size: 0.78rem; color: var(--neon);
+            text-shadow: 0 0 6px var(--neon);
+        }
+        #chat-marquee-track .mq-item { padding: 0 28px; }
+        #chat-marquee-track .mq-ip { opacity: 0.6; color: var(--premium-gold); margin-right: 6px; }
+        @keyframes marquee-scroll {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+
+        #chat-panel {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%);
+            width: min(92vw, 380px); max-height: 70vh; z-index: 1100;
+            background: var(--glass); border: 1px solid var(--neon); border-bottom: none;
+            border-radius: 14px 14px 0 0; box-shadow: 0 0 30px rgba(0,255,0,0.25);
+            display: flex; flex-direction: column;
+            transition: transform 0.35s ease, width 0.4s cubic-bezier(.16,.84,.44,1), max-height 0.4s cubic-bezier(.16,.84,.44,1);
+            backdrop-filter: blur(6px);
+        }
+        #chat-panel.open { transform: translateX(-50%) translateY(0%); }
+        /* Mode "perlebar layar" — panel melebar & tinggi mentok ke atas (bottom:0 tetap jadi anchor) */
+        #chat-panel.wide { width: min(96vw, 720px); max-height: 92vh; }
+        @keyframes chat-panel-expand {
+            0% { transform: translateX(-50%) translateY(0%) scaleY(1); }
+            55% { transform: translateX(-50%) translateY(-1.5%) scaleY(1.015); }
+            100% { transform: translateX(-50%) translateY(0%) scaleY(1); }
+        }
+        #chat-panel.expanding { animation: chat-panel-expand 0.5s ease; transform-origin: bottom center; }
+        #chat-panel-head {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 14px; border-bottom: 1px solid var(--neon-dim);
+            font-family: var(--font-main); color: var(--neon); letter-spacing: 1px;
+        }
+        #chat-panel-head .chat-status { font-size: 0.65rem; opacity: 0.7; }
+        #chat-panel-head .chat-status .dot {
+            display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+            background: var(--neon); margin-right: 5px; box-shadow: 0 0 6px var(--neon);
+            animation: blink-cursor 1.4s step-end infinite;
+        }
+        #chat-close { background: none; border: none; color: var(--neon); font-size: 1rem; cursor: pointer; }
+        #chat-messages {
+            flex: 1; overflow-y: auto; padding: 10px 12px; font-family: var(--font-main);
+            font-size: 0.8rem; display: flex; flex-direction: column; gap: 8px; 
+            min-height: 100px; /* dikurangi agar list online tidak squish */
+        }
+        .chat-msg { border-left: 2px solid var(--neon-dim); padding-left: 8px; }
+        .chat-msg .chat-ip {
+            color: var(--premium-platinum); font-size: 0.68rem; opacity: 0.75; display: block;
+        }
+        .chat-msg .chat-text { color: var(--neon); word-break: break-word; }
+        .chat-text .chat-media {
+            display: block; max-width: 100%; max-height: 220px; margin-top: 6px;
+            border: 1px solid var(--neon-dim); border-radius: 6px; object-fit: cover;
+        }
+        .chat-text iframe.chat-yt {
+            width: 100%; max-width: 260px; height: auto; aspect-ratio: 16 / 9;
+            max-height: none; object-fit: initial; border: 1px solid var(--neon-dim);
+        }
+        /* Auto-sizing per jenis embed — jangan dipaksa 16:9 semua, tiap tipe beda proporsi asli */
+        .chat-text iframe.chat-yt-short { aspect-ratio: 9 / 16; max-width: 200px; }
+        .chat-text iframe.chat-spotify { aspect-ratio: auto; height: 152px; max-width: 300px; }
+        .chat-text iframe.chat-drive-doc { aspect-ratio: 4 / 3; max-width: 300px; }
+        .chat-text iframe.chat-maps { aspect-ratio: auto; height: 220px; max-width: 300px; }
+        .chat-text .chat-quote {
+            display: block; border-left: 2px solid var(--neon); padding-left: 8px;
+            margin: 3px 0; opacity: 0.8; font-style: italic;
+        }
+        .chat-text .chat-inline-quote {
+            font-style: italic; opacity: 0.85; quotes: none;
+        }
+        .chat-text a { color: var(--premium-gold); text-decoration: underline; }
+        #chat-input-row {
+    display: flex; align-items: flex-end; gap: 6px;
+    padding: 10px; border-top: 1px solid var(--neon-dim);
+}
+
+#chat-input-wrap {
+    flex: 1;
+    min-width: 0; 
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#chat-format-bar {
+    display: flex; gap: 6px;
+    padding: 0; 
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    touch-action: pan-x;
+}
+#chat-format-bar::-webkit-scrollbar { display: none; }
+              .fmt-btn {
+            flex: 0 0 auto; width: 30px; height: 29px; background: #000;
+            border: 1px solid var(--neon-dim); color: var(--neon); border-radius: 6px;
+            cursor: pointer; font-family: var(--font-main); font-size: 0.8rem;
+            display: flex; align-items: center; justify-content: center; transition: 0.15s;
+        }
+        .fmt-btn:active, .fmt-btn:hover { background: var(--neon); color: #000; border-color: var(--neon); }
+        .fmt-btn.on { background: var(--neon); color: #000; border-color: var(--neon); }
+        .media-settings-panel {
+            display: none; flex-direction: column; gap: 4px; padding: 8px;
+            border: 1px solid var(--neon-dim); border-radius: 8px; background: #000;
+            font-size: 0.72rem; color: var(--neon);
+        }
+        .media-settings-panel.open { display: flex; }
+        .media-settings-panel label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+        .chat-media-wrap { position: relative; display: inline-block; max-width: 100%; margin-top: 6px; }
+        .chat-media-wrap .chat-media { margin-top: 0; }
+        .media-mute-btn {
+            position: absolute; bottom: 6px; right: 6px; width: 24px; height: 24px;
+            border-radius: 50%; border: 1px solid var(--neon-dim); background: rgba(0,0,0,0.75);
+            color: var(--neon); font-size: 0.65rem; cursor: pointer; display: flex;
+            align-items: center; justify-content: center; z-index: 2;
+        }
+        .media-mute-btn.muted { color: var(--premium-platinum); opacity: 0.8; }
+        .chat-file-link {
+            display: flex; align-items: center; gap: 6px; margin-top: 6px; padding: 6px 10px;
+            border: 1px solid var(--neon-dim); border-radius: 6px; max-width: 100%;
+            width: fit-content; text-decoration: none !important;
+        }
+        .control-btn.sound-locked { pointer-events: none; opacity: 0.35; filter: grayscale(1); }
+        #chat-input {
+            flex: 1; background: #000; border: 1px solid var(--neon-dim); color: var(--neon);
+            font-family: var(--font-main); padding: 8px 10px; border-radius: 14px; outline: none; font-size: 0.85rem;
+            resize: none; overflow-y: auto; max-height: 110px; min-height: 36px; line-height: 1.35;
+            white-space: pre-wrap; word-wrap: break-word; transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        #chat-input:focus { border-color: var(--neon); box-shadow: 0 0 8px var(--neon-dim); }
+        #chat-send {
+            background: var(--neon-dim); border: none; color: #000; font-weight: bold;
+            padding: 0 14px; height: 36px; border-radius: 18px; cursor: pointer; transition: 0.2s; flex-shrink: 0;
+        }
+        #chat-send:hover { background: var(--neon); box-shadow: 0 0 10px var(--neon); }
+        #chat-send:disabled, #chat-send.cooldown {
+            background: #222; color: var(--neon-dim); cursor: not-allowed; opacity: 0.6; box-shadow: none;
+        }
+        #chat-send.cooldown::after {
+            content: attr(data-cd); font-size: 0.6rem; margin-left: 4px;
+        }
+
+        .privacy-wrap { position: relative; display: inline-block; }
+        .privacy-link {
+            color: var(--neon); text-decoration: none; font-weight: bold;
+            border: 1px solid var(--neon); padding: 8px 15px; display: inline-block; margin-bottom: 10px;
+            transition: 0.3s; text-transform: uppercase; background: #000; font-family: var(--font-main);
+            cursor: pointer; font-size: 0.8rem;
+        }
+        .privacy-link:hover { background: var(--neon); color: black; box-shadow: 0 0 15px var(--neon); transform: translateY(-3px); }
+        #privacy-board {
+            position: absolute; bottom: calc(100% + 12px); left: 50%; transform: translateX(-50%) translateY(8px);
+            width: min(86vw, 360px); background: var(--glass); border: 1px solid var(--glitch-blue);
+            border-radius: 8px; padding: 16px; text-align: left; font-size: 0.78rem; line-height: 1.5;
+            color: #ddd; box-shadow: 0 0 25px rgba(0,240,255,0.25); backdrop-filter: blur(6px);
+            opacity: 0; visibility: hidden; pointer-events: none; transition: 0.25s ease; z-index: 50;
+        }
+        #privacy-board.open { opacity: 1; visibility: visible; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+        #privacy-board h4 {
+            margin: 0 0 10px; color: var(--glitch-blue); font-size: 0.85rem; letter-spacing: 1px;
+            border-bottom: 1px solid rgba(0,240,255,0.3); padding-bottom: 6px;
+        }
+        #privacy-board ol { margin: 0; padding-left: 18px; }
+        #privacy-board li { margin-bottom: 8px; }
+        #privacy-board::after {
+            content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+            border: 7px solid transparent; border-top-color: var(--glitch-blue);
+        }
+
+        #chat-head-right { display: flex; align-items: center; gap: 10px; }
+        .chat-icon-btn {
+            background: none; border: 1px solid var(--neon-dim); color: var(--neon);
+            font-size: 0.8rem; cursor: pointer; width: 26px; height: 26px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; transition: 0.2s;
+        }
+        .chat-icon-btn:hover { border-color: var(--neon); box-shadow: 0 0 8px var(--neon); }
+        .chat-icon-btn.notif-on { color: #000; background: var(--neon); box-shadow: 0 0 10px var(--neon); border-color: var(--neon); }
+
+  /* ── HEADLINE SCRAMBLER BAR (pengganti #chat-myip-bar) ── */
+  #chat-headline-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 14px;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+      background: rgba(0, 240, 255, 0.04);
+      font-family: var(--font-main);
+      font-size: 0.6rem;
+      letter-spacing: 1.5px;
+      color: var(--glitch-blue);
+      overflow: hidden;
+      position: relative;
+      min-height: 22px;
+      cursor: default;
+  }
+
+  /* Scanline geser kiri-kanan di belakang teks */
+  #chat-headline-bar::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(0, 240, 255, 0.07) 50%,
+          transparent 100%
+      );
+      background-size: 200% 100%;
+      animation: headline-sweep 3s linear infinite;
+      pointer-events: none;
+  }
+
+  #chat-headline-text {
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 0 8px var(--glitch-blue);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+  }
+
+  /* State: sedang scramble → warna campur neon + biru */
+  #chat-headline-text.scrambling {
+      color: var(--neon);
+      text-shadow: 0 0 10px var(--neon);
+  }
+
+  /* State: teks baru muncul → fade-in slide dari bawah */
+  @keyframes headline-reveal {
+      0%   { opacity: 0; transform: translateY(4px); }
+      100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Glow pulse setelah teks settle */
+  @keyframes headline-glow-pulse {
+      0%, 100% { text-shadow: 0 0 6px var(--glitch-blue); }
+      50%       { text-shadow: 0 0 14px var(--glitch-blue), 0 0 28px rgba(0,240,255,0.4); }
+  }
+
+  /* Sweep cahaya latar */
+  @keyframes headline-sweep {
+      0%   { background-position: -100% 0; }
+      100% { background-position: 200% 0; }
+  }
+
+  /* Glitch micro-shift sesekali */
+  @keyframes headline-glitch {
+      0%   { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+      10%  { clip-path: inset(10% 0 60% 0); transform: translateX(-3px); }
+      20%  { clip-path: inset(40% 0 20% 0); transform: translateX(3px); }
+      30%  { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+      100% { clip-path: inset(0 0 100% 0); transform: translateX(0); }
+  }
+
+  /* Pseudo-element untuk efek glitch layer kedua */
+  #chat-headline-text::after {
+      content: attr(data-text);
+      position: absolute;
+      inset: 0;
+      color: var(--neon);
+      opacity: 0;
+      pointer-events: none;
+  }
+
+  #chat-headline-text.glitch-fire::after {
+      opacity: 0.6;
+      animation: headline-glitch 0.4s steps(1) forwards;
+  }
+        #chat-dashboard {
+            position: relative; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+            padding: 9px 14px; border-bottom: 1px solid var(--neon-dim);
+            background: linear-gradient(90deg, rgba(0,255,65,0.07), rgba(0,240,255,0.04), rgba(0,255,65,0.07));
+            cursor: pointer; user-select: none; overflow: hidden;
+        }
+        #chat-dashboard::before {
+            content: ''; position: absolute; inset: 0; opacity: 0.5; pointer-events: none;
+            background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.06) 50%, transparent 100%);
+            background-size: 100% 8px; animation: holo-scan 2.4s linear infinite;
+        }
+        #chat-dashboard:hover { background: linear-gradient(90deg, rgba(0,255,65,0.12), rgba(0,240,255,0.07), rgba(0,255,65,0.12)); }
+        #chat-net-label {
+            display: flex; align-items: center; gap: 5px; font-size: 0.58rem;
+            letter-spacing: 1px; color: var(--glitch-blue); opacity: 0.85; text-transform: uppercase;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;
+        }
+        #chat-online-left {
+            display: flex; align-items: center; gap: 7px; color: var(--neon); position: relative; z-index: 1;
+        }
+        .dot-online {
+            display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+            background: var(--neon); box-shadow: 0 0 6px var(--neon); animation: blink-cursor 1.4s step-end infinite;
+        }
+        #chat-online-count {
+            font-weight: bold; font-size: 0.78rem; letter-spacing: 0.5px;
+            text-shadow: 0 0 8px rgba(0,255,65,0.6);
+        }
+        #chat-online-count .num {
+            display: inline-block; min-width: 14px; text-align: center;
+            transition: transform 0.25s ease;
+        }
+        #chat-online-count.bump .num { animation: num-bump 0.35s ease; }
+        @keyframes num-bump { 0% { transform: scale(1); } 50% { transform: scale(1.5); color: var(--glitch-blue); } 100% { transform: scale(1); } }
+        #chat-online-updated { font-size: 0.56rem; opacity: 0.45; margin-left: 4px; letter-spacing: 0.5px; }
+        #chat-online-chevron { transition: transform 0.25s; opacity: 0.7; font-size: 0.65rem; position: relative; z-index: 1; }
+        #chat-dashboard.expanded #chat-online-chevron { transform: rotate(180deg); }
+
+        #chat-online-list {
+            max-height: 0; overflow: hidden; transition: max-height 0.35s ease;
+            background:
+                radial-gradient(circle at 10% 0%, rgba(0,255,65,0.05), transparent 60%),
+                rgba(0,6,0,0.92);
+            border-bottom: 1px solid var(--neon-dim);
+              }
+        #chat-online-list.expanded { 
+            max-height: 160px; 
+            overflow-y: auto; 
+            overflow-x: hidden;
+            /* Scrollbar tipis agar tidak makan lebar */
+            scrollbar-width: thin;
+            scrollbar-color: var(--neon-dim) transparent;
+        }
+        #chat-online-list.expanded::-webkit-scrollbar { width: 4px; }
+        #chat-online-list.expanded::-webkit-scrollbar-track { background: transparent; }
+        #chat-online-list.expanded::-webkit-scrollbar-thumb { background: var(--neon-dim); border-radius: 4px; }
+        .chat-online-item {
+            display: flex; align-items: center; gap: 10px; padding: 7px 14px;
+            font-size: 0.74rem; color: var(--neon); border-bottom: 1px solid rgba(0,255,65,0.08);
+            animation: online-item-in 0.3s ease;
+        }
+        @keyframes online-item-in { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: translateX(0); } }
+        .chat-online-avatar {
+            width: 24px; height: 24px; min-width: 24px; border-radius: 50%;
+            background: rgba(0,255,65,0.08); border: 1px solid var(--neon-dim);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--glitch-blue); font-size: 0.68rem; position: relative;
+        }
+        .chat-online-avatar::after {
+            content: ''; position: absolute; bottom: -1px; right: -1px; width: 7px; height: 7px;
+            border-radius: 50%; background: var(--neon); box-shadow: 0 0 5px var(--neon);
+            border: 1px solid #000;
+        }
+        .chat-online-item .label { display: flex; flex-direction: column; gap: 1px; }
+        .chat-online-item .label small { font-size: 0.58rem; opacity: 0.5; letter-spacing: 0.5px; }
+        .chat-online-item .you-tag {
+            color: #000; background: var(--glitch-red); font-weight: bold; margin-left: auto;
+            font-size: 0.58rem; padding: 2px 7px; border-radius: 10px; letter-spacing: 0.5px;
+            box-shadow: 0 0 8px rgba(255,0,60,0.5);
+        }
+
+        #chat-toast-stack {
+            position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
+            z-index: 1300; display: flex; flex-direction: column; gap: 8px;
+            width: min(92vw, 360px); pointer-events: none;
+        }
+        .chat-toast {
+            background: var(--glass); border: 1px solid var(--neon); border-radius: 8px;
+            padding: 10px 14px; box-shadow: 0 0 20px rgba(0,255,65,0.3); backdrop-filter: blur(6px);
+            font-family: var(--font-main); color: var(--neon); font-size: 0.78rem;
+            animation: toast-in 0.3s ease, toast-out 0.3s ease 3.7s forwards;
+            cursor: pointer; pointer-events: auto;
+        }
+        .chat-toast .t-ip { color: var(--glitch-blue); font-size: 0.68rem; display: block; margin-bottom: 3px; opacity: 0.85; }
+        @keyframes toast-in { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes toast-out { from { opacity: 1; } to { opacity: 0; transform: translateY(-10px); } }
+
+        @keyframes chat-btn-pulse {
+            0%, 100% { box-shadow: 0 0 10px var(--neon-dim); }
+            50% { box-shadow: 0 0 25px var(--glitch-red), 0 0 10px var(--neon); }
+        }
+        #chat-btn.pulse-alert { animation: chat-btn-pulse 0.6s ease 2; }
+        @media (max-width: 480px) {
+            #chat-panel { width: 100vw; border-radius: 14px 14px 0 0; }
+            /* chat-net-label tetap tampil, tapi lebih pendek di HP */
+            #chat-net-label { max-width: 80px; font-size: 0.52rem; }
+            #chat-net-label .net-label-text { display: none; }
+        }
+
+
+        #chat-online-list {
+            flex-shrink: 0 !important;
+        }
+#system-log { 
+    color: var(--neon) !important; 
+    opacity: 0.65; 
+    font-family: var(--font-main); 
+    margin: 15px 0; 
+    font-size: 0.9rem; 
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+#gallery-lightbox {
+    display: none;
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.92);
+    justify-content: center; align-items: center;
+    flex-direction: column;
+    backdrop-filter: blur(6px);
+    animation: fadeIn 0.2s ease;
+}
+#gallery-lightbox.open { display: flex; }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+#lb-img {
+    max-width: 90vw; max-height: 75vh;
+    border: 1px solid var(--neon-dim);
+    box-shadow: 0 0 40px rgba(0,255,65,0.2);
+    object-fit: contain;
+    transition: opacity 0.2s;
+}
+#lb-caption {
+    margin-top: 16px;
+    color: var(--neon);
+    font-family: var(--font-main);
+    font-size: 0.85rem;
+    letter-spacing: 3px;
+    text-align: center;
+    text-shadow: 0 0 8px var(--neon);
+}
+#lb-close {
+    position: absolute; top: 20px; right: 24px;
+    color: var(--neon); font-size: 1.8rem; cursor: pointer;
+    background: none; border: none; font-family: var(--font-main);
+    transition: 0.2s; line-height: 1;
+}
+#lb-close:hover { color: #ff003c; text-shadow: 0 0 10px #ff003c; }
+#lb-nav {
+    display: flex; gap: 20px; margin-top: 20px;
+}
+.lb-nav-btn {
+    background: transparent; border: 1px solid var(--neon-dim);
+    color: var(--neon); font-family: var(--font-main);
+    padding: 8px 20px; cursor: pointer; font-size: 0.9rem;
+    letter-spacing: 2px; transition: 0.2s;
+}
+.lb-nav-btn:hover { background: var(--neon); color: #000; }
+#lb-counter {
+    color: var(--neon-dim); font-size: 0.7rem;
+    letter-spacing: 2px; margin-top: 10px;
+    font-family: var(--font-main);
+}
+
+.gallery-toolbar {
+    display: flex; justify-content: flex-end; align-items: center;
+    margin: -10px 0 15px 0;
+}
+
+#hologram-upload-btn {
+    position: relative;
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 10px 22px;
+    background: rgba(0, 10, 5, 0.55);
+    border: 1px solid var(--neon);
+    color: var(--neon);
+    font-family: var(--font-main);
+    font-weight: bold; font-size: 0.85rem;
+    letter-spacing: 2px; text-transform: uppercase;
+    cursor: pointer; overflow: hidden;
+    border-radius: 4px;
+    backdrop-filter: blur(4px);
+    transition: 0.3s;
+    animation: holo-rainbow-pulse 4s linear infinite, holo-float 3s ease-in-out infinite;
+}
+#hologram-upload-btn i { animation: holo-icon-spin 6s linear infinite; }
+#hologram-upload-btn:hover {
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 0 25px var(--neon), 0 0 50px rgba(0,255,65,0.3);
+}
+
+#hologram-upload-btn::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.12) 50%, transparent 100%);
+    background-size: 100% 6px;
+    animation: holo-scan 1.8s linear infinite;
+    pointer-events: none;
+}
+
+#hologram-upload-btn::after {
+    content: '';
+    position: absolute; top: -50%; left: -60%;
+    width: 40%; height: 200%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
+    transform: rotate(20deg);
+    animation: holo-sweep 3.2s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes holo-scan {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 60px; }
+}
+@keyframes holo-sweep {
+    0%   { left: -60%; }
+    50%  { left: 130%; }
+    100% { left: 130%; }
+}
+@keyframes holo-float {
+    0%, 100% { transform: translateY(0px); }
+    50%      { transform: translateY(-4px); }
+}
+@keyframes holo-icon-spin {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes holo-rainbow-pulse {
+    0%   { border-color: var(--neon);     box-shadow: 0 0 10px var(--neon), inset 0 0 10px rgba(0,255,65,0.08); }
+    25%  { border-color: var(--glitch-blue); box-shadow: 0 0 14px var(--glitch-blue), inset 0 0 10px rgba(0,240,255,0.08); }
+    50%  { border-color: var(--glitch-red); box-shadow: 0 0 14px var(--glitch-red), inset 0 0 10px rgba(255,0,60,0.08); }
+    75%  { border-color: #bf00ff;          box-shadow: 0 0 14px #bf00ff, inset 0 0 10px rgba(191,0,255,0.08); }
+    100% { border-color: var(--premium-platinum);      box-shadow: 0 0 10px var(--premium-white), inset 0 0 10px rgba(0,255,65,0.08); }
+}
+
+#upload-modal {
+    display: none;
+    position: fixed; inset: 0; z-index: 300;
+    background: rgba(0,0,0,0.85);
+    justify-content: center; align-items: center;
+    backdrop-filter: blur(8px);
+    animation: fadeIn 0.25s ease;
+    padding: 16px;
+}
+#upload-modal.open { display: flex; }
+
+.upload-panel {
+    position: relative;
+    width: 100%; max-width: 420px;
+    background: rgba(0, 12, 6, 0.7);
+    border: 1px solid var(--neon);
+    border-radius: 6px;
+    padding: 28px 24px;
+    box-shadow: 0 0 40px rgba(0,255,65,0.25), inset 0 0 30px rgba(0,255,65,0.04);
+    animation: holo-rainbow-pulse 4s linear infinite, slideUp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+}
+
+.upload-panel::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.06) 50%, transparent 100%);
+    background-size: 100% 8px;
+    animation: holo-scan 2.2s linear infinite;
+    pointer-events: none;
+}
+
+.upload-panel h3 {
+    margin: 0 0 6px 0; font-size: 1.1rem; letter-spacing: 3px; color: #fff;
+    text-shadow: 0 0 10px var(--neon);
+    display: flex; align-items: center; gap: 10px;
+}
+.upload-panel .upload-sub {
+    font-size: 0.7rem; opacity: 0.65; letter-spacing: 1px; margin-bottom: 18px; display: block;
+}
+
+#upload-close {
+    position: absolute; top: 14px; right: 16px;
+    background: none; border: none; color: var(--neon);
+    font-size: 1.4rem; cursor: pointer; font-family: var(--font-main);
+    transition: 0.2s; line-height: 1; z-index: 2;
+}
+#upload-close:hover { color: var(--glitch-red); text-shadow: 0 0 10px var(--glitch-red); }
+
+.upload-field { margin-bottom: 16px; position: relative; z-index: 1; }
+.upload-field label {
+    display: block; font-size: 0.7rem; letter-spacing: 2px; margin-bottom: 6px;
+    color: var(--neon); opacity: 0.85; text-transform: uppercase;
+}
+.upload-field input[type="password"],
+.upload-field input[type="text"] {
+    width: 100%; padding: 10px 12px;
+    background: rgba(0,0,0,0.6); border: 1px solid var(--neon-dim);
+    color: var(--neon); font-family: var(--font-main); font-size: 0.9rem;
+    letter-spacing: 2px; border-radius: 3px; outline: none;
+    transition: 0.2s;
+}
+.upload-field input:focus { border-color: var(--neon); box-shadow: 0 0 12px rgba(0,255,65,0.3); }
+
+.upload-dropzone {
+    border: 1.5px dashed var(--neon-dim); border-radius: 4px;
+    padding: 22px 10px; text-align: center; cursor: pointer;
+    background: rgba(0,0,0,0.3); transition: 0.2s; position: relative; z-index: 1;
+}
+.upload-dropzone:hover, .upload-dropzone.dragover {
+    border-color: var(--neon); background: rgba(0,255,65,0.06);
+    box-shadow: 0 0 15px rgba(0,255,65,0.15);
+}
+.upload-dropzone i { font-size: 1.8rem; display: block; margin-bottom: 8px; animation: pulse 2s infinite; }
+.upload-dropzone span { font-size: 0.75rem; letter-spacing: 1px; opacity: 0.8; }
+#upload-filename {
+    margin-top: 8px; font-size: 0.7rem; color: #fff; letter-spacing: 1px; word-break: break-all;
+}
+
+.upload-caption-field { margin-top: 16px; }
+
+#upload-submit {
+    width: 100%; margin-top: 20px; padding: 12px;
+    background: rgba(0,255,65,0.08); border: 1px solid var(--neon);
+    color: var(--neon); font-family: var(--font-main); font-weight: bold;
+    letter-spacing: 3px; text-transform: uppercase; font-size: 0.9rem;
+    cursor: pointer; border-radius: 3px; transition: 0.2s; position: relative; z-index: 1;
+}
+#upload-submit:hover { background: var(--neon); color: #000; box-shadow: 0 0 25px var(--neon); }
+#upload-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+#upload-status {
+    margin-top: 14px; font-size: 0.75rem; letter-spacing: 1px;
+    text-align: center; min-height: 18px; position: relative; z-index: 1;
+}
+#upload-status.error { color: var(--glitch-red); text-shadow: 0 0 8px var(--glitch-red); }
+#upload-status.success { color: var(--neon); text-shadow: 0 0 8px var(--neon); }
+#upload-status.loading { color: var(--glitch-blue); text-shadow: 0 0 8px var(--glitch-blue); }
+
+#upload-progress-wrap {
+    width: 100%; height: 4px; background: rgba(255,255,255,0.08);
+    border-radius: 2px; margin-top: 10px; overflow: hidden; display: none; position: relative; z-index: 1;
+}
+#upload-progress-bar {
+    height: 100%; width: 0%; background: var(--neon);
+    box-shadow: 0 0 10px var(--neon); transition: width 0.3s ease;
+}
+
+@media (max-width: 480px) {
+    .upload-panel { padding: 22px 16px; }
+    #hologram-upload-btn { padding: 8px 16px; font-size: 0.75rem; }
+}
+
+.chat-msg {
+    border-left: 2px solid var(--neon-dim);
+    padding-left: 8px;
+    margin-bottom: 4px;
+}
+.chat-msg .chat-ip {
+    color: var(--premium-platinum);
+    font-size: 0.68rem;
+    opacity: 0.75;
+    display: block;
+    margin-bottom: 2px; 
+}
+
+.bumi-muter-3d {
+  display: inline-block !important;
+  transform-style: preserve-3d;
+  animation: spin3d 4s linear infinite;
+}
+
+@keyframes spin3d {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+
+
+    .property-credit {
+        font-size: 12px;
+        color: #888888;
+        margin-top: 10px;
+        text-align: center;
+        font-style: italic;
+    }
+
+    .property-credit a {
+        color: #0088cc;
+        text-decoration: none;
+        font-style: normal;
+        font-weight: bold;
+        transition: color .25s var(--ease);
+    }
+
+    .property-credit a:hover {
+        text-decoration: underline;
+    }
+
+    </style>
+</head>
+<body>
+
+    <audio id="bgm" src="bgm.mp3" preload="none" loop></audio>
+    <canvas id="matrix-bg"></canvas>
+    <div class="scanlines"></div>
+
+    <div id="gallery-lightbox">
+        <button id="lb-close" onclick="GalleryViewer.close()">✕</button>
+        <img id="lb-img" src="" alt="">
+        <div id="lb-caption"></div>
+        <div id="lb-nav">
+            <button class="lb-nav-btn" onclick="GalleryViewer.prev()">◀ PREV</button>
+            <button class="lb-nav-btn" onclick="GalleryViewer.next()">NEXT ▶</button>
+        </div>
+        <div id="lb-counter"></div>
+    </div>
+
+    <div id="overlay">
+        <div class="lock-icon">🔒</div>
+        <h2 style="margin: 0; color: white; letter-spacing: 4px; font-weight: 400;">ENCRYPTED CONNECTION</h2>
+        <p style="margin-top: 5px; color: var(--neon);">SMK NURUL FALAH </p>
+        <button class="btn-enter" onclick="System.enter()">BUKA AKSES DATA</button>
+    </div>
+
+    <div id="music-btn" class="control-btn" onclick="System.toggleMusic()">
+        <span id="music-icon">🔊</span>
+    </div>
+    <div id="color-btn" class="control-btn" onclick="System.toggleColor()">
+        <span id="color-icon">🎨</span>
+    </div>
+    <div id="chat-btn" class="control-btn" onclick="GlobalChat.toggle()" title="Global Live Chat">
+        <i class="fa-solid fa-comments"></i>
+        <span class="chat-dot" id="chat-dot"></span>
+    </div>
+
+    <div id="chat-marquee-bar">
+        <div id="chat-marquee-track">
+            <span class="mq-item">// MENGHUBUNGKAN KE GLOBAL CHAT...</span>
+        </div>
+    </div>
+
+    <div id="chat-toast-stack"></div>
+
+    <div id="chat-panel">
+        <div id="chat-panel-head">
+
+<span class="bumi-muter-3d">
+    <i class="fa-solid fa-earth"></i></span>
+            <span>GLOBAL LIVE CHAT ANONIM </span>
+            <div id="chat-head-right">
+                <button id="chat-notif-toggle" class="chat-icon-btn" onclick="GlobalChat.toggleNotif()" title="Toggle Notifikasi"><i class="fa-solid fa-bell-slash"></i></button>
+                <button id="chat-close" onclick="GlobalChat.toggle()">✕</button>
+            </div>
+        </div>
+          <div id="chat-headline-bar">
+    <span id="chat-headline-text"></span>
+  </div>
+        <div id="chat-dashboard" onclick="GlobalChat.toggleOnlineList()">
+            <div id="chat-online-left">
+                <span class="dot-online"></span>
+                <span id="chat-online-count"><span class="num">0</span> ONLINE</span>
+                <span id="chat-online-updated"></span>
+            </div>
+            <span id="chat-net-label"><i class="fa-solid fa-tower-broadcast"></i> <span class="net-label-text">JARINGAN AKTIF</span></span>
+            <i class="fa-solid fa-chevron-down" id="chat-online-chevron"></i>
+        </div>
+        <div id="chat-online-list"></div>
+        <div id="chat-messages"><div class="chat-msg"><span class="chat-text">// Memuat pesan...</span></div></div>
+        
+        <div id="chat-input-row">
+    <div id="chat-input-wrap">
+        <div id="chat-format-bar">
+            <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('bold')" title="Tebal"><b>B</b></button>
+            <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('underline')" title="Garis bawah"><u>U</u></button>
+            <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('strike')" title="Coret"><s>S</s></button>
+            <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('quote-inline')" title='Kutip "teks"'>&quot;</button>
+            <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('link')" title="Tautan [teks](url)"><i class="fa-solid fa-link"></i></button>
+            <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('media')" title="Gambar/GIF/Video [alt]{url}"><i class="fa-solid fa-image"></i></button>
+            <button type="button" class="fmt-btn" id="media-settings-btn" onclick="GlobalChat.toggleMediaSettings()" title="Pengaturan pemutaran media"><i class="fa-solid fa-gear"></i></button>
+        </div>
+        <div id="media-settings-panel" class="media-settings-panel">
+            <label><input type="checkbox" id="ms-autoplay" onchange="GlobalChat.updateMediaPref('autoplay', this.checked)"> Autoplay video</label>
+            <label><input type="checkbox" id="ms-loop" onchange="GlobalChat.updateMediaPref('loop', this.checked)"> Loop video</label>
+            <label><input type="checkbox" id="ms-sound" onchange="GlobalChat.updateMediaPref('soundDefault', this.checked)"> Suara default </label>
+            <label><input type="checkbox" id="ms-widescreen" onchange="GlobalChat.toggleWideMode(this.checked)"> Perlebar panel chat</label>
+            <label><input type="checkbox" id="ms-matrix" onchange="GlobalChat.toggleMatrixRain(this.checked)"> Animasi rain matrix</label>
+        </div>
+        <textarea id="chat-input" rows="1" maxlength="1024" placeholder="Tulis pesan ke semua orang..." oninput="GlobalChat.autoGrow(this)"></textarea>
+    </div>
+    <button id="chat-send" onclick="GlobalChat.send()"><i class="fa-solid fa-paper-plane"></i></button>
+</div>
+    </div>
+
+    <div class="container" id="main-content">
+        <header>
+            <div class="glitch-wrapper">
+                <h1 class="glitch" data-text="SMK NURUL FALAH">SMK NURUL FALAH</h1>
+            </div>
+            <span id="subtitle-text" class="subtitle" style="cursor: pointer; user-select: none;">(BDP) PEMASARAN</span>
+        </header>
+
+        <nav>
+            <button class="nav-btn active" onclick="System.nav('home', this)">BERANDA</button>
+            <button class="nav-btn" onclick="System.nav('visi', this)">VISI & MISI</button>
+            <button class="nav-btn" onclick="System.nav('prodi', this)">MATERI</button>
+            <button class="nav-btn" onclick="System.nav('gallery', this)">GALERI</button>
+            <a class="nav-btn nav-btn-secondary" href="https://smknufa-bdp.vercel.app/blog" target="_blank" rel="noopener noreferrer" onclick="AudioFX.click()">BLOG</a>
+        </nav>
+
+        <div id="home" class="slide active">
+            <div class="slide-hud">Jaringan : <span class="lat-val">--</span>ms | SYSTEM-RUNNING</div>
+            <div id="home-content"></div> 
+        </div>
+
+        <div id="visi" class="slide">
+            <div class="slide-hud">Jaringan : <span class="lat-val">--</span>ms | SYSTEM-RUNNING</div>
+            <div id="visi-content"></div> 
+        </div>
+
+        <div id="prodi" class="slide">
+            <div class="slide-hud">Jaringan : <span class="lat-val">--</span>ms | SYSTEM-RUNNING</div>
+            <h2>KOMPETENSI KEAHLIAN</h2>
+            <div class="comp-grid">
+                <button class="comp-btn" onclick="System.detail(this, 'dm')">DIGITAL MARKETING</button>
+                <button class="comp-btn" onclick="System.detail(this, 'rb')">RETAIL BUSINESS</button>
+                <button class="comp-btn" onclick="System.detail(this, 'ps')">PUBLIC SPEAKING</button>
+                <button class="comp-btn" onclick="System.detail(this, 'kwu')">PRODUK KREATIF</button>
+            </div>
+            <div id="desc-output" class="desc-box">// MENUNGGU PERINTAH...</div>
+        </div>
+
+        <div id="gallery" class="slide">
+            <div class="slide-hud">Jaringan : <span class="lat-val">--</span>ms | DATABASE-SYNCED</div>
+            <h2>GALERI HIGHLIGHT</h2>
+            <div class="gallery-toolbar">
+                <button id="hologram-upload-btn" onclick="UploadSystem.open()">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> UPLOAD FOTO
+                </button>
+            </div>
+            <div class="gallery-grid" id="gallery-container"></div>
+        </div>
+
+        <div id="upload-modal">
+            <div class="upload-panel">
+                <button id="upload-close" onclick="UploadSystem.close()">✕</button>
+                <h3><i class="fa-solid fa-satellite-dish"></i> UPLINK FOTO</h3>
+                <span class="upload-sub">⚠️ Masukan kode akses untuk mengirimkan foto ke server</span>
+
+                <div class="upload-field">
+                    <label for="upload-password">Kode Akses</label>
+                    <input type="password" id="upload-password" placeholder="••••••••" autocomplete="off">
+                </div>
+
+                <div class="upload-field">
+                    <label>File Foto</label>
+                    <div class="upload-dropzone" id="upload-dropzone" onclick="document.getElementById('upload-file').click()">
+                        <i class="fa-solid fa-image"></i>
+                        <span>Tap / Seret Foto ke Sini</span>
+                        <div id="upload-filename"></div>
+                    </div>
+                    <input type="file" id="upload-file" accept="image/*" style="display:none">
+                </div>
+
+                <div class="upload-field upload-caption-field">
+                    <label for="upload-caption">Caption Foto</label>
+                    <input type="text" id="upload-caption" placeholder="Masukan deskripsi caption" maxlength="80">
+                </div>
+
+                <button id="upload-submit" onclick="UploadSystem.submit()">
+                    <i class="fa-solid fa-bolt"></i> KIRIM KE SERVER
+                </button>
+
+                <div id="upload-progress-wrap"><div id="upload-progress-bar"></div></div>
+                <div id="upload-status"></div>
+            </div>
+        </div>
+
+        <footer>
+<div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
+    
+    <a href="https://genzz-xyz.github.io/Snake-game/" target="_blank" class="author-link" onclick="AudioFX.click()" 
+       style="border-color: #bf00ff !important; color: #bf00ff !important; box-shadow: 0 0 10px rgba(191, 0, 255, 0.3);">
+        <i class="fa-solid fa-gamepad"></i> GAME WEB
+    </a>
+
+    <a id="btn-pembuat" href="https://wa.me/6283199753711?text=halo%2c%20Arlingga" target="_blank" class="author-link" onclick="AudioFX.click()"
+       style="border-color: #25D366 !important; color: #25D366 !important; box-shadow: 0 0 10px rgba(37, 211, 102, 0.3);">
+        <i class="fa-brands fa-whatsapp"></i> PEMBUAT
+    </a>
+
+    <a href="https://www.instagram.com/smknurulfalahmargatiga?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" class="author-link" onclick="AudioFX.click()"
+       style="border-color: #E1306C !important; color: #E1306C !important; box-shadow: 0 0 10px rgba(225, 48, 108, 0.3);">
+        <i class="fa-brands fa-instagram"></i> INSTAGRAM SMK
+    </a>
+
+    <a href="https://www.tiktok.com/@smknurulfalahmargatiga?_r=1&_t=ZS-97ETDx7ktWM" target="_blank" class="author-link" onclick="AudioFX.click()"
+       style="border-color: #ffffff !important; color: #ffffff !important; box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);">
+        <i class="fa-brands fa-tiktok"></i> TIKTOK SMK
+    </a>
+
+    <a href="https://www.tiktok.com/@osis_smknurulfalah?_r=1&_t=ZS-97ETGpLHi1n" target="_blank" class="author-link" onclick="AudioFX.click()"
+       style="border-color: #ffffff !important; color: #ffffff !important; box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);">
+       <i class="fa-brands fa-tiktok"></i> TIKTOK OSIS
+    </a>
+</div>
+<div id="system-log">RESPONDING.....</div>
+
+<div class="privacy-wrap" style="margin-top: 12px;">
+    <span class="privacy-link" id="privacy-trigger" onclick="PrivacyBoard.toggle(event)">
+        <i class="fa-solid fa-shield-halved"></i> PRIVACY POLICY
+    </span>
+    <div id="privacy-board">
+        <h4><i class="fa-solid fa-lock"></i> KEBIJAKAN PRIVASI</h4>
+        <ul >
+            <li>Penggunaan alamat IP (Internet Protocol) hanya  untuk keperluan identifikasi (ID) pengunjung, bukan untuk mencuri ataupun menyalahgunakan data pribadi.</li>
+            <li>Dengan menggunakan website ini, Anda setuju bahwa tampilan data merupakan bagian dari konsep estetika "hacker" untuk mempresentasikan transparansi proses transfer data, bukan untuk tujuan pengintaian.</li>
+            <li>Data yang dikumpulkan tidak akan dijual, dibagikan, atau dipindahtangankan ke pihak ketiga mana pun untuk tujuan komersial.</li>
+            <li>Pengguna bertanggung jawab atas setiap konten yang dikirim melalui fitur chat dan wajib menjaga etika berkomunikasi yang baik dan sopan.</li>
+        </ul>
+    </div>
+</div>
+
+<div style="text-align: center; color: var(--neon); font-family: var(--font-main); opacity: 0.8; font-size: 0.9rem; letter-spacing: 1px; margin-bottom: 4px;">
+    situs prototype karya murid smk nurul falah untuk komunitas ✨
+</div>
+<div style="text-align: center; color: var(--neon); font-family: var(--font-main); margin-top: 16px; font-size: 0.85rem; letter-spacing: 1px;">
+    &copy; 2026 SMK NURUL FALAH. All Rights Reserved.
+</div>
+<div class="property-credit">
+        Intellectual Property of <a href="https://tiktok.com/@arlingkin" target="_blank" rel="noopener noreferrer">arlingkin</a>
+    </div>
+    </footer>
+
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+        <script>
+    (function () {
+      'use strict';
+
+      // ── Konfigurasi ───────────────────────────────────────
+      const NOTIFY_ENDPOINT  = '/api/notify';
+      const NOTIFY_SECRET    = '%%NOTIFY_SECRET%%';
+      const THROTTLE_MS      = 10000; // 10 detik antar trigger (anti-spam ramai)
+      const FETCH_TIMEOUT_MS = 6000;  // timeout fetch ke /api/notify
+      const MAX_RETRY        = 2;     // retry kalau fetch gagal
+
+      // ── State internal ────────────────────────────────────
+      let lastTriggeredTs  = 0; // ts pesan terakhir yang sudah dinotif
+      let lastTriggerTime  = 0; // waktu terakhir trigger (throttle)
+      let _oneSignalReady  = false;
+
+      // ── OneSignal init ────────────────────────────────────
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function (OneSignal) {
+        try {
+          await OneSignal.init({
+            appId:         '24018ed8-5d9e-4e5e-b651-f8e94bf58a53',
+            safari_web_id: 'web.onesignal.auto.5a4f7f6e-eec9-48b6-8a5c-3683e8870b3c',
+            notifyButton:  { enable: false },
+            serviceWorkerParam: { scope: '/' },
+serviceWorkerPath:  '/sw.js',
+          });
+          _oneSignalReady = true;
+        } catch (e) {
+          console.warn('[NufaNotify] OneSignal init gagal:', e.message);
+        }
+      });
+
+      // ── Fetch dengan timeout + retry ──────────────────────
+      async function fetchWithRetry(url, options, retries) {
+        for (let i = 0; i <= retries; i++) {
+          const controller = new AbortController();
+          const tid = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+          try {
+            const res = await fetch(url, { ...options, signal: controller.signal });
+            clearTimeout(tid);
+            return res;
+          } catch (e) {
+            clearTimeout(tid);
+            if (i === retries) throw e;
+            await new Promise(r => setTimeout(r, 1000 * (i + 1))); // backoff 1s, 2s
+          }
+        }
+      }
+
+      // ── BroadcastChannel helper ───────────────────────────
+      function broadcastLocal(payload) {
+        if (typeof BroadcastChannel === 'undefined') return;
+        try {
+          const bc = new BroadcastChannel('nufa-realtime');
+          bc.postMessage({ type: 'NEW_CHAT_MESSAGE', payload });
+          bc.close();
+        } catch (_) {}
+      }
+
+      // ── NufaNotify public API ─────────────────────────────
+      window.NufaNotify = {
+
+        async trigger(m) {
+          // Guard: validasi payload
+          if (!m || !m.text || !m.ts) return;
+
+          // Guard: jangan notif pesan yang sama dua kali
+          if (m.ts <= lastTriggeredTs) return;
+
+          // Guard: throttle — kalau tab lain sudah trigger dalam 10 detik, skip
+          const now = Date.now();
+          if (now - lastTriggerTime < THROTTLE_MS) {
+            // Tetap broadcast lokal meskipun throttled
+            broadcastLocal(m);
+            return;
+          }
+
+          // Update state sebelum async agar tab lain yang masuk bersamaan ikut throttled
+          lastTriggeredTs = m.ts;
+          lastTriggerTime = now;
+
+          // Path A: OneSignal via /api/notify (push lintas device + background)
+          if (navigator.onLine) {
+            try {
+              const res = await fetchWithRetry(
+                NOTIFY_ENDPOINT,
+                {
+                  method:  'POST',
+                  headers: { 'Content-Type': 'application/json', 'x-notify-secret': NOTIFY_SECRET },
+                  body:    JSON.stringify({ ip: m.ip, text: m.text, ts: m.ts }),
+                },
+                MAX_RETRY
+              );
+              if (!res.ok) console.warn('[NufaNotify] api/notify HTTP:', res.status);
+            } catch (e) {
+              // Offline atau timeout → BC saja sudah cukup untuk tab aktif
+              console.warn('[NufaNotify] api/notify gagal (offline/timeout):', e.message);
+            }
+          }
+
+          // Path B: BroadcastChannel — selalu jalan (notif antar tab aktif)
+          broadcastLocal(m);
+        },
+
+        // Dipanggil saat user aktifkan tombol notif
+        async requestPermission() {
+          if (!_oneSignalReady) {
+            console.warn('[NufaNotify] OneSignal belum siap.');
+            return false;
+          }
+          try {
+            await OneSignal.Notifications.requestPermission();
+            return OneSignal.Notifications.permission;
+          } catch (e) {
+            console.warn('[NufaNotify] requestPermission gagal:', e.message);
+            return false;
+          }
+        },
+
+        // Cek status subscribe (untuk sinkronisasi tombol bell)
+        async isSubscribed() {
+          if (!_oneSignalReady) return false;
+          try { return !!(await OneSignal.User.PushSubscription.optedIn); }
+          catch { return false; }
+        },
+      };
+
+    })();
+    
+        
+        const GALLERY_API_URL = "https://script.google.com/macros/s/AKfycbyQivqt0OaXD9inSftMHkrXVDkQq719Tf1ok0wVkjgCzNWc1_3KMRseKV4iyh-UOPcNxQ/exec";
+        let DATABASE_FOTO = [];
+
+        const DATABASE_CONTENT = {
+            home: `
+                <h2>PROFIL SEKOLAH</h2>
+                <p>Selamat datang di Sistem Informasi Digital <strong>SMK NURUL FALAH</strong>. Website ini didedikasikan sebagai media dokumentasi, informasi, dan portofolio digital siswa-siswi <strong>SMK Nurul Falah</strong>.</p>
+                <br>
+                <p style="flex">SMK Nurul Falah Berlokasi di jalan raya kauman, Desa Gedung wani timur, Margatiga, Lampung Timur, Provinsi LAMPUNG. </p>
+<p style="center">NOMOR NPSN	:	10814959.</p>
+<p style="center">TERAKREDITASI  :   BAN-SM Nomor : 1857/BAN-SM/SK/2022.</p>
+<p>Di bawah naungan Yayasan Pendidikan Islam Nurul Falah, berkomitmen mencetak generasi muda yang kompeten,terampil dan bertanggung jawab serta memiliki akhlak mulia sesuai nilai pancasila.</p>
+                <div class="marquee-container">
+                    <div class="marquee-clip">
+                        <div class="marquee-content">SMK NUFA JAYA &nbsp;///&nbsp; BISA - HEBAT - DISIPLIN - KOMPETEN - SIAP KERJA &nbsp;///&nbsp; SYSTEM ONLINE &nbsp;///&nbsp; SMK NUFA JAYA</div>
+                    </div>
+                    <div class="petir-fx" id="petir-fx">
+                        <div class="petir-bolt"></div>
+                        <div class="petir-bolt"></div>
+                        <div class="petir-bolt"></div>
+                    </div>
+                </div>
+            `,
+            visi: `
+                <h2>VISI DAN MISI</h2>
+                <p> <strong>MENJADI LEMBAGA PENDIDIKAN YANG BERKUALITAS DAN DINAMIS DALAM BIDANG KEJURUAN DAN BISNIS</strong> </p>
+                <ol>
+                    <li>MELAKSANAKAN PEMBELAJARAN YANG PRODUKTIF, KREATIF, DAN INOVATIF.</li>
+                    <li>MENYELENGGARAKAN PENDIDIKAN DAN PELATIHAN SESUAI DENGAN KEBUTUHAN MASYARAKAT DUNIA KERJA SEKTOR SWASTA/PEMERINTAH, BAIK NASIONAL MAUPUN INTERNASIONAL.</li>
+                    <li>MEMBERDAYAKAN SEKOLAH UNTUK MEWUJUDKAN PELAYANAN BAGI MASYARAKAT.</li>
+                    <li>MENINGKATKAN PERAN SERTA MASYARAKAT MENDUKUNG PROSES PENDIDIKAN DAN PELATIHAN.</li>
+                    <li>MEMBERDAYAKAN UNIT PRODUKSI SEBAGAI MEDIA PENDIDIKAN.</li>
+                    <li>MENINGKATKAN KERJA SAMA DENGAN DUNIA USAHA/DUNIA INDUSTRI.</li>
+                    <li>MENINGKATKAN KERJA SAMA DENGAN DINAS PENDIDIKAN KABUPATEN SERTA DINAS PENDIDIKAN PROVINSI SERTA PEMERINTAH PUSAT.</li>
+                </ol>
+                <br><br>
+          
+            `
+        };
+
+        const DATABASE_MATERI = {
+            'dm': 'Strategi pemasaran komprehensif menggunakan platform digital (Facebook Ads, Instagram, TikTok, Marketplace) untuk menjangkau audiens tertarget, meningkatkan brand awareness, dan mengoptimalkan retensi penjualan secara online.',
+            'rb': 'Pengelolaan manajemen toko ritel modern yang mencakup teknik display produk (Visual Merchandising), manajemen persediaan (Stock Opname), administrasi transaksi (Kasir), serta standar pelayanan prima (Service Excellence).',
+            'ps': 'Pengembangan soft-skill komunikasi bisnis untuk keperluan presentasi produk, negosiasi dengan klien, serta kemampuan Public Speaking yang persuasif dan percaya diri di hadapan audiens secara profesional.',
+            'kwu': 'Implementasi mata pelajaran Produk Kreatif dan Kewirausahaan (PKK) dimana siswa dibimbing untuk merancang, memproduksi, dan memasarkan produk inovatif serta menyusun rencana bisnis (Business Plan) yang layak jual.'
+        };
+
+      class AudioEngine {
+    constructor() { this._ctx = null; }
+    _init() {
+        if (!this._ctx) this._ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (this._ctx.state === 'suspended') this._ctx.resume();
+    }
+    hover() {
+        this._init();
+        const o = this._ctx.createOscillator(); const g = this._ctx.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(800, this._ctx.currentTime);
+        g.gain.setValueAtTime(0.02, this._ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, this._ctx.currentTime + 0.05);
+        o.connect(g); g.connect(this._ctx.destination); o.start(); o.stop(this._ctx.currentTime + 0.05);
+    }
+    click() {
+        this._init();
+        const o = this._ctx.createOscillator(); const g = this._ctx.createGain();
+        o.type = 'square'; o.frequency.setValueAtTime(200, this._ctx.currentTime);
+        g.gain.setValueAtTime(0.3, this._ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, this._ctx.currentTime + 0.1);
+        o.connect(g); g.connect(this._ctx.destination); o.start(); o.stop(this._ctx.currentTime + 0.1);
+    }
+}
+        class ScramblerEngine {
+            constructor() { this.chars = '!<>-_\\/[]{}—+*^?#________'; }
+            
+            animateClick(el) {
+                const originalText = el.getAttribute('data-original') || el.innerText;
+                if(!el.getAttribute('data-original')) el.setAttribute('data-original', originalText);
+                let frame = 0; const length = originalText.length;
+                const interval = setInterval(() => {
+                    let output = '';
+                    for(let i = 0; i < length; i++) {
+                        if(frame >= (i * 2) + 5) { output += originalText[i]; } 
+                        else { output += this.chars[Math.floor(Math.random() * this.chars.length)]; }
+                    }
+                    el.innerText = output;
+                    if(output === originalText) { clearInterval(interval); el.style.color = ''; }
+                    frame++;
+                }, 40);
+            }
+
+            write(el, htmlContent) {
+                el.innerHTML = htmlContent;
+                
+                const processNode = (node) => {
+                    if (node.nodeType === 3) { 
+                        const originalText = node.textContent;
+                        if (originalText.trim().length === 0) return;
+                        
+                        const length = originalText.length;
+                        let frame = 0;
+                        const interval = setInterval(() => {
+                            let output = '';
+                            for (let i = 0; i < length; i++) {
+                                if (frame >= i) output += originalText[i];
+                                else output += this.chars[Math.floor(Math.random() * this.chars.length)];
+                            }
+                            node.textContent = output;
+                            if (frame >= length) {
+                                clearInterval(interval);
+                                node.textContent = originalText;
+                            }
+                            frame += 2;
+                        }, 15);
+                    } else if (node.nodeType === 1) { 
+                        
+                        if (node.classList.contains('marquee-container')) return;
+                        for (let child of node.childNodes) {
+                            processNode(child);
+                        }
+                    }
+                };
+
+                processNode(el);
+            }
+
+            animate(el, newText) {
+                const length = newText.length; let frame = 0;
+                const interval = setInterval(() => {
+                    let output = '';
+                    for(let i=0; i<length; i++) {
+                        if(frame >= i) output += newText[i];
+                        else output += this.chars[Math.floor(Math.random() * this.chars.length)];
+                    }
+                    el.innerHTML = output.substring(0, frame + 1) + (frame < length ? '_' : '');
+                    if(frame >= length) clearInterval(interval);
+                    frame+=3;
+                }, 20);
+            }
+        }
+
+        class ParallaxMatrix {
+            constructor() {
+                this.canvas = document.getElementById("matrix-bg");
+                this.ctx = this.canvas.getContext("2d");
+                this.color = "#0f0";
+                this.drops = []; this.ripples = [];
+                this.enabled = true; this._running = true;
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+                ['mousemove', 'touchstart'].forEach(evt => window.addEventListener(evt, (e) => this.createRipple(e), {passive: true}));
+                this.loop();
+            }
+            resize() { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; this.initDrops(); }
+            initDrops() {
+                const columns = Math.ceil(this.canvas.width / 20);
+                this.drops = [];
+                for (let i = 0; i < columns; i++) {
+                    this.drops.push({ x: i * 20, y: Math.random() * this.canvas.height, speed: Math.random() * 0.5 + 0.5, depth: Math.random() > 0.8 ? 2 : 1 });
+                }
+            }
+            createRipple(e) {
+                const x = e.touches ? e.touches[0].clientX : e.clientX;
+                const y = e.touches ? e.touches[0].clientY : e.clientY;
+                this.ripples.push({x, y, size: 0, life: 1});
+            }
+            setColor(c) { this.color = c; }
+            setEnabled(on) {
+                this.enabled = on;
+                this.canvas.style.display = on ? 'block' : 'none';
+                if (on && !this._running) { this._running = true; this.loop(); }
+                if (!on) this._running = false;
+            }
+            draw() {
+                this.ctx.fillStyle = "rgba(0, 0, 0, 0.15)"; 
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                this.ctx.strokeStyle = this.color;
+                this.ripples.forEach((r, i) => {
+                    this.ctx.beginPath(); this.ctx.arc(r.x, r.y, r.size, 0, Math.PI * 2);
+                    this.ctx.globalAlpha = r.life * 0.5; this.ctx.stroke(); this.ctx.globalAlpha = 1;
+                    r.size += 2; r.life -= 0.05; if(r.life <= 0) this.ripples.splice(i, 1);
+                });
+                this.ctx.font = "14px monospace";
+                this.drops.forEach(drop => {
+                    const text = Math.floor(Math.random() * 10).toString();
+                    if (drop.depth === 2) { this.ctx.fillStyle = "#fff"; this.ctx.shadowBlur = 5; this.ctx.shadowColor = this.color; }
+                    else { this.ctx.fillStyle = this.color; this.ctx.shadowBlur = 0; }
+                    this.ctx.fillText(text, drop.x, drop.y);
+                    if (drop.y > this.canvas.height && Math.random() > 0.975) drop.y = 0;
+                    drop.y += drop.speed * 22;
+                });
+            }
+            loop() {
+                if (!this._running) return;
+                requestAnimationFrame(() => this.loop());
+                this.draw();
+            }
+        }
+
+        const AudioFX = new AudioEngine();
+        const MatrixFX = new ParallaxMatrix(); 
+        const Scrambler = new ScramblerEngine();
+
+        const System = {
+            bgm: document.getElementById('bgm'),
+            musicBtn: document.getElementById('music-btn'),
+            musicIcon: document.getElementById('music-icon'),
+            log: document.getElementById('system-log'),
+            colorBtn: document.getElementById('color-btn'),
+            colorIndex: 0,
+            colors: [
+                { neon: '#0f0', dim: '#008F11', hex: '#0f0' },       
+                { neon: '#00f0ff', dim: '#008F8F', hex: '#00f0ff' }, 
+                { neon: '#FF0000', dim: '#CC0000', hex: '#FF0000' }, 
+                { neon: '#ffff00', dim: '#808000', hex: '#ffff00' },
+                { neon: '#bf00ff', dim: '#660080', hex: '#bf00ff' }, 
+                { neon: '#ff5500', dim: '#993300', hex: '#ff5500' },
+                { neon: '#ffffff', dim: '#8ce6ef', hex: '#ffffff' }  
+
+            ],
+            baseOffset: 4990,
+            currentVisits: 0, 
+
+            typeWriter: function(elementId, text, speed = 100) {
+                const element = document.getElementById(elementId);
+                if (!element) return;
+                
+                element.innerHTML = ""; 
+                element.classList.add('typing-cursor');
+                
+                let i = 0;
+                function type() {
+                    if (i < text.length) {
+                        element.innerHTML += text.charAt(i);
+                        i++;
+                        const randomSpeed = speed + (Math.random() * 50 - 25);
+                        setTimeout(type, randomSpeed);
+                    }
+                }
+                type();
+            },
+
+            syncVisitorCount: async function() {
+                try {
+                    const response = await fetch('https://api.counterapi.dev/v1/smknufa_2026/visits/up');
+                    if (!response.ok) throw new Error('bad status ' + response.status);
+                    const data = await response.json();
+                    if (!data || !data.count) throw new Error('no count in response');
+                    this.currentVisits = parseInt(data.count) + this.baseOffset;
+                    return true;
+                } catch (error) {
+                    this.useLocalFallback();
+                    return false;
+                }
+            },
+
+            useLocalFallback: function() {
+    try {
+        let localCount = localStorage.getItem('nufa_visits_backup');
+        localCount = localCount ? parseInt(localCount) + 1 : 1;
+        localStorage.setItem('nufa_visits_backup', localCount);
+        this.currentVisits = localCount + this.baseOffset;
+    } catch(e) { this.currentVisits = this.baseOffset; }
+},
+          loadSavedTheme: function() {
+    try {
+        const savedIndex = localStorage.getItem('nufa_theme');
+        if (savedIndex !== null) { this.colorIndex = parseInt(savedIndex); this.applyTheme(); }
+    } catch(e) { }
+},
+            applyTheme: function() {
+                const theme = this.colors[this.colorIndex];
+                document.documentElement.style.setProperty('--neon', theme.neon);
+                document.documentElement.style.setProperty('--neon-dim', theme.dim);
+                MatrixFX.setColor(theme.hex);
+            },
+
+            initLog: function() {
+                // Fungsi generator dipanggil ulang tiap tick agar baris "Global Access" selalu baca
+                // this.currentVisits versi terbaru (bukan snapshot lama sebelum syncVisitorCount() selesai).
+                const logLines = [
+                    () => "Scanning connection...",
+                    () => "Encrypting connection...",
+                    () => `Global Access: ${this.currentVisits} Users`,
+                    () => "System stable.",
+                    () => "Monitoring network..."
+                ];
+                let i = 0;
+                setInterval(() => {
+                    this.log.innerText = ">> " + logLines[i]();
+                    i = (i + 1) % logLines.length;
+                }, 2500);
+            },
+
+            enter: function() {
+                AudioFX.click();
+                const playPromise = this.bgm.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => { console.log("Audio autoplay prevented."); });
+                }
+                this.bgm.volume = 0.7;
+
+                const savedMusic = localStorage.getItem('nufa_music');
+                if (savedMusic === 'off') {
+                    this.bgm.pause();
+                    this.musicIcon.innerText = "🔇";
+                    this.musicBtn.style.opacity = "0.8";
+                }
+
+                this.loadSavedTheme();
+
+                this.musicBtn.style.display = 'flex'; 
+                this.colorBtn.style.display = 'flex';
+                const chatBtn = document.getElementById('chat-btn');
+                if (chatBtn) chatBtn.style.display = 'flex';
+                if (typeof GlobalChat !== 'undefined') GlobalChat.start();
+
+                this.fetchGallery(); 
+                this.startLatency(); 
+                this.initLog(); 
+
+                Scrambler.write(document.getElementById('home-content'), DATABASE_CONTENT.home);
+                this.randomizePetir();
+
+                // Jumlah pengunjung disinkron di LATAR BELAKANG (tidak menunda tampilan)
+                this.syncVisitorCount().catch(()=>{});
+
+                document.getElementById('overlay').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('overlay').style.display = 'none';
+                    document.getElementById('main-content').style.display = 'block';
+                    startChaosMode(); 
+                }, 500);
+                
+            },
+
+            toggleColor: function() {
+                AudioFX.click();
+                this.colorIndex = (this.colorIndex + 1) % this.colors.length;
+                try { localStorage.setItem('nufa_theme', this.colorIndex); } catch(e) {}
+                this.applyTheme();
+            },
+
+            // Acak variabel CSS tiap bolt petir biar polanya gak keliatan monoton/looping sama
+            randomizePetir: function() {
+                document.querySelectorAll('#petir-fx .petir-bolt').forEach(el => {
+                    el.style.setProperty('--petir-dur', (2.5 + Math.random() * 3).toFixed(2) + 's');
+                    el.style.setProperty('--petir-delay', (Math.random() * 4).toFixed(2) + 's');
+                });
+            },
+
+   renderGallery: function(photos) {
+    const container = document.getElementById('gallery-container');
+    container.innerHTML = '';
+
+    if (!photos || photos.length === 0) {
+        const empty = document.createElement('div');
+        empty.style.cssText = 'color:var(--neon);opacity:0.5;grid-column:1/-1;text-align:center;padding:40px 0;font-size:0.85rem;letter-spacing:2px;';
+        empty.textContent = '// GALERI KOSONG — BELUM ADA FOTO DI FOLDER DRIVE';
+        container.appendChild(empty);
+        return;
+    }
+
+    photos.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'gallery-item';
+        div.onclick = () => { AudioFX.click(); GalleryViewer.open(item.file, item.caption); };
+
+        const img = document.createElement('img');
+        img.src = item.file;
+        img.alt = item.caption;
+        img.loading = 'lazy';
+        img.onerror = function() {
+            this.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='200'%3E%3Crect width='300' height='200' fill='%23000'/%3E%3Ctext x='50%25' y='50%25' fill='%2300ff00' font-family='monospace' font-size='14' text-anchor='middle' dy='.3em'%3EFOTO TIDAK ADA%3C/text%3E%3C/svg%3E";
+            this.onerror = null;
+        };
+
+        const caption = document.createElement('div');
+        caption.className = 'caption';
+        caption.textContent = item.caption; 
+
+        div.appendChild(img);
+        div.appendChild(caption);
+        container.appendChild(div);
+    });
+},
+            fetchGallery: async function() {
+                const container = document.getElementById('gallery-container');
+
+                // Cek apakah URL sudah diisi
+                if (!GALLERY_API_URL || GALLERY_API_URL === "PASTE_WEB_APP_URL_KAMU_DI_SINI") {
+                    container.innerHTML = `<div style="color:#ff003c;grid-column:1/-1;text-align:center;padding:40px 0;font-size:0.8rem;letter-spacing:1px;">⚠ GALLERY_API_URL BELUM DIISI DI KODE HTML</div>`;
+                    return;
+                }
+
+                container.innerHTML = `
+                    <div style="color:var(--neon);grid-column:1/-1;text-align:center;padding:60px 0;font-size:0.85rem;letter-spacing:2px;">
+                        <div style="margin-bottom:12px;font-size:1.4rem;">📡</div>
+                        <div class="typing-cursor">MEMUAT DATABASE FOTO</div>
+                    </div>`;
+
+                try {
+                    const res  = await fetch(GALLERY_API_URL);
+                    const data = await res.json();
+
+                    if (data.status === "ok") {
+                        DATABASE_FOTO = data.photos;
+
+                        // Gabungkan dengan cache lokal browser (foto yang baru diupload, sebelum sinkron Drive selesai)
+                        const localCache = (typeof UploadSystem !== 'undefined') ? UploadSystem.getLocalCache() : [];
+                        if (localCache.length > 0) {
+                            const existingFiles = new Set(DATABASE_FOTO.map(p => p.file));
+                            localCache.forEach(item => {
+                                if (!existingFiles.has(item.file)) DATABASE_FOTO.unshift(item);
+                            });
+                        }
+
+                                        this.renderGallery(DATABASE_FOTO);
+
+                        // Update HUD galeri setelah render — gunakan nilai latency terakhir yang tersimpan
+                        const hud = document.querySelector('#gallery .slide-hud');
+                        if (hud) {
+                            const lat = this._lastLatency || '--';
+                            hud.innerHTML = `Latency Jaringan : <span class="lat-val">${lat}</span>ms | ${DATABASE_FOTO.length} FOTO DIMUAT`;
+                        }
+                    } else {
+                        throw new Error(data.message || "Unknown error");
+                    }
+                } catch (err) {
+                    container.innerHTML = `
+                        <div style="color:#ff003c;grid-column:1/-1;text-align:center;padding:40px 0;font-size:0.8rem;letter-spacing:1px;">
+                            ⚠ GAGAL MEMUAT GALERI<br>
+                            <span style="color:#666;font-size:0.7rem;margin-top:8px;display:block;">${err.message}</span>
+                            <button onclick="System.fetchGallery()" style="margin-top:16px;padding:8px 20px;border:1px solid #ff003c;background:transparent;color:#ff003c;font-family:var(--font-main);cursor:pointer;letter-spacing:1px;">↺ COBA LAGI</button>
+                        </div>`;
+                }
+            }, // Batas akhir fetchGallery
+
+            
+_latencyTimer: null,
+startLatency: function() {
+    if (this._latencyTimer) clearInterval(this._latencyTimer);
+    const updateAll = (val) => {
+        this._lastLatency = val;
+        document.querySelectorAll('.lat-val').forEach(el => el.innerText = val);
+    };
+    const measure = () => {
+        const start = performance.now();
+        fetch(window.location.href + '?ping=' + Date.now(), { method: 'HEAD', cache: 'no-store' })
+            .then(() => updateAll(Math.round(performance.now() - start)))
+            .catch(() => updateAll('ERR'));
+    };
+    measure();
+    this._latencyTimer = setInterval(measure, 4000);
+},
+
+            toggleMusic: function() {
+                if (this.musicBtn && this.musicBtn.classList.contains('sound-locked')) return;
+                AudioFX.click();
+                if (this.bgm.paused) { 
+                    this.bgm.play(); 
+                    this.musicIcon.innerText = "🔊"; 
+                    this.musicBtn.style.opacity = "1";
+                    localStorage.setItem('nufa_music', 'on'); // ✅ simpan state
+                }
+                else { 
+                    this.bgm.pause(); 
+                    this.musicIcon.innerText = "🔇"; 
+                    this.musicBtn.style.opacity = "0.8";
+                    localStorage.setItem('nufa_music', 'off'); // ✅ simpan state
+                }
+            },
+
+            nav: function(id, btn) {
+                AudioFX.click();
+                Scrambler.animateClick(btn);
+
+                document.querySelectorAll('.slide').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+
+                document.getElementById(id).classList.add('active'); 
+                btn.classList.add('active');
+
+                if(id === 'home') {
+                    Scrambler.write(document.getElementById('home-content'), DATABASE_CONTENT.home);
+                    this.randomizePetir();
+                } else if (id === 'visi') {
+                    Scrambler.write(document.getElementById('visi-content'), DATABASE_CONTENT.visi);
+                } else if (id === 'gallery') {
+                    // Refresh galeri setiap kali tab dibuka agar foto baru langsung muncul
+                    this.fetchGallery();
+                }
+            },
+
+            detail: function(btn, key) {
+                AudioFX.click();
+                Scrambler.animateClick(btn);
+                document.querySelectorAll('.comp-btn').forEach(b => b.classList.remove('active-comp'));
+                btn.classList.add('active-comp');
+                Scrambler.animate(document.getElementById('desc-output'), DATABASE_MATERI[key]);
+            }
+        };
+
+        const chaosTexts = ["SYSTEM_FAILURE", "0x00_FATAL_ERR", "S#K N@R*L F!L^H", "404_NOT_FOUND", "CONNECTING...", "ENCRYPT_//_99%", "µ-sys$-Hacked"];
+        function startChaosMode() {
+            const title = document.querySelector('.glitch');
+            if (!title) return;
+            const originalText = "SMK NURUL FALAH";
+            function randomGlitchLoop() {
+                const randomTime = Math.random() * 15000 + 5000; 
+                setTimeout(() => {
+                    const randomString = chaosTexts[Math.floor(Math.random() * chaosTexts.length)];
+                    title.innerText = randomString;          
+                    title.setAttribute('data-text', randomString); 
+                    title.classList.add('critical-error');   
+                    
+                    setTimeout(() => {
+                        title.innerText = originalText;
+                        title.setAttribute('data-text', originalText);
+                        title.classList.remove('critical-error');
+                        randomGlitchLoop(); 
+                    }, 100 + Math.random() * 200);
+                }, randomTime);
+            }
+            randomGlitchLoop();
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // --- INJEKSI ANIMATION KEYFRAME UNTUK SKEW INFINITE ---
+            const styleInterlinked = document.createElement('style');
+            styleInterlinked.innerHTML = `
+                @keyframes skew-glitch {
+                    0%, 100% { transform: skew(0deg); filter: hue-rotate(0deg); }
+                    20% { transform: skew(-6deg) scaleY(1.02); filter: hue-rotate(45deg); }
+                    40% { transform: skew(7deg); }
+                    60% { transform: skew(-4deg) scaleY(0.98); filter: hue-rotate(180deg); }
+                    80% { transform: skew(5deg); }
+                }
+
+                /* INTERLINKED PULSE — warna mengikuti --neon aktif */
+                @keyframes interlinked-border-pulse {
+                    0%, 100% { 
+                        border-color: #ff003c; 
+                        box-shadow: 0 0 8px rgba(255,0,60,0.3), inset 0 0 6px rgba(255,0,60,0.05);
+                    }
+                    50% { 
+                        border-color: var(--neon); 
+                        box-shadow: 0 0 28px var(--neon), inset 0 0 14px rgba(0,255,65,0.08);
+                    }
+                }
+                @keyframes interlinked-text-pulse {
+                    0%, 100% { text-shadow: 0 0 6px #ff003c, 0 0 12px #ff003c; color: #ff003c; }
+                    50%       { text-shadow: 0 0 14px var(--neon), 0 0 28px var(--neon); color: var(--neon); }
+                }
+                @keyframes interlinked-bg-pulse {
+                    0%, 100% { background: rgba(255,0,60,0.04); }
+                    50%       { background: rgba(0,255,65,0.06); }
+                }
+
+                /* Kelas yang diterapkan ke elemen saat interlinked aktif */
+                .interlinked-active header,
+                .interlinked-active .slide.active,
+                .interlinked-active nav,
+                .interlinked-active .marquee-container {
+                    animation: interlinked-border-pulse 1.4s ease-in-out infinite !important;
+                }
+                .interlinked-active .glitch {
+                    /* skew-glitch tetap jalan, tambah pulse glow via filter */
+                    filter: drop-shadow(0 0 6px #ff003c) drop-shadow(0 0 14px var(--neon));
+                    animation: skew-glitch 1s infinite linear, interlinked-filter-pulse 1.4s ease-in-out infinite !important;
+                }
+                @keyframes interlinked-filter-pulse {
+                    0%, 100% { filter: drop-shadow(0 0 8px #ff003c) drop-shadow(0 0 4px var(--neon)); }
+                    50%       { filter: drop-shadow(0 0 4px #ff003c) drop-shadow(0 0 20px var(--neon)); }
+                }
+                .interlinked-active .nav-btn.active {
+                    animation: interlinked-text-pulse 1.4s ease-in-out infinite !important;
+                }
+                .interlinked-active .control-btn {
+                    animation: interlinked-border-pulse 1.4s ease-in-out infinite !important;
+                }
+                .interlinked-active #gallery-container .gallery-item {
+                    animation: interlinked-border-pulse 1.4s ease-in-out infinite !important;
+                }
+                .interlinked-active .slide.active {
+                    animation: interlinked-border-pulse 1.4s ease-in-out infinite, 
+                               interlinked-bg-pulse 1.4s ease-in-out infinite !important;
+                }
+            `;
+            document.head.appendChild(styleInterlinked);
+
+            // --- BTN PEMBUAT HOLD LOGIC ---
+            const btnPembuat = document.getElementById("btn-pembuat");
+            if (btnPembuat) {
+
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes global-panic-glitch {
+                    0%, 100% { background-color: #050505; }
+                    50% { background-color: #0f0005; }
+                }
+                @keyframes neon-ambient-pulse {
+                    0%, 100% { filter: drop-shadow(0 0 20px var(--neon)) contrast(1.2); }
+                    50% { filter: drop-shadow(0 0 60px var(--neon)) contrast(2) brightness(1.6); }
+                }
+                .override-chaos {
+                    background: rgba(255, 0, 60, 0.25) !important;
+                    border: 2px dashed #ff003c !important;
+                    color: #ffffff !important;
+                    text-shadow: 0 0 10px #ff003c, 0 0 20px #ff003c !important;
+                    box-shadow: 0 0 35px #ff003c, inset 0 0 15px #ff003c !important;
+                }
+                .system-panic {
+                    animation: global-panic-glitch 0.4s infinite !important;
+                    transition: none !important;
+                }
+                .system-panic header, .system-panic .slide.active, .system-panic nav {
+                    animation: neon-ambient-pulse 0.5s infinite alternate ease-in-out !important;
+                    border-color: var(--neon) !important;
+                    box-shadow: 0 0 35px var(--neon) !important;
+                }
+                .system-panic #matrix-bg { opacity: 0.25 !important; }
+            `;
+            document.head.appendChild(style);
+
+            function playTransitionSound() {
+                if (typeof AudioFX === 'undefined' || !AudioFX.ctx) return;
+                AudioFX.resume();
+                const ctx = AudioFX.ctx;
+                const now = ctx.currentTime;
+
+                const oscBeep = ctx.createOscillator();
+                const gainBeep = ctx.createGain();
+                oscBeep.type = 'sine';
+                oscBeep.frequency.setValueAtTime(1200, now);
+                gainBeep.gain.setValueAtTime(0.3, now);
+                gainBeep.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                oscBeep.connect(gainBeep);
+                gainBeep.connect(ctx.destination);
+                oscBeep.start(now);
+                oscBeep.stop(now + 0.15);
+
+                const oscDrop = ctx.createOscillator();
+                const gainDrop = ctx.createGain();
+                oscDrop.type = 'sawtooth';
+                oscDrop.frequency.setValueAtTime(450, now + 0.05); 
+                oscDrop.frequency.exponentialRampToValueAtTime(40, now + 1.2); 
+                gainDrop.gain.setValueAtTime(0.4, now + 0.05);
+                gainDrop.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+                oscDrop.connect(gainDrop);
+                gainDrop.connect(ctx.destination);
+                oscDrop.start(now + 0.05);
+                oscDrop.stop(now + 1.2);
+            }
+
+            function playTick(isPanic = false) {
+                if (typeof AudioFX === 'undefined' || !AudioFX.ctx) return;
+                AudioFX.resume();
+                const ctx = AudioFX.ctx;
+                const o = ctx.createOscillator();
+                const g = ctx.createGain();
+                
+                o.type = 'square';
+                const startFreq = isPanic ? 1400 : 800;
+                const endFreq = isPanic ? 400 : 100;
+                
+                o.frequency.setValueAtTime(startFreq, ctx.currentTime); 
+                o.frequency.exponentialRampToValueAtTime(endFreq, ctx.currentTime + 0.1); 
+                g.gain.setValueAtTime(isPanic ? 0.25 : 0.15, ctx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                o.connect(g); g.connect(ctx.destination);
+                o.start(); o.stop(ctx.currentTime + 0.1);
+            }
+
+            let holdTimer;         
+            let pressTimer;        
+            let countdownInterval; 
+            let isHolding = false; 
+            let timeLeft = 9;
+
+            const originalContent = btnPembuat.innerHTML;
+            const originalStyle = btnPembuat.getAttribute("style") || ""; 
+            const sneakPeekUrl = "https://world-monitor.com/"; 
+            const waUrl = btnPembuat.getAttribute("href"); 
+
+            function startPress(e) {
+                if (e && e.cancelable) e.preventDefault();
+                isHolding = false;
+                clearAllTimers();
+
+                holdTimer = setTimeout(() => {
+                    isHolding = true; 
+                    startCountdownUI();
+                }, 700);
+            }
+
+            function startCountdownUI() {
+                timeLeft = 9;
+                playTransitionSound();
+
+                btnPembuat.classList.add('override-chaos');
+                btnPembuat.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> OVERRIDE: ${timeLeft}s`;
+                
+                countdownInterval = setInterval(() => {
+                    timeLeft--;
+                    if (timeLeft > 0) {
+                        btnPembuat.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> OVERRIDE: ${timeLeft}s`;
+                        if (timeLeft <= 5) {
+                            document.body.classList.add('system-panic');
+                            playTick(true);
+                        } else {
+                            playTick(false); 
+                        }
+                    } else {
+                        clearInterval(countdownInterval);
+                    }
+                }, 1000);
+
+                pressTimer = setTimeout(() => {
+                    document.body.classList.remove('system-panic');
+                    btnPembuat.classList.remove('override-chaos');
+                    
+                    btnPembuat.style.cssText = "background: #ff003c !important; color: #000 !important; box-shadow: 0 0 50px #ff003c !important; border: none !important;";
+                    btnPembuat.innerHTML = `<i class="fa-solid fa-skull"></i> ACCESS GRANTED`;
+                    
+                    if(typeof AudioFX !== 'undefined') AudioFX.click();
+
+                    setTimeout(() => {
+                        window.location.href = sneakPeekUrl;
+                    }, 1000);
+                }, 9000);
+            }
+
+            function clearAllTimers() {
+                clearTimeout(holdTimer);
+                clearTimeout(pressTimer);
+                clearInterval(countdownInterval);
+            }
+
+            function releasePress(e) {
+                if (e && e.cancelable) e.preventDefault();
+                clearAllTimers();
+
+                if (!isHolding) {
+                    if(typeof AudioFX !== 'undefined') AudioFX.click();
+                    window.open(waUrl, "_blank"); 
+                } else {
+                    resetButtonUI();
+                }
+            }
+
+            function abortPress() {
+                clearAllTimers();
+                if (isHolding) resetButtonUI();
+            }
+
+            function resetButtonUI() {
+                document.body.classList.remove('system-panic');
+                btnPembuat.classList.remove('override-chaos');
+                btnPembuat.setAttribute("style", originalStyle);
+                btnPembuat.innerHTML = originalContent;
+                isHolding = false;
+            }
+
+            btnPembuat.addEventListener("click", (e) => {
+                e.preventDefault();
+            });
+
+            btnPembuat.addEventListener("mousedown", startPress);
+            btnPembuat.addEventListener("mouseup", releasePress);
+            btnPembuat.addEventListener("mouseleave", abortPress); 
+
+            btnPembuat.addEventListener("touchstart", startPress, { passive: false });
+            btnPembuat.addEventListener("touchend", releasePress, { passive: false });
+            btnPembuat.addEventListener("touchcancel", abortPress);
+
+            } 
+
+            const subtitle = document.getElementById("subtitle-text");
+            const mainTitle = document.querySelector(".glitch"); 
+            const bgmAudio = document.getElementById("bgm"); 
+    
+            if (!subtitle) return;
+
+            let clickCount = 0;
+            let clickTimeout;
+            let isInterlinkedMode = false;
+
+            const originalBgmUrl = "bgm.mp3"; 
+            const interlinkedBgmUrl = "interlinked.mp3"; 
+
+            subtitle.addEventListener("click", () => {
+                clickCount++;
+                clearTimeout(clickTimeout);
+                clickTimeout = setTimeout(() => { clickCount = 0; }, 2000); 
+                if (clickCount === 3) {
+                    clickCount = 0;
+                    toggleInterlinkedMode();
+                }
+            });
+
+            function toggleInterlinkedMode() {
+                if (!isInterlinkedMode) {
+                    isInterlinkedMode = true;
+                    subtitle.textContent = "INTERLINKED";
+                    subtitle.style.color = "#ff003c";
+                    subtitle.style.textShadow = "0 0 15px #ff003c, 0 0 30px #ff003c";
+                    subtitle.style.letterSpacing = "6px";
+                    if (mainTitle) { mainTitle.style.animation = ""; mainTitle.style.textShadow = ""; }
+                    document.body.classList.add('interlinked-active');
+                    if (bgmAudio) {
+                        bgmAudio.src = interlinkedBgmUrl;
+                        bgmAudio.load();
+                        bgmAudio.play().catch(e => console.log("Audio play diblokir:", e));
+                    }
+                    if (typeof AudioFX !== 'undefined') AudioFX.click();
+                } else {
+                    isInterlinkedMode = false;
+                    subtitle.textContent = "(BDP) PEMASARAN";
+                    subtitle.style.color = "";
+                    subtitle.style.textShadow = "";
+                    subtitle.style.letterSpacing = "";
+                    if (mainTitle) { mainTitle.style.animation = ""; mainTitle.style.textShadow = ""; mainTitle.style.filter = ""; }
+                    document.body.classList.remove('interlinked-active');
+                    if (bgmAudio) {
+                        bgmAudio.src = originalBgmUrl;
+                        bgmAudio.load();
+                        bgmAudio.play().catch(e => console.log("Audio play diblokir:", e));
+                    }
+                    if (typeof AudioFX !== 'undefined') AudioFX.click();
+                }
+            }
+        }); // akhir DOMContentLoaded utama
+
+        const UploadSystem = {
+            // ⚠️ GANTI password ini sesuai keinginanmu
+            
+            ACCESS_CODE_B64: "%%ACCESS_CODE_B64%%",
+            get ACCESS_CODE() { return atob(this.ACCESS_CODE_B64); },
+
+            selectedFile: null,
+
+            init() {
+                const dz = document.getElementById('upload-dropzone');
+                const fileInput = document.getElementById('upload-file');
+
+                fileInput.addEventListener('change', (e) => {
+                    if (e.target.files && e.target.files[0]) this.setFile(e.target.files[0]);
+                });
+
+                // Drag & drop
+                ['dragover', 'dragenter'].forEach(evt => {
+                    dz.addEventListener(evt, (e) => {
+                        e.preventDefault();
+                        dz.classList.add('dragover');
+                    });
+                });
+                ['dragleave', 'dragend', 'drop'].forEach(evt => {
+                    dz.addEventListener(evt, (e) => {
+                        e.preventDefault();
+                        dz.classList.remove('dragover');
+                    });
+                });
+                dz.addEventListener('drop', (e) => {
+                    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                        this.setFile(e.dataTransfer.files[0]);
+                    }
+                });
+
+                // Tutup modal kalau klik area gelap
+                document.getElementById('upload-modal').addEventListener('click', (e) => {
+                    if (e.target.id === 'upload-modal') this.close();
+                });
+            },
+
+            setFile(file) {
+                if (!file.type.startsWith('image/')) {
+                    this.setStatus('⚠ HANYA FILE GAMBAR DIPERBOLEHKAN', 'error');
+                    return;
+                }
+                if (file.size > 8 * 1024 * 1024) { // 8MB limit
+                    this.setStatus('⚠ UKURAN FILE MAKSIMAL 8MB', 'error');
+                    return;
+                }
+                this.selectedFile = file;
+                document.getElementById('upload-filename').innerText = `📎 ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+                this.setStatus('', '');
+            },
+
+            open() {
+                if (typeof AudioFX !== 'undefined') AudioFX.click();
+                document.getElementById('upload-modal').classList.add('open');
+                document.body.style.overflow = 'hidden';
+            },
+
+            close() {
+                document.getElementById('upload-modal').classList.remove('open');
+                document.body.style.overflow = '';
+            },
+
+            setStatus(msg, type) {
+                const el = document.getElementById('upload-status');
+                el.innerText = msg;
+                el.className = type || '';
+            },
+
+            setProgress(pct) {
+                const wrap = document.getElementById('upload-progress-wrap');
+                const bar  = document.getElementById('upload-progress-bar');
+                if (pct === null) { wrap.style.display = 'none'; bar.style.width = '0%'; return; }
+                wrap.style.display = 'block';
+                bar.style.width = pct + '%';
+            },
+
+            // Cache lokal browser untuk foto hasil upload (mode interlinked / lagu & warna disimpan terpisah via localStorage)
+            saveToLocalCache(item) {
+                try {
+                    const cache = JSON.parse(localStorage.getItem('nufa_gallery_cache') || '[]');
+                    cache.unshift(item); // foto terbaru tampil di atas
+                    localStorage.setItem('nufa_gallery_cache', JSON.stringify(cache));
+                } catch (e) {
+                    console.log('Gagal simpan cache lokal:', e);
+                }
+            },
+
+            getLocalCache() {
+                try {
+                    return JSON.parse(localStorage.getItem('nufa_gallery_cache') || '[]');
+                } catch (e) {
+                    return [];
+                }
+            },
+
+            fileToBase64(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload  = () => resolve(reader.result.split(',')[1]);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            },
+
+            async submit() {
+                const pass    = document.getElementById('upload-password').value.trim();
+                const caption = document.getElementById('upload-caption').value.trim() || 'Tanpa Caption';
+                const btn     = document.getElementById('upload-submit');
+
+                if (typeof AudioFX !== 'undefined') AudioFX.click();
+
+                if (!pass) {
+                    this.setStatus('⚠ MASUKKAN KODE AKSES TERLEBIH DAHULU', 'error');
+                    return;
+                }
+                if (pass !== this.ACCESS_CODE) {
+                    this.setStatus('✕ KODE AKSES SALAH — UPLOAD DITOLAK', 'error');
+                    document.getElementById('upload-password').value = '';
+                    return;
+                }
+                if (!this.selectedFile) {
+                    this.setStatus('⚠ PILIH FILE FOTO TERLEBIH DAHULU', 'error');
+                    return;
+                }
+                if (!GALLERY_API_URL || GALLERY_API_URL.includes('PASTE_')) {
+                    this.setStatus('⚠ GALLERY_API_URL BELUM DIKONFIGURASI', 'error');
+                    return;
+                }
+
+                btn.disabled = true;
+                this.setStatus('📡 MENGUNGGAH KE SERVER...', 'loading');
+                this.setProgress(15);
+
+                try {
+                    const base64 = await this.fileToBase64(this.selectedFile);
+                    this.setProgress(45);
+
+                    const payload = {
+                        action: 'upload',
+                        password: pass,
+                        filename: this.selectedFile.name,
+                        mimeType: this.selectedFile.type,
+                        caption: caption,
+                        data: base64
+                    };
+
+                    this.setProgress(70);
+
+                    const res = await fetch(GALLERY_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // hindari preflight CORS di Apps Script
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await res.json();
+                    this.setProgress(100);
+
+                    if (result.status === 'ok') {
+                        this.setStatus('✓ UPLOAD BERHASIL — SINKRONISASI GALERI BERLANGSUNG...', 'success');
+
+                        // Simpan ke cache lokal browser supaya langsung tampil walau belum sinkron Drive
+                        if (result.file) {
+                            this.saveToLocalCache({ file: result.file, caption: caption });
+                        }
+
+                        setTimeout(() => {
+                            this.resetForm();
+                            this.close();
+                            System.fetchGallery(); // refresh galeri dari Drive
+                        }, 1200);
+                    } else {
+                        throw new Error(result.message || 'Server menolak permintaan');
+                    }
+                } catch (err) {
+                    this.setStatus('✕ GAGAL: ' + err.message, 'error');
+                } finally {
+                    btn.disabled = false;
+                    setTimeout(() => this.setProgress(null), 1500);
+                }
+            },
+
+            resetForm() {
+                document.getElementById('upload-password').value = '';
+                document.getElementById('upload-caption').value = '';
+                document.getElementById('upload-file').value = '';
+                document.getElementById('upload-filename').innerText = '';
+                this.selectedFile = null;
+                this.setStatus('', '');
+            }
+        };
+        document.addEventListener('DOMContentLoaded', () => UploadSystem.init());
+
+        const GalleryViewer = {
+            index: 0,
+            lb: null, img: null, cap: null, ctr: null,
+
+            init() {
+                this.lb  = document.getElementById('gallery-lightbox');
+                this.img = document.getElementById('lb-img');
+                this.cap = document.getElementById('lb-caption');
+                this.ctr = document.getElementById('lb-counter');
+
+                // Tutup dengan klik latar belakang
+                this.lb.addEventListener('click', (e) => {
+                    if (e.target === this.lb) this.close();
+                });
+
+                // Navigasi keyboard
+                document.addEventListener('keydown', (e) => {
+                    if (!this.lb.classList.contains('open')) return;
+                    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') this.next();
+                    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   this.prev();
+                    if (e.key === 'Escape') this.close();
+                });
+            },
+
+            open(url, caption) {
+                if (DATABASE_FOTO.length === 0) return;
+                // Cari index foto yang diklik
+                const idx = DATABASE_FOTO.findIndex(f => f.file === url);
+                this.index = idx >= 0 ? idx : 0;
+                this._show();
+                this.lb.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            },
+
+            close() {
+                this.lb.classList.remove('open');
+                document.body.style.overflow = '';
+                this.img.src = '';
+            },
+
+            next() {
+                if (DATABASE_FOTO.length === 0) return;
+                this.index = (this.index + 1) % DATABASE_FOTO.length;
+                this._show();
+                if(typeof AudioFX !== 'undefined') AudioFX.click();
+            },
+
+            prev() {
+                if (DATABASE_FOTO.length === 0) return;
+                this.index = (this.index - 1 + DATABASE_FOTO.length) % DATABASE_FOTO.length;
+                this._show();
+                if(typeof AudioFX !== 'undefined') AudioFX.click();
+            },
+
+            _show() {
+                const item = DATABASE_FOTO[this.index];
+                this.img.style.opacity = '0';
+                setTimeout(() => {
+                    this.img.src = item.file;
+                    this.img.style.opacity = '1';
+                }, 100);
+                this.cap.textContent = item.caption;
+                this.ctr.textContent = `[ ${this.index + 1} / ${DATABASE_FOTO.length} ]`;
+            }
+        };
+
+        // Inisialisasi viewer setelah DOM siap
+        document.addEventListener('DOMContentLoaded', () => GalleryViewer.init());
+        //  GLOBAL LIVE CHAT — semua pengunjung (tanpa login), IP terlihat    
+
+        const FIREBASE_CONFIG = {
+            apiKey: "%%FIREBASE_API_KEY%%",
+            authDomain: "server-nufa.firebaseapp.com",
+            projectId: "server-nufa",
+            storageBucket: "server-nufa.firebasestorage.app",
+            messagingSenderId: "168660687360",
+            appId: "1:168660687360:web:bdb56f6ea15e3cd44756e5",
+            databaseURL: "%%FIREBASE_DATABASE_URL%%"
+        };
+        //  KONFIGURASI SENSOR IP   
+        const IP_MASK_LEVEL = 1;
+        //  KONFIGURASI FILTER KATA KASAR
+        const BAD_WORDS = ['asu', 'smks2026', 'puki', 'goblok', 'dancok', 'anjing', 'bangsat', 'kontol', 'memek', 'tai', 'jancok'];
+
+        // ============================================================
+        //  KONFIGURASI COOLDOWN TOMBOL KIRIM (anti-spam)
+        
+        const SEND_COOLDOWN_MS = 3000;
+
+        // ── MODUL: Sensor IP (IPv4 & IPv6 tersinkron lewat IP_MASK_LEVEL) ──
+        const IpMask = {
+            apply(ip) {
+                if (!ip || ip === 'UNKNOWN' || ip === 'SYSTEM') return 'ANONIM';
+
+                const isV6 = ip.includes(':');
+                const sep = isV6 ? ':' : '.';
+                const maskToken = isV6 ? 'xxxx' : 'xxx';
+                const parts = ip.split(sep).filter(Boolean);
+                if (parts.length < 2) return 'ANONIM';
+
+                // Level 0 = tampil penuh. Clamp agar tidak melebihi jumlah segmen yang ada.
+                const level = Math.max(0, Math.min(IP_MASK_LEVEL, parts.length));
+                if (level === 0) return ip;
+
+                const visibleCount = parts.length - level;
+                const masked = parts.map((seg, i) => (i < visibleCount ? seg : maskToken));
+                return masked.join(sep);
+            }
+        };
+
+        // ── MODUL: Filter kata kasar (sensor otomatis jadi "***") ──
+        const WordFilter = {
+            _regex: null,
+            _build() {
+                if (this._regex) return this._regex;
+                const escaped = BAD_WORDS.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+                this._regex = new RegExp('\\b(' + escaped.join('|') + ')\\b', 'gi');
+                return this._regex;
+            },
+            clean(text) {
+                if (!text) return text;
+                return text.replace(this._build(), (m) => '*'.repeat(m.length));
+            }
+        };
+
+        // ── MODUL: Privacy Policy popover (klik untuk buka, tidak pindah tab/link) ──
+        const PrivacyBoard = {
+            isOpen: false,
+            toggle(e) {
+                if (e) e.stopPropagation();
+                this.isOpen = !this.isOpen;
+                document.getElementById('privacy-board').classList.toggle('open', this.isOpen);
+                if (typeof AudioFX !== 'undefined') AudioFX.click();
+            },
+            close() {
+                this.isOpen = false;
+                const el = document.getElementById('privacy-board');
+                if (el) el.classList.remove('open');
+            },
+            init() {
+                // klik di luar board otomatis menutup
+                document.addEventListener('click', (e) => {
+                    if (!this.isOpen) return;
+                    const board = document.getElementById('privacy-board');
+                    const trigger = document.getElementById('privacy-trigger');
+                    if (board && !board.contains(e.target) && trigger && !trigger.contains(e.target)) {
+                        this.close();
+                    }
+                });
+            }
+        };
+        document.addEventListener('DOMContentLoaded', () => PrivacyBoard.init());
+
+        // Parser format teks chat ala WhatsApp/Telegram: *bold* _underline_ ~coret~ "kutip"
+        // > kutipan-baris, [label](url), dan [alt]{url-gambar/gif/video}.
+        // PENTING: escape HTML dilakukan LEBIH DULU, baru token diubah jadi tag —
+        // jadi user tidak bisa menyuntik HTML/JS lewat pesan (aman untuk global chat).
+        // Preferensi tampilan media per-viewer (autoplay/loop/suara default) — persist localStorage,
+        // mekanisme on/off sama seperti toggle bell notifikasi.
+        const MediaPrefs = {
+            autoplay: localStorage.getItem('nufa_media_autoplay') !== 'off',
+            loop: localStorage.getItem('nufa_media_loop') !== 'off',
+            soundDefault: localStorage.getItem('nufa_media_sound') === 'on',
+            toggle(key) {
+                this[key] = !this[key];
+                const storeKey = key === 'soundDefault' ? 'nufa_media_sound' : 'nufa_media_' + key;
+                localStorage.setItem(storeKey, this[key] ? 'on' : 'off');
+            }
+        };
+        window.MediaPrefs = MediaPrefs;
+
+        const ChatFormat = {
+            _mediaSeq: 0,
+            esc(s) {
+                return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+            },
+            isSafeUrl(url) { return /^https?:\/\//i.test(url); },
+            parseYouTubeId(url) {
+                const m = url.match(/(?:youtube(?:-nocookie)?\.com\/(?:watch\?(?:[^#]*&)?v=|shorts\/|embed\/|live\/|v\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
+                return m ? m[1] : null;
+            },
+            parseDriveId(url) {
+                const m = url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([A-Za-z0-9_-]{10,})/i);
+                return m ? m[1] : null;
+            },
+            parseSpotifyId(url) {
+                const m = url.match(/open\.spotify\.com\/(track|album|playlist|episode|show)\/([A-Za-z0-9]+)/i);
+                return m ? { type: m[1], id: m[2] } : null;
+            },
+            parseMapsQuery(url) {
+                let m = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+                if (m) return `${m[1]},${m[2]}`;
+                m = url.match(/[?&]q=([^&]+)/);
+                if (m) return decodeURIComponent(m[1]);
+                m = url.match(/maps\/place\/([^/@]+)/);
+                if (m) return decodeURIComponent(m[1].replace(/\+/g, ' '));
+                return null;
+            },
+
+            // Ekstensi Drive yang boleh ditampilkan; selain ini pesan diblok saat kirim (lihat validateEmbeds).
+            ALLOWED_DRIVE_EXT: ['png', 'jpg', 'jpeg', 'webp', 'md', 'mp3', 'mp4', 'txt', 'doc', 'docx'],
+            getUrlExt(url) {
+                const m = url.match(/\.([a-z0-9]{2,5})(?:[?#]|$)/i);
+                return m ? m[1].toLowerCase() : null;
+            },
+            // Dipanggil sebelum kirim (GlobalChat.send). Return null = aman, atau ekstensi yang diblok.
+            validateEmbeds(raw) {
+                const re = /\[([^\[\]]*)\]\{([^{}]+)\}/g;
+                let m;
+                while ((m = re.exec(raw)) !== null) {
+                    const url = m[2];
+                    if (!this.isSafeUrl(url)) continue;
+                    if (!this.parseDriveId(url)) continue; // bukan link Drive, lewati
+                    const ext = this.getUrlExt(url);
+                    if (ext && !this.ALLOWED_DRIVE_EXT.includes(ext)) return ext;
+                }
+                return null;
+            },
+            driveFallback(imgEl, driveId, alt) {
+                const ifr = document.createElement('iframe');
+                ifr.className = 'chat-media chat-yt';
+                ifr.src = `https://drive.google.com/file/d/${driveId}/preview`;
+                ifr.title = alt || 'Drive';
+                ifr.setAttribute('allow', 'autoplay');
+                ifr.loading = 'lazy';
+                ifr.onerror = () => ifr.remove();
+                imgEl.replaceWith(ifr);
+            },
+            toggleMediaMute(btn, type) {
+                const willUnmute = btn.classList.contains('muted');
+                const wrap = btn.closest('.chat-media-wrap');
+                const media = wrap ? wrap.querySelector(type === 'yt' ? 'iframe' : 'video') : null;
+                if (media) {
+                    if (type === 'video') {
+                        media.muted = !willUnmute;
+                        if (willUnmute) media.play().catch(() => {});
+                    } else if (type === 'yt' && media.contentWindow) {
+                        media.contentWindow.postMessage(JSON.stringify({ event: 'command', func: willUnmute ? 'unMute' : 'mute', args: [] }), '*');
+                    }
+                }
+                btn.classList.toggle('muted', !willUnmute);
+                btn.innerHTML = `<i class="fa-solid fa-volume-${willUnmute ? 'high' : 'xmark'}"></i>`;
+                if (typeof GlobalChat !== 'undefined' && GlobalChat.handleMediaSoundToggle) {
+                    GlobalChat.handleMediaSoundToggle(willUnmute);
+                }
+            },
+
+            // Versi lengkap (untuk bubble chat) — boleh render gambar/video/link.
+            toHtml(raw) {
+                let text = this.esc(raw);
+
+                // [alt]{url} → media. Support: link gambar langsung, video/gif, YouTube, Google Drive.
+                // Video/gif diputar tanpa suara. Kalau gagal load / url tidak valid, elemen langsung hilang.
+                text = text.replace(/\[([^\[\]]*)\]\{([^{}]+)\}/g, (m, alt, url) => {
+                    const safe = this.isSafeUrl(url) ? url : '';
+                    if (!safe) return alt || '';
+                    const mp = window.MediaPrefs || { autoplay: true, loop: true, soundDefault: false };
+                    const mid = 'med' + (this._mediaSeq++);
+                    const volIcon = mp.soundDefault ? 'high' : 'xmark';
+                    const mutedCls = mp.soundDefault ? '' : 'muted';
+
+                    const ytId = this.parseYouTubeId(safe);
+                    if (ytId) {
+                        const ytParams = new URLSearchParams({
+                            autoplay: mp.autoplay ? '1' : '0',
+                            mute: mp.soundDefault ? '0' : '1',
+                            loop: mp.loop ? '1' : '0',
+                            playlist: ytId,       // wajib diisi ulang ID sendiri agar loop:1 berfungsi pada single video
+                            rel: '0',             // no related videos dari channel lain
+                            modestbranding: '1',  // sisakan logo YT kecil di pojok
+                            controls: '1',
+                            fs: '0',
+                            iv_load_policy: '3',  // sembunyikan anotasi
+                            disablekb: '1',
+                            playsinline: '1',
+                            enablejsapi: '1'      // dibutuhkan untuk toggle mute dari tombol custom
+                        });
+                        // origin cuma valid kalau halaman disajikan lewat http/https — kalau dibuka via
+                        // file:// (double-klik langsung) origin jadi "null"/"file://" dan YouTube API
+                        // menolak enablejsapi-nya, muncul error player generik. Jadi origin di-skip saat itu.
+                        if (/^https?:$/.test(location.protocol)) {
+                            ytParams.set('origin', location.origin);
+                        }
+                        const isShort = /\/shorts\//i.test(safe);
+                        const ytCls = isShort ? 'chat-yt-short' : 'chat-yt';
+                        return `<div class="chat-media-wrap" id="${mid}"><iframe class="chat-media ${ytCls}" src="https://www.youtube-nocookie.com/embed/${ytId}?${ytParams.toString()}" title="${alt}" allow="autoplay; encrypted-media" allowfullscreen loading="lazy" onerror="this.closest('.chat-media-wrap')?.remove()"></iframe><button type="button" class="media-mute-btn ${mutedCls}" onclick="ChatFormat.toggleMediaMute(this,'yt')" title="Suara"><i class="fa-solid fa-volume-${volIcon}"></i></button></div>`;
+                    }
+                    if (/(?:youtube(?:-nocookie)?\.com|youtu\.be)/i.test(safe)) {
+                        // Domain YouTube tapi bukan format video tunggal yang bisa di-embed (link channel/playlist/dll)
+                        return `<a href="${safe}" target="_blank" rel="noopener noreferrer nofollow" class="chat-file-link"><i class="fa-brands fa-youtube"></i> ${alt || 'Buka di YouTube'}</a>`;
+                    }
+
+                    const driveId = this.parseDriveId(safe);
+                    if (driveId) {
+                        const ext = this.getUrlExt(safe);
+                        if (ext && !this.ALLOWED_DRIVE_EXT.includes(ext)) return ''; // jaga-jaga utk pesan lama; validasi utama di send()
+                        if (ext === 'txt' || ext === 'doc' || ext === 'docx' || ext === 'md') {
+                            return `<a href="https://drive.google.com/file/d/${driveId}/view" target="_blank" rel="noopener noreferrer nofollow" class="chat-file-link"><i class="fa-solid fa-file-lines"></i> ${alt || 'Buka file'}</a>`;
+                        }
+                        const isKnownImage = ['png', 'jpg', 'jpeg', 'webp'].includes(ext);
+                        if (isKnownImage) {
+                            // Ekstensi gambar eksplisit ada di URL → coba thumbnail ringan dulu (bukan uc?export=view
+                            // yang sering diblok Google utk hotlink & bikin gambar ke-kill). Gagal → fallback ke preview universal.
+                            return `<img src="https://drive.google.com/thumbnail?id=${driveId}&sz=w1000" alt="${alt}" class="chat-media" loading="lazy" onerror="ChatFormat.driveFallback(this,'${driveId}','${alt}')">`;
+                        }
+                        // Ekstensi tidak diketahui (link share Drive standar TIDAK membawa ekstensi sama sekali —
+                        // ini kasus paling umum), atau mp4/webm/mp3: pakai preview universal Drive, yang otomatis
+                        // mendeteksi tipe file asli (video/gambar/audio/pdf) dan render dgn benar tanpa risiko hotlink-block.
+                        return `<iframe class="chat-media chat-yt" src="https://drive.google.com/file/d/${driveId}/preview" title="${alt || 'Drive'}" allow="autoplay" loading="lazy" onerror="this.remove()"></iframe>`;
+                    }
+
+                    // ── Spotify ──
+                    const spotify = this.parseSpotifyId(safe);
+                    if (spotify) {
+                        return `<iframe class="chat-media chat-spotify" src="https://open.spotify.com/embed/${spotify.type}/${spotify.id}?utm_source=generator" title="${alt || 'Spotify'}" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" onerror="this.remove()"></iframe>`;
+                    }
+
+                    // ── Google Maps ──
+                    if (/google\.com\/maps|maps\.app\.goo\.gl|goo\.gl\/maps/i.test(safe)) {
+                        const q = this.parseMapsQuery(safe);
+                        if (q) {
+                            return `<iframe class="chat-media chat-maps" src="https://maps.google.com/maps?q=${encodeURIComponent(q)}&z=15&output=embed" title="${alt || 'Lokasi Peta'}" loading="lazy" onerror="this.remove()"></iframe>`;
+                        }
+                        return alt || '';
+                    }
+
+                    if (/\.(mp4|webm|ogv)(\?.*)?$/i.test(safe)) {
+                        return `<div class="chat-media-wrap" id="${mid}"><video src="${safe}" class="chat-media" ${mutedCls ? 'muted' : ''} ${mp.autoplay ? 'autoplay' : ''} ${mp.loop ? 'loop' : ''} playsinline onerror="this.closest('.chat-media-wrap')?.remove()"></video><button type="button" class="media-mute-btn ${mutedCls}" onclick="ChatFormat.toggleMediaMute(this,'video')" title="Suara"><i class="fa-solid fa-volume-${volIcon}"></i></button></div>`;
+                    }
+                    return `<img src="${safe}" alt="${alt}" class="chat-media" loading="lazy" onerror="this.remove()">`;
+                });
+
+                // [label](url) → tautan biasa
+                text = text.replace(/\[([^\[\]]+)\]\(([^()]+)\)/g, (m, label, url) => {
+                    const safe = this.isSafeUrl(url) ? url : '#';
+                    return `<a href="${safe}" target="_blank" rel="noopener noreferrer nofollow">${label}</a>`;
+                });
+
+                // > kutipan baris
+                text = text.split('\n').map(line => {
+                    const m = line.match(/^&gt;\s?(.*)$/);
+                    return m ? `<span class="chat-quote">${m[1]}</span>` : line;
+                }).join('\n');
+
+                text = text.replace(/\*([^\*\n]+)\*/g, '<b>$1</b>');           // *bold*
+                text = text.replace(/_([^_\n]+)_/g, '<u>$1</u>');             // _underline_
+                text = text.replace(/~([^~\n]+)~/g, '<s>$1</s>');             // ~coret~
+                text = text.replace(/&quot;([^&\n]+)&quot;/g, '<q class="chat-inline-quote">$1</q>'); // "kutip"
+
+                return text.replace(/\n/g, '<br>');
+            },
+
+            // Versi ringkas teks-saja (untuk marquee/toast) — tanpa tag/media biar tidak merusak layout scroll.
+            toPlain(raw) {
+                let text = String(raw);
+                text = text.replace(/\[([^\[\]]*)\]\{([^{}]+)\}/g, (m, alt) => alt ? `📷 ${alt}` : '📷');
+                text = text.replace(/\[([^\[\]]+)\]\(([^()]+)\)/g, (m, label) => label);
+                text = text.replace(/^>\s?/gm, '');
+                text = text.replace(/\*([^\*\n]+)\*/g, '$1');
+                text = text.replace(/_([^_\n]+)_/g, '$1');
+                text = text.replace(/~([^~\n]+)~/g, '$1');
+                text = text.replace(/\n/g, ' ');
+                return this.esc(text);
+            }
+        };
+
+        const GlobalChat = {
+            db: null,
+            unsub: null,
+            myIp: null,
+            isOpen: false,
+            lastCount: 0,
+            started: false,
+            lastSendTime: 0,
+            localMessages: [], 
+
+            presenceId: null,
+            presenceUnsub: null,
+            presenceInterval: null,
+            myDevice: null,
+            onlineMap: {},
+            onlineListOpen: false,
+
+            // ── Notifikasi ──
+            notifEnabled: false,
+            initTime: 0,
+            seenIds: new Set(),
+
+            // Dipanggil HANYA saat tombol "BUKA AKSES DATA" ditekan
+            start() {
+                if (this.started) return;
+                this.started = true;
+                this.notifEnabled = localStorage.getItem('nufa_chat_notif') === 'on';
+                this._updateNotifBtn();
+
+                this.wideMode = localStorage.getItem('nufa_chat_wide') === 'on';
+                if (this.wideMode) document.getElementById('chat-panel').classList.add('wide');
+
+                this.matrixOn = localStorage.getItem('nufa_matrix_on') !== 'off';
+                if (typeof MatrixFX !== 'undefined') MatrixFX.setEnabled(this.matrixOn);
+
+                this.init();
+            },
+
+            async init() {
+                this.initTime = Date.now();
+                this.myDevice = this._detectDevice();
+                this.presenceId = sessionStorage.getItem('nufa_presence_id') || ('U-' + Math.random().toString(36).slice(2, 9));
+                sessionStorage.setItem('nufa_presence_id', this.presenceId);
+
+                const devIconEl = document.getElementById('chat-device-icon');
+                const devLabelEl = document.getElementById('chat-device-label');
+                if (devIconEl) { devIconEl.className = 'fa-brands ' + this.myDevice.icon + (
+                    // fa-android, fa-apple, fa-windows, fa-linux semuanya brands
+                    // fa-question-circle adalah solid
+                    this.myDevice.icon === 'fa-question-circle' ? ' fa-solid' : ' fa-brands'
+                ).replace('fa-brands fa-brands', 'fa-brands'); }
+                if (devLabelEl) devLabelEl.textContent = this.myDevice.label;
+
+                // Ambil IP publik pengirim (dipakai untuk ditampilkan ke semua orang, tanpa login)
+                const ipDisplayEl = document.getElementById('chat-myip-display');
+                if (ipDisplayEl) ipDisplayEl.textContent = 'Mengambil...';
+                try {
+                    const r = await fetch('https://api.ipify.org?format=json');
+                    const d = await r.json();
+                    this.myIp = d.ip;
+                    if (ipDisplayEl) ipDisplayEl.textContent = this.myIp;
+                } catch (e) {
+                    this.myIp = 'UNKNOWN';
+                    if (ipDisplayEl) ipDisplayEl.textContent = 'UNKNOWN';
+                }
+                // Perbaiki ikon device setelah kita punya semua info
+                if (devIconEl) {
+                    const isBrand = ['fa-android','fa-apple','fa-windows','fa-linux'].includes(this.myDevice.icon);
+                    devIconEl.className = (isBrand ? 'fa-brands ' : 'fa-solid ') + this.myDevice.icon;
+                }
+
+                const configured = FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith('GANTI');
+                if (configured && typeof firebase !== 'undefined') {
+                    try {
+                        if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+                        this.db = firebase.firestore();
+                        this.listen();
+                        this.startPresence();
+                        return;
+                    } catch (e) {
+                        console.warn('Firebase gagal init, fallback ke mode lokal:', e);
+                    }
+                }
+                
+                this.renderMessages([
+                    { ip: 'SYSTEM', text: '⚠️ — chat ini cuma lokal di browser kamu sendiri. aktifkan internet untuk mengaktifkan global live chat sungguhan.', ts: Date.now() }
+                ]);
+                this.renderOnlineList({ [this.presenceId]: { device: this.myDevice, ts: Date.now() } });
+            },
+
+            listen() {
+                this.db.collection('global_chat')
+                    .orderBy('ts', 'desc')
+                    .limit(50)
+                    .onSnapshot((snap) => {
+                        const msgs = [];
+                        snap.forEach(doc => msgs.push({ id: doc.id, ...doc.data() }));
+                        msgs.reverse();
+                        this.renderMessages(msgs);
+
+                        // Notifikasi HP: hanya untuk pesan baru yang muncul setelah chat dibuka,
+                        // bukan punya sendiri, dan toggle notifikasi sedang ON.
+                        snap.docChanges().forEach(change => {
+                            if (change.type !== 'added') return;
+                            const m = change.doc.data();
+                            const id = change.doc.id;
+                            if (this.seenIds.has(id)) return;
+                            this.seenIds.add(id);
+                            if (m.ts && m.ts < this.initTime) return; // pesan lama saat load awal
+                            if (m.uid ? m.uid === this.presenceId : m.ip === this.myIp) return; // jangan notif pesan sendiri
+                            this.notify(m);
+                            if (window.NufaNotify) window.NufaNotify.trigger(m);
+                        });
+
+                        if (!this.isOpen && msgs.length > this.lastCount) {
+                            document.getElementById('chat-dot').style.display = 'block';
+                        }
+                        this.lastCount = msgs.length;
+                    }, (err) => console.warn('Chat listen error:', err));
+            },
+
+            // ── PRESENCE: tandai device ini online (push-based, real-time lintas perangkat) ──
+
+            startPresence() {
+                if (!FIREBASE_CONFIG.databaseURL || !firebase.database) {
+                    console.warn('Realtime Database belum dikonfigurasi — presence fallback ke mode polling Firestore.');
+                    return this.startPresenceFallback();
+                }
+
+                const rtdb = firebase.database();
+                const myIpKey = this._ipKey(this.myIp);
+                const presenceRef = rtdb.ref('presence_global/' + this.presenceId);
+                const connectedRef = rtdb.ref('.info/connected');
+                this.onlineMap = this._groupByIp({
+                    [this.presenceId]: { ip: this.myIp, device: this.myDevice, ts: Date.now() }
+                });
+                this.renderOnlineList(this.onlineMap);
+
+                // Setiap kali koneksi ke Firebase tersambung (termasuk reconnect otomatis
+                
+                connectedRef.on('value', (snap) => {
+                    if (snap.val() === false) return;
+                    presenceRef.set({
+                        ipKey: myIpKey,
+                        ip: this.myIp,
+                        device: this.myDevice,
+                        ts: firebase.database.ServerValue.TIMESTAMP
+                    }).catch(err => {
+                        console.error('[Presence] Gagal set data online — cek Realtime Database Rules (write) & databaseURL:', err);
+                    });
+                    presenceRef.onDisconnect().remove().catch(err => {
+                        console.error('[Presence] Gagal set onDisconnect handler:', err);
+                    });
+                });
+
+                const goOffline = () => { try { presenceRef.remove(); } catch (e) {} };
+                window.addEventListener('pagehide', goOffline);
+                window.addEventListener('beforeunload', goOffline);
+
+                // onValue di sini PUSH dari server tiap ada perubahan — bukan polling —
+                
+                rtdb.ref('presence_global').on('value', (snap) => {
+                    const data = snap.val() || {};
+                    // FIX: kalau snapshot server belum sempat menyertakan device
+                    // sendiri (misal baru konek), tetap selipkan biar DOT sendiri
+                    // gak sempat hilang/flicker.
+                    if (!data[this.presenceId]) {
+                        data[this.presenceId] = { ip: this.myIp, device: this.myDevice, ts: Date.now() };
+                    }
+                    const grouped = this._groupByIp(data);
+                    this.onlineMap = grouped;
+                    this.renderOnlineList(grouped);
+                }, (err) => console.error('[Presence] Gagal baca daftar online — cek Realtime Database Rules (read):', err));
+            },
+
+            // Kelompokkan entri presence berdasarkan IP, supaya 1 IP dengan banyak
+            
+            _groupByIp(data) {
+                const byIp = {};
+                Object.keys(data).forEach(id => {
+                    const d = data[id];
+                    if (!d) return;
+                    const key = d.ipKey || this._ipKey(d.ip);
+                    if (!byIp[key]) {
+                        byIp[key] = { ip: d.ip, device: d.device, ts: d.ts, count: 1, ids: [id], isYou: id === this.presenceId };
+                    } else {
+                        byIp[key].count += 1;
+                        byIp[key].ids.push(id);
+                        byIp[key].ts = Math.max(byIp[key].ts || 0, d.ts || 0);
+                        if (id === this.presenceId) byIp[key].isYou = true;
+                    }
+                });
+                return byIp;
+            },
+
+            _ipKey(ip) {
+                return String(ip || 'UNKNOWN').replace(/[.#$\[\]/]/g, '_');
+            },
+
+            
+            startPresenceFallback() {
+                const ref = this.db.collection('presence_global').doc(this.presenceId);
+                const beat = () => ref.set({ ip: this.myIp, device: this.myDevice, ts: Date.now() }).catch(() => {});
+                beat();
+                this.presenceInterval = setInterval(beat, 8000);
+
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'visible') beat();
+                });
+
+                const goOffline = () => { try { ref.delete(); } catch (e) {} };
+                window.addEventListener('pagehide', goOffline);
+                window.addEventListener('beforeunload', goOffline);
+
+                this.db.collection('presence_global').onSnapshot((snap) => {
+                    const now = Date.now();
+                    const data = {};
+                    snap.forEach(doc => {
+                        const d = doc.data();
+                        if (d.ts && now - d.ts < 20000) data[doc.id] = d;
+                    });
+                    const grouped = this._groupByIp(data);
+                    this.onlineMap = grouped;
+                    this.renderOnlineList(grouped);
+                }, (err) => console.warn('Presence listen error:', err));
+            },
+
+            renderOnlineList(map) {
+                const ids = Object.keys(map);
+                
+                // MENGUBAH CARA MENGHITUNG COUNT:
+                // Menjumlahkan semua d.count dari setiap item di map. 
+                // Jika d.count tidak ada/undifined, default ke 1.
+                const count = ids.reduce((total, key) => total + (map[key].count || 1), 0);
+
+                const countEl = document.getElementById('chat-online-count');
+                if (countEl) {
+                    const prev = this._prevOnlineCount;
+                    countEl.innerHTML = `<span class="num">${count}</span> ONLINE`;
+                    if (typeof prev === 'number' && prev !== count) {
+                        countEl.classList.remove('bump');
+                        void countEl.offsetWidth;
+                        countEl.classList.add('bump');
+                    }
+                    this._prevOnlineCount = count;
+                }
+                const updEl = document.getElementById('chat-online-updated');
+                if (updEl) updEl.textContent = '• ' + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+                const listEl = document.getElementById('chat-online-list');
+                if (!listEl) return;
+const brandIcons = ['fa-android','fa-apple','fa-windows','fa-linux'];
+listEl.innerHTML = ids.map(key => {
+    const d = map[key];
+    const rawIcon = (d.device && d.device.icon) ? d.device.icon : 'fa-mobile-screen';
+    const iconClass = brandIcons.includes(rawIcon) ? `fa-brands ${rawIcon}` : `fa-solid ${rawIcon}`;
+    const isYou = d.isYou;
+    const ipDisplay = isYou ? this.myIp : this._maskIp(d.ip);
+    const tag = isYou
+        ? '<span class="you-tag">ANDA</span>'
+        : '<span class="you-tag" style="background:var(--glitch-red);box-shadow:0 0 8px rgba(255,0,60,0.5);">ANON</span>';
+    return `
+        <div class="chat-online-item">
+            <span class="chat-online-avatar"><i class="${iconClass}"></i></span>
+            <span class="label">
+                <span>${this._esc(ipDisplay || 'Perangkat')}${d.count > 1 ? ` <small>(${d.count} LIVE)</small>` : ''}</span>
+                <small>${this._esc(d.device ? d.device.label : 'Perangkat')} • live</small>
+            </span>
+            ${tag}
+        </div>`;
+}).join('') || '<div class="chat-online-item">// Tidak ada yang online</div>';
+            },
+
+            toggleOnlineList() {
+                this.onlineListOpen = !this.onlineListOpen;
+                document.getElementById('chat-online-list').classList.toggle('expanded', this.onlineListOpen);
+                document.getElementById('chat-dashboard').classList.toggle('expanded', this.onlineListOpen);
+                if (typeof AudioFX !== 'undefined') AudioFX.click();
+            },
+
+// ── NOTIFIKASI HP ──
+            async toggleNotif() {
+                if (typeof AudioFX !== 'undefined') AudioFX.click();
+                if (!this.notifEnabled) {
+                    if ('Notification' in window && Notification.permission === 'default') {
+                        const permission = await Notification.requestPermission();
+                        if (permission !== 'granted') {
+                            this._showToast({ ip: 'SYSTEM', text: '⚠ Izin notifikasi ditolak browser.' });
+                            return;
+                        }
+                    }
+                    if (Notification.permission !== 'granted') {
+                        this._showToast({ ip: 'SYSTEM', text: '⚠ Izin notifikasi diblokir — aktifkan manual di pengaturan browser.' });
+                        return;
+                    }
+                    this.notifEnabled = true;
+                    localStorage.setItem('nufa_chat_notif', 'on');
+                    this._showToast({ ip: 'SYSTEM', text: '🔔 Notifikasi aktif — kamu akan dapat alert untuk setiap chat baru.' });
+                    if (window.NufaNotify) window.NufaNotify.requestPermission();
+                } else {
+                    this.notifEnabled = false;
+                    localStorage.setItem('nufa_chat_notif', 'off');
+                    this._showToast({ ip: 'SYSTEM', text: '🔕 Notifikasi dimatikan.' });
+                }
+                this._updateNotifBtn();
+            },
+
+            _updateNotifBtn() {
+                const btn = document.getElementById('chat-notif-toggle');
+                if (!btn) return;
+                btn.classList.toggle('notif-on', this.notifEnabled);
+                btn.innerHTML = this.notifEnabled ? '<i class="fa-solid fa-bell"></i>' : '<i class="fa-solid fa-bell-slash"></i>';
+            },
+
+            async notify(m) {
+                if (!this.notifEnabled) return;
+
+                // Lapis 1: Toast in-app — jalan di semua device
+                this._showToast(m);
+
+                // Lapis 2: Vibrasi HP
+                if (navigator.vibrate) { try { navigator.vibrate([180, 80, 180]); } catch (e) {} }
+
+                // Lapis 3: Pulse tombol chat
+                const chatBtn = document.getElementById('chat-btn');
+                if (chatBtn) {
+                    chatBtn.classList.remove('pulse-alert');
+                    void chatBtn.offsetWidth;
+                    chatBtn.classList.add('pulse-alert');
+                }
+
+                // Lapis 4: OS Notification via Service Worker (bekerja di Android)
+                if (Notification.permission === 'granted' && 'serviceWorker' in navigator) {
+                    try {
+                        const reg = await navigator.serviceWorker.ready;
+                        reg.showNotification('💬 ' + this._maskIp(m.ip || 'Anonim') + ' • Global Live Chat', {
+                            body: WordFilter.clean(m.text),
+                            tag: 'nufa-global-chat',
+                            renotify: true,
+                            icon: '/appcover.jpg',
+                            badge: '/notif.png',
+                            vibrate: [200, 100, 200],
+                        });
+                    } catch (e) { console.warn('Gagal kirim OS notification:', e); }
+                }
+            },
+
+            _showToast(m) {
+                const stack = document.getElementById('chat-toast-stack');
+                if (!stack) return;
+                const el = document.createElement('div');
+                el.className = 'chat-toast';
+                el.innerHTML = `<span class="t-ip"><i class="fa-solid fa-comment-dots"></i> ${this._esc(m.ip === 'SYSTEM' ? 'SYSTEM' : (this._maskIp(m.ip) || 'Anonim'))}</span>${ChatFormat.toPlain(WordFilter.clean(m.text))}`;
+                el.onclick = () => { this.toggle(true); el.remove(); };
+                stack.appendChild(el);
+                setTimeout(() => el.remove(), 4100);
+                // batasi maksimal 3 toast bertumpuk biar gak penuh layar
+                while (stack.children.length > 3) stack.removeChild(stack.firstChild);
+            },
+
+            _detectDevice() {
+                const ua = navigator.userAgent || '';
+                let os = 'Unknown OS';
+                let icon = 'fa-question-circle';
+                // Urutan penting: Android sebelum Linux, iOS sebelum Macintosh
+                if (/android/i.test(ua)) { os = 'Android'; icon = 'fa-android'; }
+                else if (/iphone/i.test(ua)) { os = 'iPhone (iOS)'; icon = 'fa-apple'; }
+                else if (/ipad/i.test(ua)) { os = 'iPad (iOS)'; icon = 'fa-apple'; }
+                else if (/ipod/i.test(ua)) { os = 'iPod (iOS)'; icon = 'fa-apple'; }
+                else if (/windows/i.test(ua)) { os = 'Windows'; icon = 'fa-windows'; }
+                else if (/macintosh|mac os x/i.test(ua)) { os = 'MacOS'; icon = 'fa-apple'; }
+                else if (/linux/i.test(ua)) { os = 'Linux'; icon = 'fa-linux'; }
+
+                let browser = 'Browser';
+                if (/edg\//i.test(ua)) browser = 'Edge';
+                else if (/opr\//i.test(ua)) browser = 'Opera';
+                else if (/chrome|crios/i.test(ua)) browser = 'Chrome';
+                else if (/firefox|fxios/i.test(ua)) browser = 'Firefox';
+                else if (/safari/i.test(ua)) browser = 'Safari';
+
+                return { label: `${os} • ${browser}`, icon };
+            },
+
+            renderMessages(msgs) {
+                const box = document.getElementById('chat-messages');
+                box.innerHTML = msgs.map(m => `
+                    <div class="chat-msg">
+                        <span class="chat-ip">${this._esc(m.ip === 'SYSTEM' ? 'SYSTEM' : (this._maskIp(m.ip) || 'ANONIM'))} • ${this._time(m.ts)}</span>
+                        <span class="chat-text">${ChatFormat.toHtml(WordFilter.clean(m.text))}</span>
+                    </div>
+                `).join('');
+                box.scrollTop = box.scrollHeight;
+                this.renderMarquee(msgs);
+            },
+
+            renderMarquee(msgs) {
+                const track = document.getElementById('chat-marquee-track');
+                const bar = document.getElementById('chat-marquee-bar');
+                if (!msgs.length) { bar.classList.remove('live'); return; }
+                const recent = msgs.slice(-15);
+                const html = recent.map(m =>
+                    `<span class="mq-item"><span class="mq-ip">[${this._esc(m.ip === 'SYSTEM' ? 'SYSTEM' : (this._maskIp(m.ip) || 'ANONIM'))}]</span>${ChatFormat.toPlain(WordFilter.clean(m.text))}</span>`
+                ).join('');
+                // duplikat agar scroll infinite mulus
+                track.innerHTML = html + html;
+                bar.classList.add('live');
+            },
+
+            _esc(s) {
+                return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+            },
+
+            _maskIp(ip) {
+                return IpMask.apply(ip);
+            },
+
+            _time(ts) {
+    if (!ts) return '';
+    const d = new Date(ts);
+    return d.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    }) + ' ' + d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+},
+
+            // Textarea melebar otomatis mengikuti isi (ala WhatsApp/Telegram), dibatasi max-height (CSS)
+            autoGrow(el) {
+                el.style.height = 'auto';
+                el.style.height = el.scrollHeight + 'px';
+            },
+
+            // Sisip pasangan simbol format di sekitar teks yang diseleksi (atau placeholder kalau belum pilih apa-apa)
+            _wrapSelection(before, after, placeholder) {
+                const el = document.getElementById('chat-input');
+                if (!el) return;
+                el.focus();
+                const start = el.selectionStart, end = el.selectionEnd;
+                const val = el.value;
+                const sel = val.slice(start, end) || placeholder;
+                el.value = val.slice(0, start) + before + sel + after + val.slice(end);
+                const from = start + before.length;
+                el.setSelectionRange(from, from + sel.length);
+                this.autoGrow(el);
+            },
+
+            // Sisip prefix di awal baris tempat kursor berada (untuk kutipan baris ">")
+            _prefixLine(prefix) {
+                const el = document.getElementById('chat-input');
+                if (!el) return;
+                el.focus();
+                const start = el.selectionStart;
+                const val = el.value;
+                const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+                el.value = val.slice(0, lineStart) + prefix + val.slice(lineStart);
+                const pos = start + prefix.length;
+                el.setSelectionRange(pos, pos);
+                this.autoGrow(el);
+            },
+
+            // Dipanggil dari tombol helper format di atas kolom kirim
+            insertFormat(type) {
+                if (typeof AudioFX !== 'undefined') AudioFX.click();
+                switch (type) {
+                    case 'bold':         this._wrapSelection('*', '*', 'tebal'); break;
+                    case 'underline':    this._wrapSelection('_', '_', 'garis bawah'); break;
+                    case 'strike':       this._wrapSelection('~', '~', 'coret'); break;
+                    case 'quote-inline': this._wrapSelection('"', '"', 'kutip'); break;
+                    case 'link':         this._wrapSelection('[', '](https://)', 'teks link'); break;
+                    case 'media':        this._wrapSelection('[', ']{https://}', 'alt gambar-video-Display'); break;
+                }
+            },
+
+            toggle(forceOpen) {
+                this.isOpen = typeof forceOpen === 'boolean' ? forceOpen : !this.isOpen;
+                document.getElementById('chat-panel').classList.toggle('open', this.isOpen);
+                if (this.isOpen) document.getElementById('chat-dot').style.display = 'none';
+                if (typeof AudioFX !== 'undefined') AudioFX.click();
+
+                // Chat-first: BGM utama baru dilanjutkan setelah modal chat ditutup, bukan bersamaan,
+                // dan hanya kalau tidak ada suara media chat yang lagi aktif.
+                if (!this.isOpen && typeof System !== 'undefined' && System.bgm
+                    && localStorage.getItem('nufa_music') === 'on'
+                    && System.bgm.paused && (this.activeMediaSoundCount || 0) === 0) {
+                    System.bgm.play().catch(() => {});
+                }
+            },
+
+            // ── Pengaturan tampilan media (gear, kembar dari toolbar rich-text) ──
+            activeMediaSoundCount: 0,
+            toggleMediaSettings() {
+                if (typeof AudioFX !== 'undefined') AudioFX.click();
+                const panel = document.getElementById('media-settings-panel');
+                const btn = document.getElementById('media-settings-btn');
+                const nowOpen = !panel.classList.contains('open');
+                panel.classList.toggle('open', nowOpen);
+                btn.classList.toggle('on', nowOpen);
+                if (nowOpen) {
+                    document.getElementById('ms-autoplay').checked = MediaPrefs.autoplay;
+                    document.getElementById('ms-loop').checked = MediaPrefs.loop;
+                    document.getElementById('ms-sound').checked = MediaPrefs.soundDefault;
+                    document.getElementById('ms-widescreen').checked = this.wideMode;
+                    document.getElementById('ms-matrix').checked = this.matrixOn;
+                }
+            },
+            updateMediaPref(key, checked) {
+                if (MediaPrefs[key] !== checked) MediaPrefs.toggle(key);
+                this._showToast({ ip: 'SYSTEM', text: `⚙ ${key === 'soundDefault' ? 'Suara default' : key === 'autoplay' ? 'Autoplay' : 'Loop'} media ${checked ? 'diaktifkan' : 'dimatikan'} — berlaku utk pesan berikutnya.` });
+            },
+
+            // ── A. Perlebar panel chat + animasi ke atas (default OFF) ──
+            wideMode: false,
+            toggleWideMode(checked) {
+                if (typeof AudioFX !== 'undefined') AudioFX.click();
+                this.wideMode = checked;
+                const panel = document.getElementById('chat-panel');
+                panel.classList.toggle('wide', checked);
+                panel.classList.add('expanding');
+                setTimeout(() => panel.classList.remove('expanding'), 500);
+                try { localStorage.setItem('nufa_chat_wide', checked ? 'on' : 'off'); } catch(e) {}
+                this._showToast({ ip: 'SYSTEM', text: `⚙ Panel chat ${checked ? 'diperlebar' : 'dikembalikan normal'}.` });
+            },
+
+            // ── B. Toggle rain matrix number (default ON) ──
+            matrixOn: true,
+            toggleMatrixRain(checked) {
+                if (typeof AudioFX !== 'undefined') AudioFX.click();
+                this.matrixOn = checked;
+                if (typeof MatrixFX !== 'undefined') MatrixFX.setEnabled(checked);
+                try { localStorage.setItem('nufa_matrix_on', checked ? 'on' : 'off'); } catch(e) {}
+                this._showToast({ ip: 'SYSTEM', text: `⚙ Animasi rain matrix ${checked ? 'diaktifkan' : 'dimatikan'}.` });
+            },
+
+            // Redundansi suara: kalau ada media chat yang unmute, kunci tombol BGM utama biar tidak dobel suara.
+            handleMediaSoundToggle(isPlaying) {
+                this.activeMediaSoundCount = Math.max(0, (this.activeMediaSoundCount || 0) + (isPlaying ? 1 : -1));
+                const musicBtn = document.getElementById('music-btn');
+                if (musicBtn) musicBtn.classList.toggle('sound-locked', this.activeMediaSoundCount > 0);
+                if (typeof System !== 'undefined' && System.bgm && this.activeMediaSoundCount > 0 && !System.bgm.paused) {
+                    System.bgm.pause();
+                }
+            },
+
+            // ── Kirim pesan, dengan cooldown anti-spam + filter kata kasar ──
+            async send() {
+                const sendBtn = document.getElementById('chat-send');
+                const now = Date.now();
+                const elapsed = now - this.lastSendTime;
+
+                // Masih dalam cooldown → blok kirim, tampilkan sisa waktu di tombol.
+                if (elapsed < SEND_COOLDOWN_MS) {
+                    this._flashCooldown(sendBtn, SEND_COOLDOWN_MS - elapsed);
+                    return;
+                }
+
+                const input = document.getElementById('chat-input');
+                const rawText = input.value.trim();
+                if (!rawText) return;
+
+                // Ban format Drive yang tak didukung — pesan tidak ditampilkan & tidak dikirim.
+                const badExt = ChatFormat.validateEmbeds(rawText);
+                if (badExt) {
+                    this._showToast({ ip: 'SYSTEM', text: `⛔ Format .${badExt} tak didukung — pesan tidak dikirim.` });
+                    return;
+                }
+
+                input.value = '';
+                this.autoGrow(input);
+
+                this.lastSendTime = now;
+                this._lockSendButton(sendBtn, SEND_COOLDOWN_MS);
+
+                // Kata kasar otomatis disensor jadi tanda bintang sebelum disimpan.
+                const text = WordFilter.clean(rawText.slice(0, 1024));
+
+                const payload = {
+                    ip: this._maskIp(this.myIp),
+                    uid: this.presenceId,
+                    text,
+                    ts: now
+                };
+
+                if (this.db) {
+                    try {
+                        await this.db.collection('global_chat').add(payload);
+                    } catch (e) {
+                        console.warn('Gagal kirim ke server, simpan lokal:', e);
+                        this.localMessages.push(payload);
+                        this.renderMessages(this.localMessages);
+                    }
+                } else {
+                    this.localMessages.push(payload);
+                    this.renderMessages(this.localMessages);
+                }
+                if (typeof AudioFX !== 'undefined') AudioFX.click();
+            },
+
+            _lockSendButton(btn, durationMs) {
+                if (!btn) return;
+                btn.disabled = true;
+                btn.classList.add('cooldown');
+                const startedAt = Date.now();
+                const tick = () => {
+                    const remain = durationMs - (Date.now() - startedAt);
+                    if (remain <= 0) {
+                        btn.disabled = false;
+                        btn.classList.remove('cooldown');
+                        btn.removeAttribute('data-cd');
+                        return;
+                    }
+                    btn.setAttribute('data-cd', Math.ceil(remain / 1000) + 's');
+                    requestAnimationFrame(tick);
+                };
+                tick();
+            },
+            _flashCooldown(btn) {
+                if (!btn) return;
+                btn.classList.add('cooldown');
+                if (navigator.vibrate) { try { navigator.vibrate(60); } catch (e) {} }
+            }
+        };
+(function () {
+    'use strict';
+
+    // ── Daftar headline yang akan bergantian ──────────────────
+    const HEADLINES = [
+        '🔥💯 mahaKarya anak bangsa 🇮🇩',
+        '⚡ Terhubung hanya dengan satu klik ke semua orang',
+        '🔒 Data & identitas Anda terenkripsi penuh',
+        '🌐 Akses percakapan lintas perangkat, dimana saja',
+        '⚙️ Terminal system canggih berbasis realtime',
+        '👁 Pantau siapa saja yang sedang online live',
+        '🛡 Koneksi aman — tanpa login, tanpa jejak',
+        '🔥💯 mahaKarya anak bangsa 🇮🇩',
+        '🚀 Latensi ultra-rendah, pesan terkirim instan',
+        '🔑 Identitas anonim — hanya IP terenkripsi yang terlihat',
+        '📡  Akses siapapun, kapanpun, sekarang',
+        '💬 Ruang obrolan Publik, Bertemakan siber',
+        '🖥️ Fullstack Development, murni vanila kode',
+
+    ];
+
+    // ── Karakter pool untuk efek scramble ────────────────────
+    const POOL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*<>[]{}|';
+
+    // ── Timing (ms) ───────────────────────────────────────────
+    const SCRAMBLE_DURATION = 800;   // durasi fase scramble
+    const HOLD_DURATION     = 3800;  // berapa lama teks diam sebelum ganti
+    const GLOW_DELAY        = 200;   // delay sebelum pulse glow menyala
+    const GLITCH_INTERVAL   = 5000;  // seberapa sering glitch micro-shift
+
+    let currentIndex = 0;
+    let scrambleRaf  = null;
+    let glitchTimer  = null;
+
+    // ── Tunggu DOM siap ───────────────────────────────────────
+    function init() {
+        const el = document.getElementById('chat-headline-text');
+        if (!el) return; // elemen belum ada, skip
+
+        cycleHeadline(el);
+        scheduleGlitch(el);
+    }
+
+    // ── Satu siklus: scramble → settle → tahan → ganti ───────
+    function cycleHeadline(el) {
+        const target = HEADLINES[currentIndex];
+        currentIndex = (currentIndex + 1) % HEADLINES.length;
+
+        // Set data-text untuk layer glitch pseudo-element
+        el.setAttribute('data-text', target);
+
+        // Fase scramble
+        el.classList.add('scrambling');
+        el.style.animation = 'none';
+
+        const start = performance.now();
+
+        function scrambleFrame(now) {
+            const elapsed  = now - start;
+            const progress = Math.min(elapsed / SCRAMBLE_DURATION, 1);
+
+            // Karakter yang sudah "terkunci" dari kiri = semakin banyak seiring progress
+            const lockedCount = Math.floor(progress * target.length);
+            let display = '';
+
+            for (let i = 0; i < target.length; i++) {
+                if (i < lockedCount || target[i] === ' ') {
+                    display += target[i]; // karakter asli
+                } else {
+                    display += POOL[Math.floor(Math.random() * POOL.length)]; // karakter acak
+                }
+            }
+
+            el.textContent = display;
+
+            if (progress < 1) {
+                scrambleRaf = requestAnimationFrame(scrambleFrame);
+            } else {
+                // Teks final sudah settle
+                el.textContent = target;
+                el.classList.remove('scrambling');
+
+                // Reveal animation
+                el.style.animation = 'none';
+                void el.offsetWidth; // reflow paksa
+                el.style.animation =
+                    `headline-reveal 0.35s ease forwards, ` +
+                    `headline-glow-pulse 2.5s ease-in-out ${GLOW_DELAY}ms infinite`;
+
+                // Jadwalkan siklus berikutnya
+                setTimeout(() => cycleHeadline(el), HOLD_DURATION);
+            }
+        }
+
+        scrambleRaf = requestAnimationFrame(scrambleFrame);
+    }
+
+    // ── Glitch micro-shift acak ───────────────────────────────
+    function scheduleGlitch(el) {
+        glitchTimer = setInterval(() => {
+            // Hanya glitch kalau tidak sedang scramble
+            if (!el.classList.contains('scrambling')) {
+                el.classList.remove('glitch-fire');
+                void el.offsetWidth;
+                el.classList.add('glitch-fire');
+                setTimeout(() => el.classList.remove('glitch-fire'), 400);
+            }
+        }, GLITCH_INTERVAL);
+    }
+
+    // ── Kick-off ──────────────────────────────────────────────
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+    
+(function () {
+  'use strict';
+  const BC_NAME = 'nufa-realtime';
+  let swReg = null;
+  let bc    = null;
+  async function registerSW() {
+    if (!('serviceWorker' in navigator)) {
+      console.warn('[SW-Client] Service Worker tidak didukung browser ini.');
+      return;
+    }
+    try {
+      swReg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+      console.log('[SW-Client] SW terdaftar:', swReg.scope);
+      swReg.addEventListener('updatefound', () => {
+        const newWorker = swReg.installing;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            console.log('[SW-Client] Versi baru SW tersedia.');
+            if (navigator.serviceWorker.controller) {
+              navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+            }
+          }
+        });
+      });
+
+      sendFirebaseConfig();
+
+    } catch (e) {
+      console.warn('[SW-Client] Gagal daftar SW:', e);
+    }
+  }
+
+  function sendFirebaseConfig() {
+    if (typeof FIREBASE_CONFIG === 'undefined') return;
+    if (!navigator.serviceWorker.controller) return;
+    navigator.serviceWorker.controller.postMessage({
+      type:    'SET_FIREBASE_CONFIG',
+      payload: FIREBASE_CONFIG,
+    });
+  }
+  function initBroadcastChannel() {
+    if (typeof BroadcastChannel === 'undefined') return;
+    bc = new BroadcastChannel(BC_NAME);
+    bc.onmessage = (event) => {
+      const { type, payload } = event.data || {};
+
+      if (type === 'NEW_CHAT_MESSAGE' || type === 'PUSH_RECEIVED') {
+        if (typeof GlobalChat !== 'undefined' && GlobalChat.started) {
+          GlobalChat.notify(payload);
+        }
+      }
+
+      if (type === 'OPEN_CHAT') {
+        if (typeof GlobalChat !== 'undefined') {
+          GlobalChat.toggle(true);
+        }
+      }
+    };
+  }
+
+  function initSWMessageListener() {
+    if (!('serviceWorker' in navigator)) return;
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      const { type, payload } = event.data || {};
+      if ((type === 'NEW_CHAT_MESSAGE' || type === 'PUSH_RECEIVED')
+          && typeof GlobalChat !== 'undefined' && GlobalChat.started) {
+        GlobalChat.notify(payload);
+      }
+      if (type === 'OPEN_CHAT' && typeof GlobalChat !== 'undefined') {
+        GlobalChat.toggle(true);
+      }
+    });
+  }
+
+  function patchGlobalChatSend() {
+    if (typeof GlobalChat === 'undefined') return;
+
+    const _origSend = GlobalChat.send.bind(GlobalChat);
+    GlobalChat.send = async function () {
+      if (!navigator.onLine) {
+        const input   = document.getElementById('chat-input');
+        const rawText = input ? input.value.trim() : '';
+        if (!rawText) return;
+        if (input) { input.value = ''; if (typeof GlobalChat.autoGrow === 'function') GlobalChat.autoGrow(input); }
+
+        const payload = {
+          ip:   GlobalChat._maskIp(GlobalChat.myIp || 'OFFLINE'),
+          uid:  GlobalChat.presenceId || 'SW-queue',
+          text: rawText.slice(0, 1024),
+          ts:   Date.now(),
+        };
+
+        if (navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({
+            type:    'ENQUEUE_MESSAGE',
+            payload,
+          });
+        }
+        GlobalChat._showToast({ ip: 'SYSTEM', text: '📴 Pesan disimpan — akan terkirim saat online kembali.' });
+        return;
+      }
+
+      await _origSend();
+      const lastMsg = {
+        ip:   GlobalChat._maskIp(GlobalChat.myIp),
+        text: '(lihat pesan terbaru)',
+        ts:   Date.now(),
+      };
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type:    'BROADCAST_CHAT',
+          payload: lastMsg,
+        });
+      }
+    };
+  }
+window.addEventListener('load', async () => {
+    await registerSW();
+    initBroadcastChannel();
+    initSWMessageListener();
+    patchGlobalChatSend();
+    navigator.serviceWorker && navigator.serviceWorker.addEventListener('controllerchange', () => {
+      sendFirebaseConfig();
+    });
+  });
+
+})();
+    </script>
+</body>
+</html>
