@@ -377,6 +377,9 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
         .chat-text iframe.chat-yt-short { aspect-ratio: 9 / 16; max-width: 200px; }
         .chat-text iframe.chat-spotify { aspect-ratio: auto; height: 152px; max-width: 300px; }
         .chat-text iframe.chat-drive-doc { aspect-ratio: 4 / 3; max-width: 300px; }
+        /* Drive generik (ekstensi tak diketahui / video) — tanpa aspect-ratio dipaksa spt YT 16:9,
+           supaya konten portrait (umum dari HP) tidak dipaksa ke kotak landscape & muncul ruang kosong besar. */
+        .chat-text iframe.chat-drive-generic { aspect-ratio: auto; height: min(60vh, 380px); max-width: 300px; }
         .chat-text iframe.chat-maps { aspect-ratio: auto; height: 220px; max-width: 300px; }
         .chat-text .chat-quote {
             display: block; border-left: 2px solid var(--neon); padding-left: 8px;
@@ -2605,7 +2608,7 @@ startLatency: function() {
             },
             driveFallback(imgEl, driveId, alt) {
                 const ifr = document.createElement('iframe');
-                ifr.className = 'chat-media chat-yt';
+                ifr.className = 'chat-media chat-drive-generic';
                 ifr.src = `https://drive.google.com/file/d/${driveId}/preview`;
                 ifr.title = alt || 'Drive';
                 ifr.setAttribute('allow', 'autoplay');
@@ -2693,7 +2696,7 @@ startLatency: function() {
                         // Ekstensi tidak diketahui (link share Drive standar TIDAK membawa ekstensi sama sekali —
                         // ini kasus paling umum), atau mp4/webm/mp3: pakai preview universal Drive, yang otomatis
                         // mendeteksi tipe file asli (video/gambar/audio/pdf) dan render dgn benar tanpa risiko hotlink-block.
-                        return `<iframe class="chat-media chat-yt" src="https://drive.google.com/file/d/${driveId}/preview" title="${alt || 'Drive'}" allow="autoplay" loading="lazy" onerror="this.remove()"></iframe>`;
+                        return `<iframe class="chat-media chat-drive-generic" src="https://drive.google.com/file/d/${driveId}/preview" title="${alt || 'Drive'}" allow="autoplay" loading="lazy" onerror="this.remove()"></iframe>`;
                     }
 
                     // ── Spotify ──
