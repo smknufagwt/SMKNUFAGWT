@@ -2830,6 +2830,15 @@ startLatency: function() {
                     try {
                         if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
                         this.db = firebase.firestore();
+                        try {
+                            await this.db.enablePersistence({ synchronizeTabs: true });
+                        } catch (e) {
+                            if (e.code === 'failed-precondition') {
+                                console.warn('[Chat] Persistence gagal (multi-tab tanpa sync):', e.message);
+                            } else if (e.code === 'unimplemented') {
+                                console.warn('[Chat] Persistence tidak didukung browser ini.');
+                            }
+                        }
                         this.listen();
                         this.startPresence();
                         return;
