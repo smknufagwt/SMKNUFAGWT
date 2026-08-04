@@ -73,9 +73,19 @@ const CacheModule = {
     }
   }
 };
-    await self.registration.showNotification(title, options);
 
-    // Broadcast ke halaman aktif bahwa ada pesan baru (realtime sync)
+// ============================================================
+// [3] PUSH_MODULE — Terima push dari OneSignal & sync ke tab aktif
+//     Tampilan notifikasi sudah otomatis ditangani OneSignal SDK
+//     (importScripts di atas) — modul ini HANYA broadcast ke tab
+//     yang lagi kebuka, supaya chat sync realtime tanpa refresh.
+//     Sengaja TIDAK showNotification() manual di sini agar tidak
+//     dobel dengan notifikasi yang sudah ditampilkan OneSignal.
+// ============================================================
+const PushModule = {
+  async handlePush(event) {
+    let data = {};
+    try { data = event.data ? event.data.json() : {}; } catch (e) { return; }
     MessageModule.broadcastToClients({ type: 'PUSH_RECEIVED', payload: data });
   },
 

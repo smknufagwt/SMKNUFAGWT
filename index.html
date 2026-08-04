@@ -1334,7 +1334,15 @@ serviceWorkerPath:  '/sw.js',
                 },
                 MAX_RETRY
               );
-              if (!res.ok) console.warn('[NufaNotify] api/notify HTTP:', res.status);
+              if (!res.ok) {
+                console.warn('[NufaNotify] api/notify HTTP:', res.status);
+              } else if (typeof firebase !== 'undefined' && firebase.apps.length) {
+                // Update state dedup bersama dengan cron (notify-cron.yml), supaya pesan yang
+                // sudah dipush dari client ini tidak dipush ulang oleh cron dalam 5 menit berikutnya.
+                firebase.firestore().collection('_notify_state').doc('last')
+                  .set({ ts: m.ts }, { merge: true })
+                  .catch(e => console.warn('[NufaNotify] update _notify_state gagal:', e.message));
+              }
             } catch (e) {
               // Offline atau timeout → BC saja sudah cukup untuk tab aktif
               console.warn('[NufaNotify] api/notify gagal (offline/timeout):', e.message);
