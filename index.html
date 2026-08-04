@@ -187,6 +187,13 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
         }
         .nav-btn-secondary:hover { opacity: 1; }
 
+        .school-info-card {
+            text-align: center; border: 1px solid var(--neon-dim); border-radius: 6px;
+            padding: 12px 16px; margin: 12px 0; background: rgba(0, 20, 0, 0.4);
+        }
+        .school-info-card p { margin: 4px 0; }
+        .school-info-card strong { color: var(--premium-gold); }
+
         .marquee-container {
             border-top: 2px solid var(--neon); border-bottom: 2px solid var(--neon);
             margin-top: 25px; background: rgba(0, 20, 0, 0.9); overflow: visible;
@@ -366,8 +373,9 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
         }
         .chat-msg .chat-text { color: var(--neon); word-break: break-word; }
         .chat-text .chat-media {
-            display: block; max-width: 100%; max-height: 220px; margin-top: 6px;
-            border: 1px solid var(--neon-dim); border-radius: 6px; object-fit: cover;
+            display: block; max-width: 100%; max-height: 260px; margin-top: 6px;
+            border: 1px solid var(--neon-dim); border-radius: 6px; object-fit: contain;
+            background: rgba(0, 0, 0, 0.3);
         }
         .chat-text iframe.chat-yt {
             width: 100%; max-width: 260px; height: auto; aspect-ratio: 16 / 9;
@@ -375,7 +383,8 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
         }
         /* Auto-sizing per jenis embed — jangan dipaksa 16:9 semua, tiap tipe beda proporsi asli */
         .chat-text iframe.chat-yt-short { aspect-ratio: 9 / 16; max-width: 200px; }
-        .chat-text iframe.chat-spotify { aspect-ratio: auto; height: 152px; max-width: 300px; }
+        .chat-text iframe.chat-spotify-track { aspect-ratio: auto; height: 152px; max-width: 300px; }
+        .chat-text iframe.chat-spotify-list { aspect-ratio: auto; height: 352px; max-width: 300px; }
         .chat-text iframe.chat-drive-doc { aspect-ratio: 4 / 3; max-width: 300px; }
         /* Drive generik (ekstensi tak diketahui / video) — tanpa aspect-ratio dipaksa spt YT 16:9,
            supaya konten portrait (umum dari HP) tidak dipaksa ke kotak landscape & muncul ruang kosong besar. */
@@ -1370,9 +1379,11 @@ serviceWorkerPath:  '/sw.js',
                 <h2>PROFIL SEKOLAH</h2>
                 <p>Selamat datang di Sistem Informasi Digital <strong>SMK NURUL FALAH</strong>. Website ini didedikasikan sebagai media dokumentasi, informasi, dan portofolio digital siswa-siswi <strong>SMK Nurul Falah</strong>.</p>
                 <br>
-                <p style="flex">SMK Nurul Falah Berlokasi di jalan raya kauman, Desa Gedung wani timur, Margatiga, Lampung Timur, Provinsi LAMPUNG. </p>
-<p style="center">NOMOR NPSN	:	10814959.</p>
-<p style="center">TERAKREDITASI  :   BAN-SM Nomor : 1857/BAN-SM/SK/2022.</p>
+                <div class="school-info-card">
+                    <p>SMK Nurul Falah Berlokasi di jalan raya kauman, Desa Gedung wani timur, Margatiga, Lampung Timur, Provinsi LAMPUNG.</p>
+                    <p>NOMOR NPSN: <strong>10814959</strong></p>
+                    <p>TERAKREDITASI: <strong>BAN-SM Nomor 1857/BAN-SM/SK/2022</strong></p>
+                </div>
 <p>Di bawah naungan Yayasan Pendidikan Islam Nurul Falah, berkomitmen mencetak generasi muda yang kompeten,terampil dan bertanggung jawab serta memiliki akhlak mulia sesuai nilai pancasila.</p>
                 <div class="marquee-container">
                     <div class="marquee-clip">
@@ -2702,7 +2713,8 @@ startLatency: function() {
                     // ── Spotify ──
                     const spotify = this.parseSpotifyId(safe);
                     if (spotify) {
-                        return `<iframe class="chat-media chat-spotify" src="https://open.spotify.com/embed/${spotify.type}/${spotify.id}?utm_source=generator" title="${alt || 'Spotify'}" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" onerror="this.remove()"></iframe>`;
+                        const spotifyCls = spotify.type === 'track' ? 'chat-spotify-track' : 'chat-spotify-list';
+                        return `<iframe class="chat-media ${spotifyCls}" src="https://open.spotify.com/embed/${spotify.type}/${spotify.id}?utm_source=generator" title="${alt || 'Spotify'}" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" onerror="this.remove()"></iframe>`;
                     }
 
                     // ── Google Maps ──
