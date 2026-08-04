@@ -286,7 +286,20 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             min-height: 120px; transition: border-color 0.5s;
         }
 
-        footer { text-align: center; margin-top: 60px; padding: 20px; border-top: 1px solid var(--neon-dim); color: #666; font-size: 0.8rem; transition: border-color 0.5s; }
+        footer {
+            text-align: center; margin-top: 60px; padding: 20px; border-top: 1px solid var(--neon-dim);
+            color: #666; font-size: 0.8rem; transition: border-color 0.5s;
+            width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw);
+            box-sizing: border-box;
+        }
+        footer > * { max-width: 900px; margin-left: auto; margin-right: auto; }
+        @media (min-width: 1300px) {
+            footer { padding: 30px 20px; }
+            footer > * { max-width: 1100px; }
+        }
+        @media (max-width: 380px) {
+            .author-link { padding: 6px 10px; font-size: 0.7rem; }
+        }
         .author-link { 
             color: var(--neon); text-decoration: none; font-weight: bold; 
             border: 1px solid var(--neon); padding: 8px 15px; display: inline-block; margin-bottom: 10px;
@@ -713,7 +726,7 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
     color: var(--neon) !important; 
     opacity: 0.65; 
     font-family: var(--font-main); 
-    margin: 15px 0; 
+    margin: 15px auto; 
     font-size: 0.9rem; 
     font-weight: bold;
     letter-spacing: 1px;
