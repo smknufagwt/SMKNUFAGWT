@@ -408,7 +408,20 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             margin: 3px 0; opacity: 0.8; font-style: italic;
         }
         .chat-text .chat-inline-quote {
-            font-style: italic; opacity: 0.85; quotes: none;
+            display: block; position: relative; overflow: hidden;
+            margin: 4px 0; padding: 6px 10px 6px 12px;
+            border-left: 2px solid var(--neon);
+            background: rgba(0, 240, 255, 0.06);
+            border-radius: 0 4px 4px 0;
+            font-style: italic; opacity: 0.9; quotes: none;
+        }
+        /* Scanline sweep — sama seperti #chat-headline-bar::before, dipakai ulang di bubble kutip */
+        .chat-text .chat-inline-quote::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(0,240,255,0.08) 50%, transparent 100%);
+            background-size: 200% 100%;
+            animation: headline-sweep 3s linear infinite;
+            pointer-events: none;
         }
         .chat-text a { color: var(--premium-gold); text-decoration: underline; }
         #chat-input-row {
@@ -1395,6 +1408,35 @@ serviceWorkerPath:  '/sw.js',
         const GALLERY_API_URL = "https://script.google.com/macros/s/AKfycbyQivqt0OaXD9inSftMHkrXVDkQq719Tf1ok0wVkjgCzNWc1_3KMRseKV4iyh-UOPcNxQ/exec";
         let DATABASE_FOTO = [];
 
+        // Fetch + parse JSON dengan timeout & 1x retry. Apps Script kadang balas HTML
+        // (error page / redirect login) bukan JSON -> res.json() lempar "Unexpected token".
+        // Di sini teks mentah dibaca dulu baru di-parse manual supaya error-nya jelas.
+        async function gasFetchJSON(url, options = {}, timeoutMs = 15000, retries = 1) {
+            for (let attempt = 0; attempt <= retries; attempt++) {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), timeoutMs);
+                try {
+                    const res = await fetch(url, { ...options, signal: controller.signal });
+                    clearTimeout(timer);
+                    const raw = await res.text();
+                    let data;
+                    try {
+                        data = JSON.parse(raw);
+                    } catch {
+                        throw new Error(res.ok
+                            ? 'Server tidak mengembalikan JSON (kemungkinan script error di Apps Script)'
+                            : `Server error ${res.status}`);
+                    }
+                    return data;
+                } catch (err) {
+                    clearTimeout(timer);
+                    const isAbort = err.name === 'AbortError';
+                    if (attempt < retries) continue; // coba sekali lagi
+                    throw new Error(isAbort ? 'Waktu tunggu server habis (timeout)' : err.message);
+                }
+            }
+        }
+
         const DATABASE_CONTENT = {
             home: `
                 <h2>PROFIL SEKOLAH</h2>
@@ -1792,8 +1834,7 @@ serviceWorkerPath:  '/sw.js',
                     </div>`;
 
                 try {
-                    const res  = await fetch(GALLERY_API_URL);
-                    const data = await res.json();
+                    const data = await gasFetchJSON(GALLERY_API_URL);
 
                     if (data.status === "ok") {
                         DATABASE_FOTO = data.photos;
@@ -2376,13 +2417,12 @@ startLatency: function() {
 
                     this.setProgress(70);
 
-                    const res = await fetch(GALLERY_API_URL, {
+                    const result = await gasFetchJSON(GALLERY_API_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // hindari preflight CORS di Apps Script
                         body: JSON.stringify(payload)
-                    });
+                    }, 30000, 0); // upload: timeout lebih lama, no retry (hindari upload dobel)
 
-                    const result = await res.json();
                     this.setProgress(100);
 
                     if (result.status === 'ok') {
