@@ -2954,7 +2954,13 @@ startLatency: function() {
                         const msgs = [];
                         snap.forEach(doc => msgs.push({ id: doc.id, ...doc.data() }));
                         msgs.reverse();
-                        this.renderMessages(msgs);
+                        this.lastMsgs = msgs;
+                        // Marquee ringan (teks doang) tetap update walau panel tertutup.
+                        this.renderMarquee(msgs);
+                        // Render list pesan (berat: bisa berisi iframe YouTube/Spotify/Drive/Maps)
+                        // HANYA saat panel benar-benar terbuka, biar gak nge-rebuild+reload iframe
+                        // media di background tiap ada pesan baru masuk (boros RAM di device low-end).
+                        if (this.isOpen) this.renderMessages(msgs);
 
                         // Notifikasi HP: hanya untuk pesan baru yang muncul setelah chat dibuka,
                         // bukan punya sendiri, dan toggle notifikasi sedang ON.
@@ -3241,14 +3247,34 @@ listEl.innerHTML = ids.map(key => {
 
             renderMessages(msgs) {
                 const box = document.getElementById('chat-messages');
-                box.innerHTML = msgs.map(m => `
-                    <div class="chat-msg">
+                const key = m => m.id || (m.ts + '_' + m.ip);
+                const wantedKeys = new Set(msgs.map(key));
+
+                // Hapus node yang sudah gak ada di window pesan terbaru (kedorong keluar limit(50)).
+                Array.from(box.children).forEach(el => {
+                    if (!wantedKeys.has(el.dataset.key)) el.remove();
+                });
+
+                // Node existing TIDAK di-rebuild — supaya iframe media (YouTube/Spotify/Drive/Maps)
+                // yang sudah kepasang di pesan lama gak ikut ke-destroy & reload tiap ada pesan baru masuk.
+                const existingKeys = new Set(Array.from(box.children).map(el => el.dataset.key));
+                let lastEl = null;
+                msgs.forEach(m => {
+                    const k = key(m);
+                    if (existingKeys.has(k)) { lastEl = box.querySelector(`[data-key="${CSS.escape(k)}"]`); return; }
+                    const el = document.createElement('div');
+                    el.className = 'chat-msg';
+                    el.dataset.key = k;
+                    el.innerHTML = `
                         <span class="chat-ip">${this._esc(m.ip === 'SYSTEM' ? 'SYSTEM' : (this._maskIp(m.ip) || 'ANONIM'))} • ${this._time(m.ts)}</span>
                         <span class="chat-text">${ChatFormat.toHtml(WordFilter.clean(m.text))}</span>
-                    </div>
-                `).join('');
+                    `;
+                    if (lastEl && lastEl.nextSibling) box.insertBefore(el, lastEl.nextSibling);
+                    else box.appendChild(el);
+                    lastEl = el;
+                });
+
                 box.scrollTop = box.scrollHeight;
-                this.renderMarquee(msgs);
             },
 
             renderMarquee(msgs) {
@@ -3333,7 +3359,12 @@ listEl.innerHTML = ids.map(key => {
             toggle(forceOpen) {
                 this.isOpen = typeof forceOpen === 'boolean' ? forceOpen : !this.isOpen;
                 document.getElementById('chat-panel').classList.toggle('open', this.isOpen);
-                if (this.isOpen) document.getElementById('chat-dot').style.display = 'none';
+                if (this.isOpen) {
+                    document.getElementById('chat-dot').style.display = 'none';
+                    // Sinkronkan list pesan (termasuk render iframe media) baru saat panel dibuka —
+                    // selama tertutup renderMessages() sengaja di-skip biar hemat RAM.
+                    if (this.lastMsgs) this.renderMessages(this.lastMsgs);
+                }
                 if (typeof AudioFX !== 'undefined') AudioFX.click();
 
                 // Chat-first: BGM utama baru dilanjutkan setelah modal chat ditutup, bukan bersamaan,
