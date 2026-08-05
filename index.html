@@ -1639,6 +1639,7 @@ serviceWorkerPath:  '/sw.js',
             _galleryFetchedOnce: false,
             _galleryLastFetch: 0,
             _galleryTTL: 90000, // 90 detik — di atas ini, buka tab galeri bakal refetch otomatis
+            accessGapMs: 300000, // 5 menit — dalam rentang ini, alih tab TIDAK perlu klik ulang overlay (kecuali refresh manual)
             bgm: document.getElementById('bgm'),
             musicBtn: document.getElementById('music-btn'),
             musicIcon: document.getElementById('music-icon'),
@@ -1729,8 +1730,9 @@ serviceWorkerPath:  '/sw.js',
                 }, 2500);
             },
 
-            enter: function() {
-                AudioFX.click();
+            enter: function(auto) {
+                try { sessionStorage.setItem('nufa_last_access', Date.now()); } catch(e) {}
+                if (!auto) AudioFX.click();
                 const playPromise = this.bgm.play();
                 if (playPromise !== undefined) {
                     playPromise.catch(error => { console.log("Audio autoplay prevented."); });
@@ -1940,6 +1942,17 @@ startLatency: function() {
                 Scrambler.animate(document.getElementById('desc-output'), DATABASE_MATERI[key]);
             }
         };
+
+        // Skip overlay kalau baru buka akses (< accessGapMs) & bukan refresh manual
+        (function autoResumeAccess() {
+            try {
+                const nav = performance.getEntriesByType('navigation')[0];
+                const isManualReload = nav ? nav.type === 'reload' : false;
+                const lastAccess = parseInt(sessionStorage.getItem('nufa_last_access') || '0', 10);
+                const withinGap = lastAccess && (Date.now() - lastAccess) < System.accessGapMs;
+                if (!isManualReload && withinGap) System.enter(true);
+            } catch (e) {}
+        })();
 
         const chaosTexts = ["SYSTEM_FAILURE", "0x00_FATAL_ERR", "S#K N@R*L F!L^H", "404_NOT_FOUND", "CONNECTING...", "ENCRYPT_//_99%", "µ-sys$-Hacked"];
         function startChaosMode() {
