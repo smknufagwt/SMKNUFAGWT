@@ -1405,7 +1405,7 @@ serviceWorkerPath:  '/sw.js',
     })();
     
         
-        const GALLERY_API_URL = "https://script.google.com/macros/s/AKfycbyQivqt0OaXD9inSftMHkrXVDkQq719Tf1ok0wVkjgCzNWc1_3KMRseKV4iyh-UOPcNxQ/exec";
+        const GALLERY_API_URL = "https://script.google.com/macros/s/AKfycbzpkD-azAZYDUWmu1WZZME8WE4CYyfKyhyqKccGv6sBaG6FVKbRlX6JVM6GaspObbjmPQ/exec";
         let DATABASE_FOTO = [];
 
         // Fetch + parse JSON dengan timeout & 1x retry. Apps Script kadang balas HTML
@@ -1636,6 +1636,9 @@ serviceWorkerPath:  '/sw.js',
         const Scrambler = new ScramblerEngine();
 
         const System = {
+            _galleryFetchedOnce: false,
+            _galleryLastFetch: 0,
+            _galleryTTL: 90000, // 90 detik — di atas ini, buka tab galeri bakal refetch otomatis
             bgm: document.getElementById('bgm'),
             musicBtn: document.getElementById('music-btn'),
             musicIcon: document.getElementById('music-icon'),
@@ -1838,6 +1841,8 @@ serviceWorkerPath:  '/sw.js',
 
                     if (data.status === "ok") {
                         DATABASE_FOTO = data.photos;
+                        this._galleryFetchedOnce = true;
+                        this._galleryLastFetch = Date.now();
 
                         // Gabungkan dengan cache lokal browser (foto yang baru diupload, sebelum sinkron Drive selesai)
                         const localCache = (typeof UploadSystem !== 'undefined') ? UploadSystem.getLocalCache() : [];
@@ -1920,8 +1925,10 @@ startLatency: function() {
                 } else if (id === 'visi') {
                     Scrambler.write(document.getElementById('visi-content'), DATABASE_CONTENT.visi);
                 } else if (id === 'gallery') {
-                    // Refresh galeri setiap kali tab dibuka agar foto baru langsung muncul
-                    this.fetchGallery();
+                    // Fetch pertama kali, atau kalau cache udah lewat TTL (biar foto dari user lain
+                    // ke-refresh juga tanpa perlu refetch tiap kali tab galeri dipencet)
+                    const stale = (Date.now() - this._galleryLastFetch) > this._galleryTTL;
+                    if (!this._galleryFetchedOnce || stale) this.fetchGallery();
                 }
             },
 
