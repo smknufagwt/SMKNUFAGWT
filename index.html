@@ -345,6 +345,12 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             100% { transform: translateX(-50%); }
         }
 
+        /* ── Lite Mode: matiin efek berat (blur, animasi loop) buat device RAM/CPU rendah ── */
+        .lite-mode #chat-panel { backdrop-filter: none; background: #0b0f0b; transition: transform 0.15s linear; }
+        .lite-mode #chat-panel.expanding { animation: none; }
+        .lite-mode #chat-marquee-track { animation: none; transform: none; }
+        .lite-mode #chat-headline-text { animation: none !important; }
+
         #chat-panel {
             position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%);
             width: min(92vw, 380px); max-height: 70vh; z-index: 1100;
@@ -1118,6 +1124,7 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             <label><input type="checkbox" id="ms-sound" onchange="GlobalChat.updateMediaPref('soundDefault', this.checked)"> Suara default </label>
             <label><input type="checkbox" id="ms-widescreen" onchange="GlobalChat.toggleWideMode(this.checked)"> Perlebar panel chat</label>
             <label><input type="checkbox" id="ms-matrix" onchange="GlobalChat.toggleMatrixRain(this.checked)"> Animasi rain matrix</label>
+            <label><input type="checkbox" id="ms-lite" onchange="GlobalChat.toggleLiteMode(this.checked)"> Lite Mode (device RAM/CPU rendah)</label>
         </div>
         <textarea id="chat-input" rows="1" maxlength="1024" placeholder="Tulis pesan ke semua orang..." oninput="GlobalChat.autoGrow(this)"></textarea>
     </div>
@@ -2882,6 +2889,10 @@ startLatency: function() {
                 this.matrixOn = localStorage.getItem('nufa_matrix_on') !== 'off';
                 if (typeof MatrixFX !== 'undefined') MatrixFX.setEnabled(this.matrixOn);
 
+                // Lite Mode: default OFF kecuali user pernah nyalain manual sebelumnya.
+                this.liteMode = localStorage.getItem('nufa_lite_mode') === 'on';
+                this._applyLiteMode(this.liteMode);
+
                 this.init();
             },
 
@@ -3391,6 +3402,7 @@ listEl.innerHTML = ids.map(key => {
                     document.getElementById('ms-sound').checked = MediaPrefs.soundDefault;
                     document.getElementById('ms-widescreen').checked = this.wideMode;
                     document.getElementById('ms-matrix').checked = this.matrixOn;
+                    document.getElementById('ms-lite').checked = this.liteMode;
                 }
             },
             updateMediaPref(key, checked) {
@@ -3416,9 +3428,27 @@ listEl.innerHTML = ids.map(key => {
             toggleMatrixRain(checked) {
                 if (typeof AudioFX !== 'undefined') AudioFX.click();
                 this.matrixOn = checked;
-                if (typeof MatrixFX !== 'undefined') MatrixFX.setEnabled(checked);
+                // Lite Mode override: kalau lite aktif, rain tetap mati walau checkbox ini dinyalain.
+                if (typeof MatrixFX !== 'undefined') MatrixFX.setEnabled(this.liteMode ? false : checked);
                 try { localStorage.setItem('nufa_matrix_on', checked ? 'on' : 'off'); } catch(e) {}
                 this._showToast({ ip: 'SYSTEM', text: `⚙ Animasi rain matrix ${checked ? 'diaktifkan' : 'dimatikan'}.` });
+            },
+
+            // ── C. Lite Mode: sinergi dengan fix render incremental — matiin efek visual berat
+            // (matrix rain, blur backdrop, animasi loop) yang always-on terlepas dari panel dibuka/tutup.
+            // Default OFF; gak ganggu render pesan/iframe media yang udah dioptimasi sebelumnya. ──
+            liteMode: false,
+            _applyLiteMode(on) {
+                document.documentElement.classList.toggle('lite-mode', on);
+                // Lite mode override: matrix rain paksa mati walau toggle matrixOn terpisah nyala.
+                if (typeof MatrixFX !== 'undefined') MatrixFX.setEnabled(on ? false : this.matrixOn);
+            },
+            toggleLiteMode(checked) {
+                if (typeof AudioFX !== 'undefined') AudioFX.click();
+                this.liteMode = checked;
+                this._applyLiteMode(checked);
+                try { localStorage.setItem('nufa_lite_mode', checked ? 'on' : 'off'); } catch(e) {}
+                this._showToast({ ip: 'SYSTEM', text: `⚙ Lite Mode ${checked ? 'diaktifkan — efek visual berat dimatikan' : 'dimatikan'}.` });
             },
 
             // Redundansi suara: kalau ada media chat yang unmute, kunci tombol BGM utama biar tidak dobel suara.
