@@ -644,7 +644,9 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             display: flex; align-items: center; gap: 5px; font-size: 0.58rem;
             letter-spacing: 1px; color: var(--glitch-blue); opacity: 0.85; text-transform: uppercase;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;
+            transition: color 0.3s, opacity 0.3s;
         }
+        #chat-net-label.net-offline { color: #ff4444; opacity: 0.9; }
         #chat-online-left {
             display: flex; align-items: center; gap: 7px; color: var(--neon); position: relative; z-index: 1;
         }
@@ -1642,6 +1644,46 @@ serviceWorkerPath:  '/sw.js',
         const MatrixFX = new ParallaxMatrix(); 
         const Scrambler = new ScramblerEngine();
 
+        // Label "JARINGAN AKTIF" diganti rotasi frasa cyberpunk pakai ScramblerEngine yang udah ada
+        // (bukan animasi baru) — swap teks tiap beberapa detik, tiap swap cuma burst setInterval pendek
+        // yang otomatis clear sendiri, jadi ringan di device low-end. Ikon juga dipetakan ke navigator.onLine
+        // biar bukan cuma kosmetik — kalau beneran offline, labelnya jujur bilang gitu.
+        const NetLabel = {
+            phrases: ['JARINGAN AKTIF', 'UPLINK STABIL', 'NODE TERKONEKSI', 'SINYAL TERKUNCI', 'GRID TERSAMBUNG'],
+            idx: 0,
+            _timer: null,
+            start() {
+                if (this._timer) return;
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) { clearInterval(this._timer); this._timer = null; }
+                    else this._resume();
+                });
+                window.addEventListener('online', () => this._setOffline(false));
+                window.addEventListener('offline', () => this._setOffline(true));
+                this._setOffline(!navigator.onLine);
+                this._resume();
+            },
+            _resume() {
+                if (this._timer || document.hidden) return;
+                this._timer = setInterval(() => this._cycle(), 9000);
+            },
+            _cycle() {
+                if (this._offline) return; // pas offline, biarin teks "SINYAL TERPUTUS" diem, gak usah dirotasi
+                const el = document.querySelector('#chat-net-label .net-label-text');
+                if (!el || typeof Scrambler === 'undefined') return;
+                this.idx = (this.idx + 1) % this.phrases.length;
+                el.setAttribute('data-original', this.phrases[this.idx]);
+                Scrambler.animateClick(el);
+            },
+            _setOffline(offline) {
+                this._offline = offline;
+                const wrap = document.getElementById('chat-net-label');
+                const el = wrap && wrap.querySelector('.net-label-text');
+                if (wrap) wrap.classList.toggle('net-offline', offline);
+                if (el && offline) { el.setAttribute('data-original', 'SINYAL TERPUTUS'); if (typeof Scrambler !== 'undefined') Scrambler.animateClick(el); }
+            },
+        };
+
         const System = {
             _galleryFetchedOnce: false,
             _galleryLastFetch: 0,
@@ -1754,6 +1796,7 @@ serviceWorkerPath:  '/sw.js',
                 }
 
                 this.loadSavedTheme();
+                NetLabel.start();
 
                 this.musicBtn.style.display = 'flex'; 
                 this.colorBtn.style.display = 'flex';
@@ -3564,8 +3607,15 @@ listEl.innerHTML = ids.map(key => {
                     // Feedback murah: icon tombol musik existing dipakai lagi (gak spawn elemen baru).
                     if (System.musicIcon) System.musicIcon.innerText = '💤';
                     this._setPresenceInterval(20000); // hemat baterai: heartbeat dilonggarin
+                } else {
+                    // Non-lite: BGM udah dipegang mediaSession, tapi browser (terutama mobile) tetap
+                    // cenderung auto-pause <video>/iframe YT begitu tab di-background walau kita gak
+                    // pernah manggil .pause() sendiri. Watchdog ini nge-nudge play lagi tiap beberapa
+                    // detik biar video/YT/loop-nya keliatan "gak berhenti" — sama kayak Firestore
+                    // listener yang emang gak pernah putus. Spotify & Drive iframe TIDAK punya API kontrol
+                    // publik, jadi keduanya di luar jangkauan fix ini (limitasi platform, bukan bug kita).
+                    this._startBgMediaWatchdog();
                 }
-                // Non-lite: sengaja gak diapa-apain di sini — biarin bgm & mediaSession yang jalanin sisanya.
             },
 
             _onVisibleAudio() {
@@ -3581,10 +3631,27 @@ listEl.innerHTML = ids.map(key => {
                         this.renderMessages(this.lastMsgs);
                     }
                     this._pendingRenderFlush = false;
+                } else {
+                    this._stopBgMediaWatchdog();
                 }
             },
 
-            // Ganti interval heartbeat presence on-the-fly (dipakai poin sync-online lite mode).
+            // Watchdog nudge-play buat non-lite mode: interval pendek, cuma nyala pas hidden & non-lite,
+            // langsung mati pas balik visible atau lite mode dinyalain — gak numpuk di RAM lama-lama.
+            _bgMediaWatchdog: null,
+            _startBgMediaWatchdog() {
+                if (this._bgMediaWatchdog) return;
+                this._bgMediaWatchdog = setInterval(() => {
+                    if (this.liteMode || !document.hidden) { this._stopBgMediaWatchdog(); return; }
+                    document.querySelectorAll('#chat-messages video[loop]').forEach(v => { if (v.paused) v.play().catch(() => {}); });
+                    document.querySelectorAll('#chat-messages iframe.chat-yt, #chat-messages iframe.chat-yt-short').forEach(f => {
+                        if (f.contentWindow) f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
+                    });
+                }, 5000);
+            },
+            _stopBgMediaWatchdog() {
+                if (this._bgMediaWatchdog) { clearInterval(this._bgMediaWatchdog); this._bgMediaWatchdog = null; }
+            },
             // No-op kalau presence pakai jalur RTDB (startPresence), karena itu push-based, bukan polling.
             _setPresenceInterval(ms) {
                 if (!this.presenceInterval || !this._presenceBeat || this._presenceIntervalMs === ms) return;
