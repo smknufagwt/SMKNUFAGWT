@@ -2747,11 +2747,15 @@ startLatency: function() {
                     const mid = 'med' + (this._mediaSeq++);
                     const volIcon = mp.soundDefault ? 'high' : 'xmark';
                     const mutedCls = mp.soundDefault ? '' : 'muted';
+                    // Lite mode: jangan autoplay semua media sekaligus di HTML — IntersectionObserver
+                    // (GlobalChat._observeLiteMedia) yang milih & nyalain satu-satu berdasarkan scroll.
+                    const liteMode = (typeof GlobalChat !== 'undefined' && GlobalChat.liteMode);
+                    const wantAutoplay = mp.autoplay && !liteMode;
 
                     const ytId = this.parseYouTubeId(safe);
                     if (ytId) {
                         const ytParams = new URLSearchParams({
-                            autoplay: mp.autoplay ? '1' : '0',
+                            autoplay: wantAutoplay ? '1' : '0',
                             mute: mp.soundDefault ? '0' : '1',
                             loop: mp.loop ? '1' : '0',
                             playlist: ytId,       // wajib diisi ulang ID sendiri agar loop:1 berfungsi pada single video
@@ -2815,7 +2819,7 @@ startLatency: function() {
                     }
 
                     if (/\.(mp4|webm|ogv)(\?.*)?$/i.test(safe)) {
-                        return `<div class="chat-media-wrap" id="${mid}"><video src="${safe}" class="chat-media" ${mutedCls ? 'muted' : ''} ${mp.autoplay ? 'autoplay' : ''} ${mp.loop ? 'loop' : ''} playsinline onerror="this.closest('.chat-media-wrap')?.remove()"></video><button type="button" class="media-mute-btn ${mutedCls}" onclick="ChatFormat.toggleMediaMute(this,'video')" title="Suara"><i class="fa-solid fa-volume-${volIcon}"></i></button></div>`;
+                        return `<div class="chat-media-wrap" id="${mid}"><video src="${safe}" class="chat-media" ${mutedCls ? 'muted' : ''} ${wantAutoplay ? 'autoplay' : ''} ${mp.loop ? 'loop' : ''} playsinline onerror="this.closest('.chat-media-wrap')?.remove()"></video><button type="button" class="media-mute-btn ${mutedCls}" onclick="ChatFormat.toggleMediaMute(this,'video')" title="Suara"><i class="fa-solid fa-volume-${volIcon}"></i></button></div>`;
                     }
                     return `<img src="${safe}" alt="${alt}" class="chat-media" loading="lazy" onerror="this.remove()">`;
                 });
@@ -2892,6 +2896,7 @@ startLatency: function() {
                 // Lite Mode: default OFF kecuali user pernah nyalain manual sebelumnya.
                 this.liteMode = localStorage.getItem('nufa_lite_mode') === 'on';
                 this._applyLiteMode(this.liteMode);
+                this.initBackgroundHandling();
 
                 this.init();
             },
@@ -2971,7 +2976,13 @@ startLatency: function() {
                         // Render list pesan (berat: bisa berisi iframe YouTube/Spotify/Drive/Maps)
                         // HANYA saat panel benar-benar terbuka, biar gak nge-rebuild+reload iframe
                         // media di background tiap ada pesan baru masuk (boros RAM di device low-end).
-                        if (this.isOpen) this.renderMessages(msgs);
+                        // Tambahan lite mode: kalau tab lagi hidden, render tetap di-skip (bukan cuma pas
+                        // panel tertutup) — datanya tetap aman di this.lastMsgs, di-flush pas tab visible lagi.
+                        if (this.isOpen && !(this.liteMode && document.hidden)) {
+                            this.renderMessages(msgs);
+                        } else if (this.isOpen) {
+                            this._pendingRenderFlush = true;
+                        }
 
                         // Notifikasi HP: hanya untuk pesan baru yang muncul setelah chat dibuka,
                         // bukan punya sendiri, dan toggle notifikasi sedang ON.
@@ -3076,8 +3087,10 @@ startLatency: function() {
             startPresenceFallback() {
                 const ref = this.db.collection('presence_global').doc(this.presenceId);
                 const beat = () => ref.set({ ip: this.myIp, device: this.myDevice, ts: Date.now() }).catch(() => {});
+                this._presenceBeat = beat;
                 beat();
-                this.presenceInterval = setInterval(beat, 8000);
+                this._presenceIntervalMs = 8000;
+                this.presenceInterval = setInterval(beat, this._presenceIntervalMs);
 
                 document.addEventListener('visibilitychange', () => {
                     if (document.visibilityState === 'visible') beat();
@@ -3090,9 +3103,12 @@ startLatency: function() {
                 this.db.collection('presence_global').onSnapshot((snap) => {
                     const now = Date.now();
                     const data = {};
+                    // TTL ngikutin interval heartbeat aktif (2.5x) — biar lite mode (heartbeat 20s)
+                    // gak keliatan flicker offline-online tiap siklus karena threshold ketinggalan.
+                    const ttl = Math.round((this._presenceIntervalMs || 8000) * 2.5);
                     snap.forEach(doc => {
                         const d = doc.data();
-                        if (d.ts && now - d.ts < 20000) data[doc.id] = d;
+                        if (d.ts && now - d.ts < ttl) data[doc.id] = d;
                     });
                     const grouped = this._groupByIp(data);
                     this.onlineMap = grouped;
@@ -3286,6 +3302,53 @@ listEl.innerHTML = ids.map(key => {
                 });
 
                 box.scrollTop = box.scrollHeight;
+                if (this.liteMode) this._observeLiteMedia();
+            },
+
+            // ── E. Lite mode: satu video/YT aktif dalam satu waktu (bukan multi-autoplay).
+            // Dipilih berdasarkan kedekatan ke tengah viewport & masih visible — bukan soal background,
+            // ini murni hemat baterai/CPU saat chat dibuka (foreground), untuk komunikasi di kondisi
+            // sinyal/listrik terbatas tapi tetap harus bisa lihat media satu-satu. ──
+            _videoObserver: null,
+            _activeLiteMedia: null,
+            _setupLiteMediaObserver() {
+                if (this._videoObserver) return this._videoObserver;
+                this._videoObserver = new IntersectionObserver((entries) => {
+                    if (!this.liteMode) return;
+                    let best = null, bestDist = Infinity;
+                    const viewCenter = window.innerHeight / 2;
+                    entries.forEach(en => {
+                        const media = en.target.querySelector('video, iframe.chat-yt, iframe.chat-yt-short');
+                        if (!media) return;
+                        if (!en.isIntersecting) {
+                            if (media === this._activeLiteMedia) { this._pauseLiteMedia(media); this._activeLiteMedia = null; }
+                            return;
+                        }
+                        const rect = en.boundingClientRect;
+                        const dist = Math.abs((rect.top + rect.height / 2) - viewCenter);
+                        if (dist < bestDist) { bestDist = dist; best = media; }
+                    });
+                    if (best && best !== this._activeLiteMedia) {
+                        if (this._activeLiteMedia) this._pauseLiteMedia(this._activeLiteMedia);
+                        this._playLiteMedia(best);
+                        this._activeLiteMedia = best;
+                    }
+                }, { root: document.getElementById('chat-messages'), threshold: [0, 0.6] });
+                return this._videoObserver;
+            },
+            _playLiteMedia(media) {
+                if (media.tagName === 'VIDEO') { media.play().catch(() => {}); }
+                else if (media.contentWindow) { media.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*'); }
+            },
+            _pauseLiteMedia(media) {
+                if (media.tagName === 'VIDEO') { media.pause(); }
+                else if (media.contentWindow) { media.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }), '*'); }
+            },
+            _observeLiteMedia() {
+                const observer = this._setupLiteMediaObserver();
+                document.querySelectorAll('#chat-messages .chat-media-wrap').forEach(wrap => {
+                    if (wrap.querySelector('video, iframe.chat-yt, iframe.chat-yt-short')) observer.observe(wrap);
+                });
             },
 
             renderMarquee(msgs) {
@@ -3448,7 +3511,86 @@ listEl.innerHTML = ids.map(key => {
                 this.liteMode = checked;
                 this._applyLiteMode(checked);
                 try { localStorage.setItem('nufa_lite_mode', checked ? 'on' : 'off'); } catch(e) {}
-                this._showToast({ ip: 'SYSTEM', text: `⚙ Lite Mode ${checked ? 'diaktifkan — efek visual berat dimatikan' : 'dimatikan'}.` });
+                this._showToast({ ip: 'SYSTEM', text: `⚙ Lite Mode ${checked ? 'diaktifkan — efek visual berat & audio background dimatikan' : 'dimatikan — audio background & multi-media autoplay aktif lagi'}.` });
+                // Kalau lite dinyalain SAAT tab lagi hidden (jarang tapi mungkin, misal toggle dari
+                // notifikasi/PiP), langsung terapkan efek pause-nya juga tanpa nunggu visibilitychange berikutnya.
+                if (checked && document.hidden) this._onHiddenAudio();
+            },
+
+            // ── D. Background/Foreground handling: audio, presence heartbeat, render cache ──
+            // Dipisah dari efek visual (poin C) karena ini soal hemat baterai & RAM saat tab
+            // di-background, bukan soal device low-end. Satu listener visibilitychange dipakai
+            // buat semua tiga hal ini biar gak numpuk banyak listener terpisah (hemat RAM).
+            _bgHandlerInit: false,
+            _bgAudioWasPlaying: false,
+            _pendingRenderFlush: false,
+            initBackgroundHandling() {
+                if (this._bgHandlerInit) return;
+                this._bgHandlerInit = true;
+
+                if ('mediaSession' in navigator) {
+                    try {
+                        navigator.mediaSession.metadata = new MediaMetadata({
+                            title: 'SMK Nurul Falah — Ambient BGM',
+                            artist: 'Global Chat',
+                        });
+                        // Handler ini yang bikin "geser dari notif/lock screen → suara ilang" jalan mulus:
+                        // pause di sini pause beneran elemen audio-nya, bukan cuma UI kontrolnya.
+                        navigator.mediaSession.setActionHandler('play', () => {
+                            if (System.bgm && localStorage.getItem('nufa_music') === 'on') System.bgm.play().catch(() => {});
+                        });
+                        navigator.mediaSession.setActionHandler('pause', () => {
+                            if (System.bgm) System.bgm.pause();
+                        });
+                    } catch (e) { console.warn('[BG] mediaSession setup gagal:', e); }
+                }
+
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) this._onHiddenAudio();
+                    else this._onVisibleAudio();
+                });
+            },
+
+            _onHiddenAudio() {
+                if (this.liteMode) {
+                    // Lite: pause total (BGM + media chat aktif) buat hemat baterai.
+                    this._bgAudioWasPlaying = !!(System.bgm && !System.bgm.paused);
+                    if (System.bgm) System.bgm.pause();
+                    document.querySelectorAll('#chat-messages video').forEach(v => v.pause());
+                    document.querySelectorAll('#chat-messages iframe.chat-yt, #chat-messages iframe.chat-yt-short').forEach(f => {
+                        if (f.contentWindow) f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }), '*');
+                    });
+                    this._activeLiteMedia = null;
+                    // Feedback murah: icon tombol musik existing dipakai lagi (gak spawn elemen baru).
+                    if (System.musicIcon) System.musicIcon.innerText = '💤';
+                    this._setPresenceInterval(20000); // hemat baterai: heartbeat dilonggarin
+                }
+                // Non-lite: sengaja gak diapa-apain di sini — biarin bgm & mediaSession yang jalanin sisanya.
+            },
+
+            _onVisibleAudio() {
+                if (this.liteMode) {
+                    if (this._bgAudioWasPlaying && System.bgm && localStorage.getItem('nufa_music') === 'on') {
+                        System.bgm.play().catch(() => {});
+                    }
+                    if (System.musicIcon) System.musicIcon.innerText = (System.bgm && System.bgm.paused) ? '🔇' : '🔊';
+                    this._setPresenceInterval(8000);
+                    // Data dari onSnapshot yang ketahan pas hidden tetap kepegang di this.lastMsgs
+                    // (listener gak pernah berhenti) — tinggal di-flush ke DOM sekali di sini.
+                    if (this._pendingRenderFlush && this.isOpen && this.lastMsgs) {
+                        this.renderMessages(this.lastMsgs);
+                    }
+                    this._pendingRenderFlush = false;
+                }
+            },
+
+            // Ganti interval heartbeat presence on-the-fly (dipakai poin sync-online lite mode).
+            // No-op kalau presence pakai jalur RTDB (startPresence), karena itu push-based, bukan polling.
+            _setPresenceInterval(ms) {
+                if (!this.presenceInterval || !this._presenceBeat || this._presenceIntervalMs === ms) return;
+                clearInterval(this.presenceInterval);
+                this._presenceIntervalMs = ms;
+                this.presenceInterval = setInterval(this._presenceBeat, ms);
             },
 
             // Redundansi suara: kalau ada media chat yang unmute, kunci tombol BGM utama biar tidak dobel suara.
