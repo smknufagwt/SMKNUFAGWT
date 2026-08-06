@@ -3391,8 +3391,14 @@ listEl.innerHTML = ids.map(key => {
                     });
                     if (best && best !== this._activeLiteMedia) {
                         if (this._activeLiteMedia) this._pauseLiteMedia(this._activeLiteMedia);
-                        this._playLiteMedia(best);
-                        this._activeLiteMedia = best;
+                        // Tombol autoplay (MediaPrefs.autoplay) tetap jadi otoritas tunggal di lite mode juga —
+                        // kalau user matiin, scroll-into-view TIDAK memicu play otomatis (baru main manual via tombol suara).
+                        if (window.MediaPrefs && window.MediaPrefs.autoplay) {
+                            this._playLiteMedia(best);
+                            this._activeLiteMedia = best;
+                        } else {
+                            this._activeLiteMedia = null;
+                        }
                     }
                 }, { root: document.getElementById('chat-messages'), threshold: [0, 0.6] });
                 return this._videoObserver;
