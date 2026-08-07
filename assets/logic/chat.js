@@ -531,6 +531,13 @@
                     } else {
                         byIp[key].count += 1;
                         byIp[key].ids.push(id);
+                        // FIX: device/ip harus ikut entry paling baru (ts terbesar), bukan cuma yang pertama
+                        // konek di IP itu — biar HP/tablet yang join belakangan di IP yang sama (mis. WiFi
+                        // sekolah) kelihatan device & statusnya sendiri, bukan numpang device sebelumnya.
+                        if ((d.ts || 0) >= (byIp[key].ts || 0)) {
+                            byIp[key].device = d.device;
+                            byIp[key].ip = d.ip;
+                        }
                         byIp[key].ts = Math.max(byIp[key].ts || 0, d.ts || 0);
                         if (id === this.presenceId) byIp[key].isYou = true;
                     }
