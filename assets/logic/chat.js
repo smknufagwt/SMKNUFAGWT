@@ -378,15 +378,8 @@
                 // Ambil IP publik pengirim (dipakai untuk ditampilkan ke semua orang, tanpa login)
                 const ipDisplayEl = document.getElementById('chat-myip-display');
                 if (ipDisplayEl) ipDisplayEl.textContent = 'Mengambil...';
-                try {
-                    const r = await fetch('https://api.ipify.org?format=json');
-                    const d = await r.json();
-                    this.myIp = d.ip;
-                    if (ipDisplayEl) ipDisplayEl.textContent = this.myIp;
-                } catch (e) {
-                    this.myIp = 'UNKNOWN';
-                    if (ipDisplayEl) ipDisplayEl.textContent = 'UNKNOWN';
-                }
+                this.myIp = await this._resolveMyIp();
+                if (ipDisplayEl) ipDisplayEl.textContent = this.myIp;
                 // Perbaiki ikon device setelah kita punya semua info
                 if (devIconEl) {
                     const isBrand = ['fa-android','fa-apple','fa-windows','fa-linux'].includes(this.myDevice.icon);
@@ -713,6 +706,34 @@ listEl.innerHTML = ids.map(key => {
                 setTimeout(() => el.remove(), 4100);
                 // batasi maksimal 3 toast bertumpuk biar gak penuh layar
                 while (stack.children.length > 3) stack.removeChild(stack.firstChild);
+            },
+
+            // ── Resolusi IP publik dengan fallback chain — beberapa browser/DNS mobile
+            // (ad-block DNS, private DNS, Brave, dsb) suka nge-block domain fingerprinting
+            // kayak ipify. Coba beberapa provider berurutan, tiap percobaan dikasih timeout
+            // sendiri biar gak nge-hang lama kalau satu provider gak respon sama sekali.
+            async _resolveMyIp() {
+                const providers = [
+                    { url: 'https://api.ipify.org?format=json', pick: d => d.ip },
+                    { url: 'https://api64.ipify.org?format=json', pick: d => d.ip },
+                    { url: 'https://ipapi.co/json/', pick: d => d.ip },
+                    { url: 'https://api.myip.com', pick: d => d.ip }
+                ];
+                for (const p of providers) {
+                    try {
+                        const ip = p.pick(await this._fetchJsonWithTimeout(p.url, 4000));
+                        if (ip && typeof ip === 'string') return ip;
+                    } catch (e) { /* lanjut ke provider berikutnya */ }
+                }
+                return 'UNKNOWN';
+            },
+
+            _fetchJsonWithTimeout(url, ms) {
+                const ctrl = new AbortController();
+                const timer = setTimeout(() => ctrl.abort(), ms);
+                return fetch(url, { signal: ctrl.signal })
+                    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+                    .finally(() => clearTimeout(timer));
             },
 
             _detectDevice() {
