@@ -1077,8 +1077,10 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
 
     <div id="overlay">
         <div class="lock-icon">🔒</div>
-        <h2 style="margin: 0; color: white; letter-spacing: 4px; font-weight: 400;">ENCRYPTED CONNECTION</h2>
-        <p style="margin-top: 5px; color: var(--neon);">SMK NURUL FALAH </p>
+        <h2 style="margin: 0; color: white; letter-spacing: 4px; font-weight: 400;">SMK NURUL FALAH</h2>
+      
+        <p style="margin-top: 5px; color: var(--neon);">KONEKSI TERENKRIPSI</p>
+      <p style="margin: 0%; color: white; letter-spacing: 3px; font-weight: 100;">PORTAL - KREATIF</p>
         <button class="btn-enter" onclick="System.enter()">BUKA AKSES DATA</button>
     </div>
 
@@ -1237,6 +1239,7 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
         </div>
 
         <footer>
+          <div id="system-log">RESPONDING.....</div>
 <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
     
     <a href="https://genzz-xyz.github.io/Snake-game/" target="_blank" class="author-link" onclick="AudioFX.click()" 
@@ -1264,8 +1267,10 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
        <i class="fa-brands fa-tiktok"></i> TIKTOK OSIS
     </a>
 </div>
-<div id="system-log">RESPONDING.....</div>
-
+          
+<div style="text-align: center; color: var(--neon); font-family: var(--font-main); opacity: 0.6; font-size: 0.7rem; letter-spacing: 1px; margin-bottom: auto;">
+    karya murid smk nurul falah untuk komunitas ✨ NUFA-BASE
+</div>
 <div class="privacy-wrap" style="margin-top: 12px;">
     <span class="privacy-link" id="privacy-trigger" onclick="PrivacyBoard.toggle(event)">
         <i class="fa-solid fa-shield-halved"></i> PRIVACY POLICY
@@ -1281,9 +1286,6 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
     </div>
 </div>
 
-<div style="text-align: center; color: var(--neon); font-family: var(--font-main); opacity: 0.8; font-size: 0.9rem; letter-spacing: 1px; margin-bottom: 4px;">
-    situs prototype karya murid smk nurul falah untuk komunitas ✨
-</div>
 <div style="text-align: center; color: var(--neon); font-family: var(--font-main); margin-top: 16px; font-size: 0.85rem; letter-spacing: 1px;">
     &copy; 2026 SMK NURUL FALAH. All Rights Reserved.
 </div>
@@ -1786,7 +1788,7 @@ serviceWorkerPath:  '/sw.js',
                 const logLines = [
                     () => "Scanning connection...",
                     () => "Encrypting connection...",
-                    () => `Global Access: ${this.currentVisits} Users`,
+                    () => `Public Access: ${this.currentVisits} Users`,
                     () => "System stable.",
                     () => "Monitoring network..."
                 ];
@@ -1794,7 +1796,7 @@ serviceWorkerPath:  '/sw.js',
                 setInterval(() => {
                     this.log.innerText = ">> " + logLines[i]();
                     i = (i + 1) % logLines.length;
-                }, 2500);
+                }, 2400);
             },
 
             enter: function(auto) {
