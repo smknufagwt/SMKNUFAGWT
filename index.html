@@ -388,6 +388,14 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             transition: font-size 0.3s ease;
         }
         .chat-msg { border-left: 2px solid var(--neon-dim); padding-left: 8px; }
+        #chat-load-history-btn {
+            align-self: center; margin-bottom: 2px; padding: 5px 14px; font-size: 0.68rem;
+            font-family: var(--font-main); letter-spacing: 0.03em; color: var(--neon-dim);
+            background: rgba(0,0,0,0.35); border: 1px solid var(--neon-dim); border-radius: 20px;
+            cursor: pointer; transition: color 0.2s ease, border-color 0.2s ease;
+        }
+        #chat-load-history-btn:hover:not(:disabled) { color: var(--neon); border-color: var(--neon); }
+        #chat-load-history-btn:disabled { cursor: default; opacity: 0.6; }
         .chat-msg .chat-ip {
             color: var(--premium-platinum); font-size: 0.68rem; opacity: 0.75; display: block;
             transition: font-size 0.3s ease;
@@ -3337,11 +3345,28 @@ listEl.innerHTML = ids.map(key => {
 
             renderMessages(msgs) {
                 const box = document.getElementById('chat-messages');
+                // User masih dianggap "di bawah" kalau jarak ke dasar <120px — cuma dalam kondisi ini
+                // render auto-scroll ke pesan terbaru; kalau lagi baca histori di atas, posisi dijaga diam.
+                const nearBottom = (box.scrollHeight - box.scrollTop - box.clientHeight) < 120;
+
+                // Tombol muat riwayat selalu jadi elemen paling atas #chat-messages (dibuat sekali, live-mode saja).
+                let historyBtn = document.getElementById('chat-load-history-btn');
+                if (!historyBtn && this.db) {
+                    historyBtn = document.createElement('button');
+                    historyBtn.id = 'chat-load-history-btn';
+                    historyBtn.type = 'button';
+                    historyBtn.textContent = '↑ Muat 50 pesan lebih lama';
+                    historyBtn.onclick = () => this.loadOlderMessages();
+                    box.insertBefore(historyBtn, box.firstChild);
+                }
+
                 const key = m => m.id || (m.ts + '_' + m.ip);
                 const wantedKeys = new Set(msgs.map(key));
 
-                // Hapus node yang sudah gak ada di window pesan terbaru (kedorong keluar limit(50)).
+                // Hapus node yang sudah gak ada di window pesan terbaru (kedorong keluar limit(50)) —
+                // kecuali tombol riwayat & pesan histori (data-hist) yang sengaja hidup di luar window itu.
                 Array.from(box.children).forEach(el => {
+                    if (el === historyBtn || el.dataset.hist === '1') return;
                     if (!wantedKeys.has(el.dataset.key)) el.remove();
                 });
 
@@ -3355,6 +3380,7 @@ listEl.innerHTML = ids.map(key => {
                     const el = document.createElement('div');
                     el.className = 'chat-msg';
                     el.dataset.key = k;
+                    el.dataset.ts = m.ts;
                     el.innerHTML = `
                         <span class="chat-ip">${this._esc(m.ip === 'SYSTEM' ? 'SYSTEM' : (this._maskIp(m.ip) || 'ANONIM'))} • ${this._time(m.ts)}</span>
                         <span class="chat-text">${ChatFormat.toHtml(WordFilter.clean(m.text))}</span>
@@ -3364,8 +3390,81 @@ listEl.innerHTML = ids.map(key => {
                     lastEl = el;
                 });
 
-                box.scrollTop = box.scrollHeight;
+                // Cursor buat "muat lebih lama" berikutnya = ts pesan paling atas yang benar-benar ada di DOM.
+                const oldestEl = box.querySelector('.chat-msg[data-ts]');
+                if (oldestEl) this.historyOldestTs = Number(oldestEl.dataset.ts);
+
+                if (nearBottom) box.scrollTop = box.scrollHeight;
                 if (this.liteMode) this._observeLiteMedia();
+            },
+
+            // ── Muat 50 pesan lebih lama dari Firestore, disisipkan di atas tombolnya sendiri.
+            // Dipanggil dari tombol "↑ Muat 50 pesan lebih lama" di puncak #chat-messages. ──
+            historyOldestTs: null,
+            historyLoading: false,
+            historyExhausted: false,
+            async loadOlderMessages() {
+                if (!this.db || this.historyLoading || this.historyExhausted || !this.historyOldestTs) return;
+                const box = document.getElementById('chat-messages');
+                const btn = document.getElementById('chat-load-history-btn');
+                this.historyLoading = true;
+                if (btn) { btn.disabled = true; btn.textContent = 'Memuat...'; }
+                try {
+                    const snap = await this.db.collection('global_chat')
+                        .orderBy('ts', 'desc')
+                        .startAfter(this.historyOldestTs)
+                        .limit(50)
+                        .get();
+                    const older = [];
+                    snap.forEach(doc => older.push({ id: doc.id, ...doc.data() }));
+                    older.reverse(); // desc (batch terbaru dulu) → ascending biar urutan render lama→baru benar
+
+                    if (!older.length) {
+                        this.historyExhausted = true;
+                        if (btn) btn.textContent = 'Semua pesan sudah dimuat';
+                        return;
+                    }
+
+                    const prevScrollHeight = box.scrollHeight;
+                    const prevScrollTop = box.scrollTop;
+                    const existingKeys = new Set(Array.from(box.children).map(el => el.dataset.key));
+                    const key = m => m.id || (m.ts + '_' + m.ip);
+                    let anchor = btn;
+                    older.forEach(m => {
+                        const k = key(m);
+                        if (existingKeys.has(k)) return; // overlap dgn window live 50 — jangan dobel
+                        const el = document.createElement('div');
+                        el.className = 'chat-msg';
+                        el.dataset.key = k;
+                        el.dataset.hist = '1';
+                        el.dataset.ts = m.ts;
+                        el.innerHTML = `
+                            <span class="chat-ip">${this._esc(m.ip === 'SYSTEM' ? 'SYSTEM' : (this._maskIp(m.ip) || 'ANONIM'))} • ${this._time(m.ts)}</span>
+                            <span class="chat-text">${ChatFormat.toHtml(WordFilter.clean(m.text))}</span>
+                        `;
+                        anchor.after(el);
+                        anchor = el;
+                    });
+
+                    const oldestEl = box.querySelector('.chat-msg[data-ts]');
+                    if (oldestEl) this.historyOldestTs = Number(oldestEl.dataset.ts);
+
+                    // Kunci posisi scroll biar viewport gak "loncat" pas 50 pesan lama nyempil di atas.
+                    box.scrollTop = prevScrollTop + (box.scrollHeight - prevScrollHeight);
+
+                    if (older.length < 50) {
+                        this.historyExhausted = true;
+                        if (btn) btn.textContent = 'Semua pesan sudah dimuat';
+                    } else if (btn) {
+                        btn.textContent = '↑ Muat 50 pesan lebih lama';
+                    }
+                } catch (e) {
+                    console.warn('Gagal muat pesan lama:', e);
+                    if (btn) btn.textContent = '↑ Muat 50 pesan lebih lama (gagal, coba lagi)';
+                } finally {
+                    this.historyLoading = false;
+                    if (btn && !this.historyExhausted) btn.disabled = false;
+                }
             },
 
             // ── E. Lite mode: satu video/YT aktif dalam satu waktu (bukan multi-autoplay).
