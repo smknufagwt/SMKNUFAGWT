@@ -1055,6 +1055,7 @@ listEl.innerHTML = ids.map(key => {
                 // yang sudah kepasang di pesan lama gak ikut ke-destroy & reload tiap ada pesan baru masuk.
                 const existingKeys = new Set(Array.from(box.children).map(el => el.dataset.key));
                 let lastEl = null;
+                const newEls = [];
                 msgs.forEach(m => {
                     const k = key(m);
                     if (existingKeys.has(k)) { lastEl = box.querySelector(`[data-key="${CSS.escape(k)}"]`); return; }
@@ -1069,6 +1070,16 @@ listEl.innerHTML = ids.map(key => {
                     if (lastEl && lastEl.nextSibling) box.insertBefore(el, lastEl.nextSibling);
                     else box.appendChild(el);
                     lastEl = el;
+                    newEls.push(el);
+                });
+
+                // Attribut autoplay pada <video> yang dibuat lewat innerHTML tidak selalu
+                // dihormati browser (terutama mobile) — sama seperti kenapa iframe YouTube
+                // di atas butuh postMessage playVideo manual. Trigger .play() eksplisit
+                // di sini, cuma buat elemen yang baru saja dimasukkan (bukan yang sudah ada,
+                // biar gak restart video yang sengaja di-pause user).
+                newEls.forEach(el => {
+                    el.querySelectorAll('video[autoplay]').forEach(v => { v.play().catch(() => {}); });
                 });
 
                 // Cursor buat "muat lebih lama" berikutnya = ts pesan paling atas yang benar-benar ada di DOM.
