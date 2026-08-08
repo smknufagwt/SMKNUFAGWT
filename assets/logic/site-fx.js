@@ -312,28 +312,8 @@
                 type();
             },
 
-            syncVisitorCount: async function() {
-                try {
-                    const response = await fetch('https://api.counterapi.dev/v1/smknufa_2026/visits/up');
-                    if (!response.ok) throw new Error('bad status ' + response.status);
-                    const data = await response.json();
-                    if (!data || !data.count) throw new Error('no count in response');
-                    this.currentVisits = parseInt(data.count) + this.baseOffset;
-                    return true;
-                } catch (error) {
-                    this.useLocalFallback();
-                    return false;
-                }
-            },
-
-            useLocalFallback: function() {
-    try {
-        let localCount = localStorage.getItem('nufa_visits_backup');
-        localCount = localCount ? parseInt(localCount) + 1 : 1;
-        localStorage.setItem('nufa_visits_backup', localCount);
-        this.currentVisits = localCount + this.baseOffset;
-    } catch(e) { this.currentVisits = this.baseOffset; }
-},
+            // syncVisitorCount & useLocalFallback dipindah ke inline <script> di bawah index.html
+            // (lihat sebelum </body>) — di-attach ke object System ini via assignment.
           loadSavedTheme: function() {
     try {
         const savedIndex = localStorage.getItem('nufa_theme');
