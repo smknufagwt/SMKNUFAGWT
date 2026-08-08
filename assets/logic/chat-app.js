@@ -1,5 +1,8 @@
-/* chat-app.js — router SPA untuk /chat (landing page + navigasi room)
-   dan integrasi Supabase Auth (Google OAuth) + status approval room kelas.
+/* chat-app.js — router SPA untuk /chat (landing page + navigasi room).
+   Auth: Firebase Google Sign-In (reuse FIREBASE_CONFIG dari index.html),
+   di-bridge ke Supabase lewat Third-Party Auth (accessToken = Firebase ID token).
+   Google Cloud OAuth client terpisah belum di-setup — makanya pakai Firebase,
+   bukan supabase.auth.signInWithOAuth('google') langsung.
    Chat UI per-room (pesan realtime) menyusul di fase berikutnya —
    saat ini path room kelas/public/announcement menampilkan placeholder. */
 (function () {
@@ -94,7 +97,7 @@
         const { data, error } = await supabase
             .from('room_access_requests')
             .select('status')
-            .eq('user_id', currentUser.id)
+            .eq('user_id', currentUser.uid)
             .eq('room_id', roomId)
             .maybeSingle();
 
@@ -114,7 +117,7 @@
                 btn.textContent = 'Mengirim...';
                 const { error: insertErr } = await supabase
                     .from('room_access_requests')
-                    .insert({ user_id: currentUser.id, room_id: roomId });
+                    .insert({ user_id: currentUser.uid, room_id: roomId });
                 if (insertErr) {
                     btn.textContent = 'Gagal, coba lagi';
                     btn.disabled = false;
@@ -177,14 +180,15 @@
         window.addEventListener('popstate', render);
 
         document.getElementById('chat-account-btn').addEventListener('click', async () => {
-            if (!supabase) return;
+            if (typeof firebase === 'undefined' || !firebase.apps || !firebase.apps.length) return;
             if (currentUser) {
-                await supabase.auth.signOut();
+                await firebase.auth().signOut();
             } else {
-                await supabase.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: { redirectTo: window.location.origin + '/chat' },
-                });
+                try {
+                    await firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider());
+                } catch (err) {
+                    console.warn('[chat-app] Google sign-in gagal:', err.message);
+                }
             }
         });
     }
@@ -192,9 +196,9 @@
     function updateAccountIcon() {
         const iconEl = document.getElementById('chat-account-icon');
         if (!iconEl) return;
-        if (currentUser && currentUser.user_metadata && currentUser.user_metadata.avatar_url) {
+        if (currentUser && currentUser.photoURL) {
             iconEl.classList.remove('is-locked');
-            iconEl.innerHTML = '<img src="' + currentUser.user_metadata.avatar_url + '" alt="Akun">';
+            iconEl.innerHTML = '<img src="' + currentUser.photoURL + '" alt="Akun">';
         } else if (currentUser) {
             iconEl.classList.remove('is-locked');
             iconEl.textContent = '👤';
@@ -215,7 +219,7 @@
         supabase
             .from('room_access_requests')
             .select('room_id, status')
-            .eq('user_id', currentUser.id)
+            .eq('user_id', currentUser.uid)
             .then(({ data, error }) => {
                 if (error || !data) return;
                 const byRoom = {};
@@ -240,20 +244,37 @@
             });
     }
 
-    async function initSupabase() {
-        if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
+    async function upsertProfile(user) {
+        if (!supabase || !user) return;
+        await supabase.from('profiles').upsert({
+            id: user.uid,
+            email: user.email || null,
+            full_name: user.displayName || null,
+            avatar_url: user.photoURL || null,
+        }, { onConflict: 'id' });
+    }
+
+    function initServices() {
+        if (typeof firebase === 'undefined' || typeof window.supabase === 'undefined' || !window.supabase.createClient) {
             return; // SDK belum kemuat (mis. diblok jaringan), landing page tetap jalan tanpa auth
         }
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        if (typeof FIREBASE_CONFIG === 'undefined' || !FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey.startsWith('%%')) {
+            return; // secret belum ke-inject (build lokal tanpa GitHub Actions)
+        }
+        if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
 
-        const { data: { session } } = await supabase.auth.getSession();
-        currentUser = session ? session.user : null;
-        updateAccountIcon();
-        refreshRoomStatuses();
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            accessToken: async () => {
+                const user = firebase.auth().currentUser;
+                if (!user) return null;
+                return await user.getIdToken();
+            },
+        });
 
-        supabase.auth.onAuthStateChange((_event, session) => {
-            currentUser = session ? session.user : null;
+        firebase.auth().onAuthStateChanged(async (user) => {
+            currentUser = user;
             updateAccountIcon();
+            if (user) await upsertProfile(user);
             refreshRoomStatuses();
             if (isChatPath(window.location.pathname)) render();
         });
@@ -263,7 +284,7 @@
         if (!document.getElementById('chat-view')) return;
         bindNav();
         render();
-        initSupabase();
+        initServices();
     }
 
     if (document.readyState === 'loading') {
