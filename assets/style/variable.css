@@ -53,3 +53,175 @@
     color: var(--chat-gold-bright);
     border-color: var(--chat-gold);
 }
+
+/* ── layout root /chat ─────────────────────────────────────── */
+#chat-view {
+    min-height: 100vh;
+    background: #060502;
+    color: var(--chat-gold);
+    font-family: var(--font-main, 'Share Tech Mono', monospace);
+}
+
+.chat-nav {
+    justify-content: flex-start;
+    padding: 0 14px;
+}
+
+.chat-nav-title { margin-right: 2px; }
+
+.chat-account-btn {
+    margin-left: auto;
+    background: none;
+    border: 1px solid var(--chat-nav-border);
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    overflow: hidden;
+}
+
+.chat-account-icon {
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--chat-gold);
+}
+
+.chat-account-icon.is-locked {
+    animation: chat-lock-pulse 1.8s ease-in-out infinite;
+}
+
+.chat-account-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+@keyframes chat-lock-pulse {
+    0%, 100% { text-shadow: 0 0 4px var(--chat-gold-glow); transform: scale(1); }
+    50%      { text-shadow: 0 0 12px var(--chat-gold-glow); transform: scale(1.12); }
+}
+
+/* ── daftar room ────────────────────────────────────────────── */
+.chat-room-list {
+    padding: 16px 14px 40px;
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+.chat-room-hint {
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+    color: var(--chat-gold-dim);
+    margin: 18px 0 8px;
+}
+
+.chat-room-hint-class { margin-top: 26px; }
+
+.chat-room-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    border: 1px solid var(--chat-nav-border);
+    border-radius: 6px;
+    background: rgba(217, 192, 137, 0.05);
+    text-decoration: none;
+    color: var(--chat-gold);
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.chat-room-item:hover,
+.chat-room-item:focus-visible {
+    border-color: var(--chat-gold);
+    background: rgba(217, 192, 137, 0.1);
+}
+
+.chat-room-name {
+    font-weight: 700;
+    letter-spacing: 1px;
+    font-size: 0.85rem;
+}
+
+.chat-room-sub {
+    margin-left: auto;
+    font-size: 0.68rem;
+    color: var(--chat-gold-dim);
+}
+
+.chat-room-status {
+    margin-left: auto;
+    font-size: 0.65rem;
+    color: var(--chat-gold-dim);
+    white-space: nowrap;
+}
+
+.chat-room-status[data-state="pending"]  { color: var(--chat-gold-bright); }
+.chat-room-status[data-state="approved"] { color: #9ee6a0; }
+.chat-room-status[data-state="rejected"] { color: #e68a8a; }
+
+.chat-room-unread {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: var(--chat-gold);
+    color: #060502;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-room-unread[hidden] { display: none; }
+
+.chat-room-group {
+    border: 1px solid rgba(217, 192, 137, 0.15);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.chat-room-group-label {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    color: var(--chat-gold-dim);
+    margin-bottom: 8px;
+}
+
+.chat-room-group .chat-room-item { margin-bottom: 6px; }
+.chat-room-group .chat-room-item:last-child { margin-bottom: 0; }
+
+/* ── placeholder isi room (sebelum UI chat per-room dibangun) ── */
+.chat-room-placeholder {
+    padding: 16px 14px 40px;
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+.chat-back-btn {
+    background: none;
+    border: 1px solid var(--chat-nav-border);
+    color: var(--chat-gold);
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-family: inherit;
+    cursor: pointer;
+    margin-bottom: 14px;
+}
+
+.chat-back-btn:hover { border-color: var(--chat-gold); }
+
+#chat-room-placeholder-text {
+    color: var(--chat-gold-dim);
+    font-size: 0.8rem;
+    line-height: 1.6;
+}
+
