@@ -671,15 +671,8 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
                 // Ambil IP publik pengirim (dipakai untuk ditampilkan ke semua orang, tanpa login)
                 const ipDisplayEl = document.getElementById('chat-myip-display');
                 if (ipDisplayEl) ipDisplayEl.textContent = 'Mengambil...';
-                try {
-                    const r = await fetch('https://api.ipify.org?format=json');
-                    const d = await r.json();
-                    this.myIp = d.ip;
-                    if (ipDisplayEl) ipDisplayEl.textContent = this.myIp;
-                } catch (e) {
-                    this.myIp = 'UNKNOWN';
-                    if (ipDisplayEl) ipDisplayEl.textContent = 'UNKNOWN';
-                }
+                this.myIp = await this._resolveMyIp();
+                if (ipDisplayEl) ipDisplayEl.textContent = this.myIp;
                 // Perbaiki ikon device setelah kita punya semua info
                 if (devIconEl) {
                     const isBrand = ['fa-android','fa-apple','fa-windows','fa-linux'].includes(this.myDevice.icon);
@@ -824,6 +817,13 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
                     } else {
                         byIp[key].count += 1;
                         byIp[key].ids.push(id);
+                        // FIX: device/ip harus ikut entry paling baru (ts terbesar), bukan cuma yang pertama
+                        // konek di IP itu — biar HP/tablet yang join belakangan di IP yang sama (mis. WiFi
+                        // sekolah) kelihatan device & statusnya sendiri, bukan numpang device sebelumnya.
+                        if ((d.ts || 0) >= (byIp[key].ts || 0)) {
+                            byIp[key].device = d.device;
+                            byIp[key].ip = d.ip;
+                        }
                         byIp[key].ts = Math.max(byIp[key].ts || 0, d.ts || 0);
                         if (id === this.presenceId) byIp[key].isYou = true;
                     }
@@ -833,6 +833,34 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
 
             _ipKey(ip) {
                 return String(ip || 'UNKNOWN').replace(/[.#$\[\]/]/g, '_');
+            },
+
+            // Resolusi IP publik dengan fallback chain — beberapa browser/DNS mobile
+            // (ad-block DNS, private DNS, Brave, dsb) suka nge-block domain fingerprinting
+            // kayak ipify. Coba beberapa provider berurutan, tiap percobaan dikasih timeout
+            // sendiri biar gak nge-hang lama kalau satu provider gak respon sama sekali.
+            async _resolveMyIp() {
+                const providers = [
+                    { url: 'https://api.ipify.org?format=json', pick: d => d.ip },
+                    { url: 'https://api64.ipify.org?format=json', pick: d => d.ip },
+                    { url: 'https://ipapi.co/json/', pick: d => d.ip },
+                    { url: 'https://api.myip.com', pick: d => d.ip }
+                ];
+                for (const p of providers) {
+                    try {
+                        const ip = p.pick(await this._fetchJsonWithTimeout(p.url, 4000));
+                        if (ip && typeof ip === 'string') return ip;
+                    } catch (e) { /* lanjut ke provider berikutnya */ }
+                }
+                return 'UNKNOWN';
+            },
+
+            _fetchJsonWithTimeout(url, ms) {
+                const ctrl = new AbortController();
+                const timer = setTimeout(() => ctrl.abort(), ms);
+                return fetch(url, { signal: ctrl.signal })
+                    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+                    .finally(() => clearTimeout(timer));
             },
 
             
@@ -1572,28 +1600,53 @@ listEl.innerHTML = ids.map(key => {
         // Visitor counter fetch logic — inline di sini (bukan file eksternal)
         // supaya tidak ketahan cache SW/CDN pada assets/logic/*.js
         // Migrasi ke CounterAPI v2 (workspace-based) — v1 legacy sering gagal/kosong.
+        //
+        // Unique visitor: UID persisten disimpan di localStorage. Kunjungan PERTAMA
+        // (uid belum ada) baru nembak endpoint /up (increment). Kunjungan berikutnya
+        // dari device/browser yang sama cuma GET nilai counter tanpa nambah — jadi
+        // orang yang balik-balik gak bikin angka pengunjung membengkak terus.
+        System.getOrCreateVisitorUid = function() {
+            let uid = localStorage.getItem('nufa_visitor_uid');
+            if (uid) return { uid, isNew: false };
+            uid = (typeof crypto !== 'undefined' && crypto.randomUUID)
+                ? crypto.randomUUID()
+                : 'v-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+            localStorage.setItem('nufa_visitor_uid', uid);
+            return { uid, isNew: true };
+        };
+
+        System._parseCounterValue = function(data) {
+            const raw = data?.data?.value ?? data?.data?.up_count ?? data?.value ?? data?.count;
+            const n = parseInt(raw);
+            return isNaN(n) ? null : n;
+        };
+
         System.syncVisitorCount = async function() {
+            const { isNew } = this.getOrCreateVisitorUid();
+            // Kunjungan baru: increment (/up). Kunjungan lama: GET doang, gak nambah.
+            const endpoint = isNew
+                ? 'https://api.counterapi.dev/v2/smknufa_2026/visits/up'
+                : 'https://api.counterapi.dev/v2/smknufa_2026/visits/';
             try {
-                const response = await fetch('https://api.counterapi.dev/v2/smknufa_2026/visits/up');
+                const response = await fetch(endpoint);
                 if (!response.ok) throw new Error('bad status ' + response.status);
                 const data = await response.json();
-                // v2 bisa balas beberapa bentuk field tergantung endpoint/versi API,
-                // jadi dicoba beberapa kemungkinan path sebelum nyerah ke fallback.
-                const raw = data?.data?.value ?? data?.data?.up_count ?? data?.value ?? data?.count;
-                const count = parseInt(raw);
-                if (isNaN(count)) throw new Error('no valid count in response');
+                const count = this._parseCounterValue(data);
+                if (count === null) throw new Error('no valid count in response');
                 this.currentVisits = count + this.baseOffset;
                 return true;
             } catch (error) {
-                this.useLocalFallback();
+                this.useLocalFallback(isNew);
                 return false;
             }
         };
 
-        System.useLocalFallback = function() {
+        System.useLocalFallback = function(isNew) {
             try {
                 let localCount = localStorage.getItem('nufa_visits_backup');
-                localCount = localCount ? parseInt(localCount) + 1 : 1;
+                localCount = localCount ? parseInt(localCount) : 0;
+                // Sama kayak server: cuma nambah kalau ini visitor baru, bukan tiap reload.
+                if (isNew || !localCount) localCount += 1;
                 localStorage.setItem('nufa_visits_backup', localCount);
                 this.currentVisits = localCount + this.baseOffset;
             } catch(e) { this.currentVisits = this.baseOffset; }
