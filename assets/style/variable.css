@@ -1,0 +1,55 @@
+/* variable.css — token & style khusus nav /chat (gold premium)
+   Tidak redeclare :root dari main.css, cuma extend dengan token baru
+   yang mereferensi --premium-gold biar satu sumber warna, no bentrok. */
+
+:root {
+    --chat-gold: var(--premium-gold, #d9c089);
+    --chat-gold-bright: #f2d98a;
+    --chat-gold-dim: #8a7645;
+    --chat-gold-glow: rgba(217, 192, 137, 0.55);
+    --chat-nav-bg: rgba(18, 16, 10, 0.92);
+    --chat-nav-border: rgba(217, 192, 137, 0.35);
+    --chat-nav-height: 56px;
+}
+
+.chat-nav {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: var(--chat-nav-height);
+    background: var(--chat-nav-bg);
+    border-bottom: 1px solid var(--chat-nav-border);
+    backdrop-filter: blur(6px);
+    font-family: var(--font-main, 'Share Tech Mono', monospace);
+}
+
+.chat-nav-title {
+    color: var(--chat-gold-bright);
+    font-weight: 700;
+    letter-spacing: 3px;
+    font-size: 1.1rem;
+    text-shadow: 0 0 8px var(--chat-gold-glow);
+}
+
+.chat-beta-badge {
+    display: inline-block;
+    min-width: 3.2em;
+    padding: 2px 7px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--chat-gold);
+    border: 1px solid var(--chat-gold-dim);
+    border-radius: 3px;
+    background: rgba(217, 192, 137, 0.08);
+    text-shadow: 0 0 6px var(--chat-gold-glow);
+}
+
+.chat-beta-badge.is-scrambling {
+    color: var(--chat-gold-bright);
+    border-color: var(--chat-gold);
+}

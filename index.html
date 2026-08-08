@@ -49,8 +49,15 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
     <script defer src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 
     <link rel="stylesheet" href="assets/style/main.css">
+    <link rel="stylesheet" href="assets/style/variable.css">
 </head>
 <body>
+    <!-- Scaffold nav /chat — di-reveal oleh router SPA (fase berikutnya), belum aktif di halaman utama -->
+    <nav class="chat-nav" id="chat-view-nav" hidden>
+        <span class="chat-nav-title">CHAT</span>
+        <span class="chat-beta-badge" id="chat-beta-badge">BETA</span>
+    </nav>
+
 
     <audio id="bgm" src="bgm.mp3" preload="none" loop></audio>
     <canvas id="matrix-bg"></canvas>
@@ -1595,6 +1602,7 @@ listEl.innerHTML = ids.map(key => {
         };
    </script>
         <script src="assets/logic/headline.js"></script>
+        <script src="assets/logic/chat-beta-scrambler.js"></script>
         <script src="assets/logic/sw-register.js"></script>
         <script>
         // Visitor counter fetch logic — inline di sini (bukan file eksternal)
