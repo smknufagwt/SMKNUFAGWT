@@ -225,3 +225,19 @@
     line-height: 1.6;
 }
 
+/* ── tombol nav "CHAT" di main site, arah ke /chat ─────────────── */
+.nav-btn-chat {
+    color: var(--chat-gold-bright);
+    border-color: var(--chat-gold-dim);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-btn-chat:hover {
+    background: rgba(217, 192, 137, 0.15);
+    border-color: var(--chat-gold);
+    text-shadow: 0 0 8px var(--chat-gold-glow);
+}
+
