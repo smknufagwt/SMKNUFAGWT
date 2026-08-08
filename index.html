@@ -1560,13 +1560,18 @@ listEl.innerHTML = ids.map(key => {
         <script>
         // Visitor counter fetch logic — inline di sini (bukan file eksternal)
         // supaya tidak ketahan cache SW/CDN pada assets/logic/*.js
+        // Migrasi ke CounterAPI v2 (workspace-based) — v1 legacy sering gagal/kosong.
         System.syncVisitorCount = async function() {
             try {
-                const response = await fetch('https://api.counterapi.dev/v1/smknufa_2026/visits/up');
+                const response = await fetch('https://api.counterapi.dev/v2/smknufa_2026/visits/up');
                 if (!response.ok) throw new Error('bad status ' + response.status);
                 const data = await response.json();
-                if (!data || !data.count) throw new Error('no count in response');
-                this.currentVisits = parseInt(data.count) + this.baseOffset;
+                // v2 bisa balas beberapa bentuk field tergantung endpoint/versi API,
+                // jadi dicoba beberapa kemungkinan path sebelum nyerah ke fallback.
+                const raw = data?.data?.value ?? data?.data?.up_count ?? data?.value ?? data?.count;
+                const count = parseInt(raw);
+                if (isNaN(count)) throw new Error('no valid count in response');
+                this.currentVisits = count + this.baseOffset;
                 return true;
             } catch (error) {
                 this.useLocalFallback();

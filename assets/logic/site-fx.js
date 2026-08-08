@@ -290,7 +290,7 @@
                 { neon: '#ffffff', dim: '#8ce6ef', hex: '#ffffff' }  
 
             ],
-            baseOffset: 4990,
+            baseOffset: 6340,
             currentVisits: 0, 
 
             typeWriter: function(elementId, text, speed = 100) {
