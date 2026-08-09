@@ -19,11 +19,12 @@ jobs:
           sed -i "s|%%ACCESS_CODE_B64%%|${{ secrets.ACCESS_CODE_B64 }}|g"             index.html
           sed -i "s|%%NOTIFY_SECRET%%|${{ secrets.NOTIFY_SECRET }}|g"                 index.html
 
+      - name: Inject secrets ke dashmin.html
+        run: |
+          sed -i "s|%%FIREBASE_API_KEY%%|${{ secrets.FIREBASE_API_KEY }}|g" dashmin.html
+
       - name: Deploy ke Vercel
         run: npx vercel --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
         env:
           VERCEL_ORG_ID:     team_WAxjsLFh79gZzZGqIxczIcz8
           VERCEL_PROJECT_ID: prj_gCEeSO4IqIbjEs0oK99EyRIORx8A
-          - name: Inject secrets ke dashmin.html
-        run: |
-          sed -i "s|%%FIREBASE_API_KEY%%|${{ secrets.FIREBASE_API_KEY }}|g"           dashmin.html
