@@ -23,7 +23,6 @@
     height: var(--chat-nav-height);
     background: var(--chat-nav-bg);
     border-bottom: 1px solid var(--chat-nav-border);
-    backdrop-filter: blur(6px);
     font-family: var(--font-main, 'Share Tech Mono', monospace);
 }
 
