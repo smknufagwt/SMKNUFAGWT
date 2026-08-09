@@ -24,3 +24,6 @@ jobs:
         env:
           VERCEL_ORG_ID:     team_WAxjsLFh79gZzZGqIxczIcz8
           VERCEL_PROJECT_ID: prj_gCEeSO4IqIbjEs0oK99EyRIORx8A
+          - name: Inject secrets ke dashmin.html
+        run: |
+          sed -i "s|%%FIREBASE_API_KEY%%|${{ secrets.FIREBASE_API_KEY }}|g"           dashmin.html
