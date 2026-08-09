@@ -127,6 +127,19 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             <button class="chat-back-btn" id="chat-back-btn" type="button">&larr; Kembali</button>
             <p id="chat-room-placeholder-text"></p>
         </div>
+
+        <div class="chat-room-thread" id="chat-room-thread" hidden>
+            <div class="chat-thread-head">
+                <button class="chat-back-btn" id="chat-thread-back-btn" type="button">&larr; Kembali</button>
+                <span class="chat-thread-title" id="chat-thread-title"></span>
+            </div>
+            <div class="chat-thread-messages" id="chat-thread-messages"></div>
+            <p class="chat-thread-readonly-note" id="chat-thread-readonly-note" hidden></p>
+            <form class="chat-thread-form" id="chat-thread-form">
+                <input type="text" id="chat-thread-input" placeholder="Tulis pesan..." autocomplete="off" maxlength="1000">
+                <button type="submit">Kirim</button>
+            </form>
+        </div>
     </div>
 
 
