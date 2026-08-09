@@ -1,0 +1,154 @@
+/* dashmin.css — layout admin dashboard /dashmin. Pakai token gold dari variable.css,
+   sengaja tanpa backdrop-filter/animasi berat biar ringan & konsisten di semua browser. */
+* { box-sizing: border-box; }
+
+body.dashmin-body {
+    margin: 0;
+    min-height: 100vh;
+    background: #060502;
+    color: var(--chat-gold);
+    font-family: var(--font-main, 'Share Tech Mono', monospace);
+}
+
+.dashmin-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: var(--chat-nav-height);
+    padding: 0 14px;
+    background: var(--chat-nav-bg);
+    border-bottom: 1px solid var(--chat-nav-border);
+}
+
+.dashmin-nav-title {
+    color: var(--chat-gold-bright);
+    font-weight: 700;
+    letter-spacing: 3px;
+    font-size: 1rem;
+}
+
+.dashmin-nav-user {
+    margin-left: auto;
+    font-size: 0.7rem;
+    color: var(--chat-gold-dim);
+}
+
+.dashmin-logout-btn {
+    background: none;
+    border: 1px solid var(--chat-nav-border);
+    color: var(--chat-gold);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-family: inherit;
+    font-size: 0.68rem;
+    cursor: pointer;
+}
+.dashmin-logout-btn:hover { border-color: var(--chat-gold); }
+
+.dashmin-main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 16px 14px 40px;
+}
+
+.dashmin-gate {
+    max-width: 360px;
+    margin: 80px auto 0;
+    text-align: center;
+    padding: 0 16px;
+}
+
+.dashmin-gate p {
+    color: var(--chat-gold-dim);
+    font-size: 0.8rem;
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+.dashmin-btn {
+    background: rgba(217, 192, 137, 0.15);
+    border: 1px solid var(--chat-gold-dim);
+    color: var(--chat-gold-bright);
+    border-radius: 6px;
+    padding: 9px 18px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+.dashmin-btn:hover { border-color: var(--chat-gold); }
+.dashmin-btn:disabled { opacity: 0.4; cursor: default; }
+
+.dashmin-section {
+    margin-bottom: 28px;
+}
+
+.dashmin-section-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--chat-gold-bright);
+    margin: 0 0 10px;
+}
+
+.dashmin-empty {
+    color: var(--chat-gold-dim);
+    font-size: 0.75rem;
+    padding: 10px 0;
+}
+
+.dashmin-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    border: 1px solid var(--chat-nav-border);
+    border-radius: 6px;
+    background: rgba(217, 192, 137, 0.05);
+    flex-wrap: wrap;
+}
+
+.dashmin-row-info {
+    flex: 1;
+    min-width: 160px;
+}
+
+.dashmin-row-name {
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.dashmin-row-sub {
+    font-size: 0.65rem;
+    color: var(--chat-gold-dim);
+    margin-top: 2px;
+}
+
+.dashmin-row-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.dashmin-action-btn {
+    background: none;
+    border: 1px solid var(--chat-gold-dim);
+    color: var(--chat-gold);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-family: inherit;
+    font-size: 0.68rem;
+    cursor: pointer;
+}
+.dashmin-action-btn:hover { border-color: var(--chat-gold); }
+.dashmin-action-btn.is-approve { color: #9ee6a0; border-color: #4d7a4f; }
+.dashmin-action-btn.is-reject,
+.dashmin-action-btn.is-revoke { color: #e68a8a; border-color: #7a4d4d; }
+.dashmin-action-btn:disabled { opacity: 0.4; pointer-events: none; }
+
+.dashmin-group-label {
+    font-size: 0.68rem;
+    letter-spacing: 1px;
+    color: var(--chat-gold-dim);
+    margin: 14px 0 6px;
+}
