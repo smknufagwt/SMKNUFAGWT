@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>DASHMIN — SMK Nurul Falah</title>
+    <link rel="stylesheet" href="assets/style/variable.css">
+    <link rel="stylesheet" href="assets/style/dashmin.css">
+    <script defer src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="dashmin-body">
+    <nav class="dashmin-nav">
+        <span class="dashmin-nav-title">DASHMIN</span>
+        <span class="dashmin-nav-user" id="dashmin-nav-user"></span>
+        <button class="dashmin-logout-btn" id="dashmin-logout-btn" type="button">Keluar</button>
+    </nav>
+
+    <div class="dashmin-gate" id="dashmin-gate">
+        <p id="dashmin-gate-text">Memuat...</p>
+        <button class="dashmin-btn" id="dashmin-gate-btn" type="button" hidden>Login dengan Google</button>
+    </div>
+
+    <main class="dashmin-main" id="dashmin-dashboard" hidden>
+        <section class="dashmin-section">
+            <h2 class="dashmin-section-title">Permintaan Akses Kelas</h2>
+            <div id="dashmin-pending-list"></div>
+        </section>
+
+        <section class="dashmin-section">
+            <h2 class="dashmin-section-title">Member per Kelas</h2>
+            <div id="dashmin-members-list"></div>
+        </section>
+    </main>
+
+    <script>
+        const FIREBASE_CONFIG = {
+            apiKey: "%%FIREBASE_API_KEY%%",
+            authDomain: "server-nufa.firebaseapp.com",
+            projectId: "server-nufa",
+            storageBucket: "server-nufa.firebasestorage.app",
+            messagingSenderId: "168660687360",
+            appId: "1:168660687360:web:bdb56f6ea15e3cd44756e5"
+        };
+    </script>
+    <script src="assets/logic/dashmin-app.js"></script>
+</body>
+</html>
