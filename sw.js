@@ -255,6 +255,18 @@ const MessageModule = {
       case 'BROADCAST_CHAT':
         this.broadcastToClients({ type: 'NEW_CHAT_MESSAGE', payload });
         break;
+
+      // Halaman lapor jumlah pesan /chat yang belum dibaca — set app badge kalau browser dukung
+      case 'SET_UNREAD_BADGE':
+        try {
+          const count = (payload && payload.count) || 0;
+          if (count > 0 && 'setAppBadge' in navigator) {
+            navigator.setAppBadge(count);
+          } else if ('clearAppBadge' in navigator) {
+            navigator.clearAppBadge();
+          }
+        } catch (e) { /* Badging API gak didukung browser ini, abaikan */ }
+        break;
     }
   },
 

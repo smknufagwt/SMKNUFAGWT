@@ -21,6 +21,7 @@
         'pemasaran-2': 'Pemasaran 2', 'otomotif-2': 'Otomotif 2',
         'pemasaran-3': 'Pemasaran 3', 'otomotif-3': 'Otomotif 3',
     };
+    const ALL_ROOM_IDS = ['public', 'announcement'].concat(CLASS_ROOM_IDS);
 
     // Elemen main-site yang perlu disembunyikan selagi di /chat
     const MAIN_SITE_SELECTORS = [
@@ -29,11 +30,63 @@
         '#chat-marquee-bar', '#chat-toast-stack', '#chat-panel',
     ];
 
+    const ACCOUNT_HINT_MESSAGES = [
+        'Login akun google anda',
+        'Akses percakapan dengan email anda',
+        'Kelas kamu, obrolan kamu 🎓',
+        'Aman & privat, cukup 1x klik',
+    ];
+
     let supabase = null;
     let currentUser = null;
     let isAdmin = false;
     let currentChannel = null;
     let currentRoomId = null;
+    let hintHandle = null;
+    let hintIndex = 0;
+    let unreadChannel = null;
+    let unreadMap = {}; // { roomId: count }
+
+    function cycleAccountHint(el) {
+        if (!window.ScrambleFX) return;
+        const text = ACCOUNT_HINT_MESSAGES[hintIndex % ACCOUNT_HINT_MESSAGES.length];
+        hintIndex++;
+        hintHandle = window.ScrambleFX.run(el, text, {
+            perCharMs: 35, tickMs: 30, holdMs: 2600, loop: false,
+            onDone: () => {
+                if (currentUser) return; // login kejadian di tengah cycle, biarin handler login yang ambil alih
+                hintHandle = setTimeout(() => cycleAccountHint(el), 2600);
+            },
+        });
+    }
+
+    function updateAccountHint() {
+        const el = document.getElementById('chat-account-hint');
+        if (!el || !window.ScrambleFX) return;
+        stopAccountHint();
+
+        if (currentUser) {
+            const label = currentUser.email || currentUser.displayName || 'Akun tersambung';
+            el.classList.remove('is-scrambling');
+            el.classList.add('is-visible');
+            hintHandle = window.ScrambleFX.run(el, label, { perCharMs: 60, tickMs: 30, holdMs: 0, loop: false });
+            // rainbow nyala setelah teks penuh ter-lock (delay ≈ durasi scramble)
+            setTimeout(() => el.classList.add('is-identity'), label.length * 60 + 120);
+        } else {
+            el.classList.remove('is-identity');
+            el.classList.add('is-visible');
+            hintIndex = 0;
+            cycleAccountHint(el);
+        }
+    }
+
+    function stopAccountHint() {
+        if (hintHandle) {
+            if (typeof hintHandle.stop === 'function') hintHandle.stop();
+            else clearTimeout(hintHandle);
+            hintHandle = null;
+        }
+    }
 
     function showChatToast(msg) {
         let toast = document.getElementById('chat-toast');
@@ -95,6 +148,7 @@
         document.getElementById('chat-room-placeholder').hidden = true;
         document.getElementById('chat-room-thread').hidden = true;
         teardownThread();
+        if (currentUser) computeUnreadCounts();
     }
 
     function showPlaceholderText(msg) {
@@ -112,7 +166,7 @@
     function canWriteToRoom(roomId) {
         if (roomId === 'public') return true;
         if (roomId === 'announcement') return isAdmin;
-        return true; // room kelas hanya sampai sini setelah lolos gate approved/admin
+        return false; // room kelas: writable ditentukan eksplisit oleh renderClassRoomGate
     }
 
     function scrollThreadToBottom(el) {
@@ -141,7 +195,7 @@
         container.appendChild(el);
     }
 
-    async function openThread(roomId) {
+    async function openThread(roomId, writableOverride) {
         document.getElementById('chat-room-list').hidden = true;
         document.getElementById('chat-room-placeholder').hidden = true;
         document.getElementById('chat-room-thread').hidden = false;
@@ -150,15 +204,19 @@
         const list = document.getElementById('chat-thread-messages');
         const form = document.getElementById('chat-thread-form');
         const note = document.getElementById('chat-thread-readonly-note');
+        const existingBtn = note.parentElement.querySelector('.chat-request-btn');
+        if (existingBtn) existingBtn.remove();
 
-        const writable = canWriteToRoom(roomId);
+        const writable = writableOverride !== undefined ? writableOverride : canWriteToRoom(roomId);
         form.hidden = !writable;
         note.hidden = writable;
         if (!writable) {
             note.textContent = roomId === 'announcement'
                 ? 'Hanya admin yang bisa mengirim pesan di Announcement.'
-                : 'Kamu tidak punya akses tulis di ruang ini.';
+                : 'Kamu tidak punya akses tulis di ruang ini — cuma bisa baca.';
         }
+
+        markRoomRead(roomId);
 
         if (currentRoomId === roomId && currentChannel) return; // sudah kebuka, cuma toggle permission
         teardownThread();
@@ -195,6 +253,7 @@
                 if (empty) empty.remove();
                 appendMessageEl(list, payload.new);
                 scrollThreadToBottom(list);
+                markRoomRead(roomId);
             })
             .subscribe();
     }
@@ -211,40 +270,36 @@
     }
 
     async function renderClassRoomGate(roomId) {
-        document.getElementById('chat-room-thread').hidden = true;
-        teardownThread();
-
         if (isAdmin) {
-            await openThread(roomId);
+            await openThread(roomId, true);
             return;
         }
 
-        document.getElementById('chat-room-list').hidden = true;
-        const box = document.getElementById('chat-room-placeholder');
-        const text = document.getElementById('chat-room-placeholder-text');
-        box.hidden = false;
-        text.textContent = 'Memuat status akses...';
-        const existingBtn = box.querySelector('.chat-request-btn');
-        if (existingBtn) existingBtn.remove();
+        const [mineRes, othersRes] = await Promise.all([
+            supabase.from('room_access_requests').select('status').eq('user_id', currentUser.uid).eq('room_id', roomId).maybeSingle(),
+            supabase.from('room_access_requests').select('room_id, status').eq('user_id', currentUser.uid).neq('room_id', roomId).in('status', ['pending', 'approved']),
+        ]);
 
-        const { data, error } = await supabase
-            .from('room_access_requests')
-            .select('status')
-            .eq('user_id', currentUser.uid)
-            .eq('room_id', roomId)
-            .maybeSingle();
+        const myStatus = mineRes.data ? mineRes.data.status : null;
+        const hasActiveElsewhere = !othersRes.error && othersRes.data && othersRes.data.length > 0;
+        const writable = myStatus === 'approved';
 
-        if (error) {
-            text.textContent = 'Gagal memuat status akses.';
-            return;
-        }
+        await openThread(roomId, writable);
+        if (writable) return; // full akses, gak perlu banner tambahan
 
-        if (!data) {
-            text.textContent = 'Kamu belum minta akses ke "' + ROOM_LABELS[roomId] + '".';
+        const note = document.getElementById('chat-thread-readonly-note');
+        if (myStatus === 'pending') {
+            note.textContent = 'Permintaan akses kamu ke "' + ROOM_LABELS[roomId] + '" masih menunggu approval admin. Sementara cuma bisa baca.';
+        } else if (myStatus === 'rejected') {
+            note.textContent = 'Permintaan akses ke "' + ROOM_LABELS[roomId] + '" ditolak admin. Sementara cuma bisa baca.';
+        } else if (hasActiveElsewhere) {
+            note.textContent = 'Kamu udah aktif di kelas lain — room ini cuma bisa dibaca.';
+        } else {
+            note.textContent = 'Kamu tidak punya akses tulis di ruang ini — cuma bisa baca.';
             const btn = document.createElement('button');
             btn.className = 'chat-back-btn chat-request-btn';
             btn.type = 'button';
-            btn.textContent = 'Minta Akses';
+            btn.textContent = 'Minta Akses ke Kelas Ini';
             btn.addEventListener('click', async () => {
                 btn.disabled = true;
                 btn.textContent = 'Mengirim...';
@@ -252,23 +307,17 @@
                     .from('room_access_requests')
                     .insert({ user_id: currentUser.uid, room_id: roomId });
                 if (insertErr) {
-                    btn.textContent = 'Gagal, coba lagi';
+                    showChatToast(insertErr.message.includes('aktif') ? insertErr.message : 'Gagal mengirim permintaan.');
+                    btn.textContent = 'Minta Akses ke Kelas Ini';
                     btn.disabled = false;
                 } else {
-                    renderClassRoomGate(roomId);
+                    showChatToast('Permintaan terkirim, tunggu approval admin.');
+                    btn.remove();
+                    note.textContent = 'Permintaan akses ke "' + ROOM_LABELS[roomId] + '" masih menunggu approval admin. Sementara cuma bisa baca.';
                     refreshRoomStatuses();
                 }
             });
-            box.appendChild(btn);
-            return;
-        }
-
-        if (data.status === 'pending') {
-            text.textContent = 'Permintaan akses ke "' + ROOM_LABELS[roomId] + '" sedang menunggu approval admin.';
-        } else if (data.status === 'approved') {
-            await openThread(roomId);
-        } else {
-            text.textContent = 'Permintaan akses ke "' + ROOM_LABELS[roomId] + '" ditolak admin.';
+            note.insertAdjacentElement('afterend', btn);
         }
     }
 
@@ -383,6 +432,7 @@
                 greetEl.hidden = true;
             }
         }
+        updateAccountHint();
     }
 
     function refreshRoomStatuses() {
@@ -421,6 +471,133 @@
             });
     }
 
+    function lastReadStorageKey() {
+        return currentUser ? 'chatLastRead:' + currentUser.uid : null;
+    }
+
+    function getLastReadMap() {
+        const key = lastReadStorageKey();
+        if (!key) return {};
+        try { return JSON.parse(localStorage.getItem(key) || '{}'); } catch (e) { return {}; }
+    }
+
+    function setLastReadMap(map) {
+        const key = lastReadStorageKey();
+        if (!key) return;
+        try { localStorage.setItem(key, JSON.stringify(map)); } catch (e) { /* storage penuh/diblok, abaikan */ }
+    }
+
+    function markRoomRead(roomId) {
+        if (!currentUser) return;
+        const map = getLastReadMap();
+        map[roomId] = new Date().toISOString();
+        setLastReadMap(map);
+        unreadMap[roomId] = 0;
+        renderUnreadBadges();
+    }
+
+    function roomIdToPath(roomId) {
+        if (roomId === 'public' || roomId === 'announcement') return '/chat/' + roomId;
+        const idx = roomId.lastIndexOf('-');
+        return '/chat/' + roomId.slice(0, idx) + '/' + roomId.slice(idx + 1);
+    }
+
+    function notifyServiceWorkerBadge(count) {
+        if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) return;
+        try {
+            navigator.serviceWorker.controller.postMessage({ type: 'SET_UNREAD_BADGE', payload: { count: count } });
+        } catch (e) { /* SW belum siap, abaikan */ }
+    }
+
+    function renderUnreadBadges() {
+        let total = 0;
+        ALL_ROOM_IDS.forEach((roomId) => {
+            const badge = document.querySelector('[data-unread="' + roomId + '"]');
+            const count = unreadMap[roomId] || 0;
+            total += count;
+            if (badge) {
+                badge.textContent = count > 99 ? '99+' : String(count);
+                badge.hidden = count === 0;
+            }
+        });
+        const dot = document.getElementById('nav-chat-unread-dot');
+        if (dot) dot.hidden = total === 0;
+        notifyServiceWorkerBadge(total);
+    }
+
+    async function countUnread(roomId, sinceIso) {
+        try {
+            const { count } = await supabase
+                .from('messages')
+                .select('id', { count: 'exact', head: true })
+                .eq('room_id', roomId)
+                .gt('created_at', sinceIso);
+            return count || 0;
+        } catch (e) {
+            return 0;
+        }
+    }
+
+    async function computeUnreadCounts() {
+        if (!supabase || !currentUser) return;
+        const map = getLastReadMap();
+        if (!Object.keys(map).length) {
+            // baru pertama kali: jangan hitung histori lama sebagai unread
+            const now = new Date().toISOString();
+            ALL_ROOM_IDS.forEach((id) => { map[id] = now; });
+            setLastReadMap(map);
+        }
+        const counts = await Promise.all(
+            ALL_ROOM_IDS.map((id) => countUnread(id, map[id] || '1970-01-01T00:00:00Z'))
+        );
+        ALL_ROOM_IDS.forEach((id, i) => { unreadMap[id] = counts[i]; });
+        renderUnreadBadges();
+    }
+
+    function maybeNotify(msg) {
+        if (!('Notification' in window) || Notification.permission !== 'granted') return;
+        try {
+            const n = new Notification((ROOM_LABELS[msg.room_id] || msg.room_id) + ' • ' + (msg.display_name || 'Pesan baru'), {
+                body: msg.content,
+                icon: '/appcover.jpg',
+                tag: 'chat-' + msg.room_id,
+            });
+            n.onclick = () => {
+                window.focus();
+                navigate(roomIdToPath(msg.room_id));
+                n.close();
+            };
+        } catch (e) { /* browser nolak/gak dukung, abaikan */ }
+    }
+
+    function teardownUnreadChannel() {
+        if (unreadChannel && supabase) supabase.removeChannel(unreadChannel);
+        unreadChannel = null;
+    }
+
+    function setupUnreadChannel() {
+        teardownUnreadChannel();
+        if (!supabase || !currentUser) return;
+        unreadChannel = supabase
+            .channel('messages-unread-watch')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
+                const msg = payload.new;
+                if (msg.user_id === currentUser.uid) return; // pesan sendiri gak dihitung unread
+                if (msg.room_id === currentRoomId) return;   // lagi kebuka, otomatis "read"
+                unreadMap[msg.room_id] = (unreadMap[msg.room_id] || 0) + 1;
+                renderUnreadBadges();
+                maybeNotify(msg);
+            })
+            .subscribe();
+    }
+
+    function maybeRequestNotificationPermission() {
+        if (!('Notification' in window)) return;
+        if (Notification.permission === 'default') {
+            Notification.requestPermission().catch(() => {});
+        }
+    }
+
     async function upsertProfile(user) {
         if (!supabase || !user) return;
         await supabase.from('profiles').upsert({
@@ -456,8 +633,14 @@
                 await upsertProfile(user);
                 const { data } = await supabase.from('profiles').select('is_admin').eq('id', user.uid).maybeSingle();
                 isAdmin = !!(data && data.is_admin);
+                maybeRequestNotificationPermission();
+                computeUnreadCounts();
+                setupUnreadChannel();
             } else {
                 teardownThread();
+                teardownUnreadChannel();
+                unreadMap = {};
+                renderUnreadBadges();
             }
             refreshRoomStatuses();
             if (isChatPath(window.location.pathname)) render();

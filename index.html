@@ -56,8 +56,10 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
     <!-- /chat landing — di-toggle oleh assets/logic/chat-app.js berdasarkan pathname -->
     <div id="chat-view" hidden>
         <nav class="chat-nav">
+            <a class="chat-home-btn" href="/" id="chat-home-btn" aria-label="Kembali ke beranda">←</a>
             <span class="chat-nav-title">CHAT</span>
             <span class="chat-beta-badge" id="chat-beta-badge">BETA</span>
+            <span class="chat-account-hint" id="chat-account-hint"></span>
             <button class="chat-account-btn" id="chat-account-btn" type="button" aria-label="Akun">
                 <span class="chat-account-icon" id="chat-account-icon">🔒</span>
             </button>
@@ -260,7 +262,7 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             <button class="nav-btn" onclick="System.nav('prodi', this)">MATERI</button>
             <button class="nav-btn" onclick="System.nav('gallery', this)">GALERI</button>
             <a class="nav-btn nav-btn-secondary" href="https://smknufa-bdp.vercel.app/blog" target="_blank" rel="noopener noreferrer" onclick="AudioFX.click()">BLOG</a>
-            <a class="nav-btn nav-btn-chat" href="/chat" onclick="AudioFX.click()">CHAT</a>
+            <a class="nav-btn nav-btn-chat" href="/chat" onclick="AudioFX.click()">CHAT<span class="chat-unread-dot" id="nav-chat-unread-dot" hidden></span></a>
         </nav>
 
         <div id="home" class="slide active">
@@ -1696,6 +1698,7 @@ listEl.innerHTML = ids.map(key => {
         };
    </script>
         <script src="assets/logic/headline.js"></script>
+        <script src="assets/logic/scramble-engine.js"></script>
         <script src="assets/logic/chat-beta-scrambler.js"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
         <script defer src="assets/logic/chat-app.js"></script>
