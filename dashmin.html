@@ -19,18 +19,34 @@
     </nav>
 
     <div class="dashmin-gate" id="dashmin-gate">
+        <div class="dashmin-gate-icon">🛡️</div>
         <p id="dashmin-gate-text">Memuat...</p>
         <button class="dashmin-btn" id="dashmin-gate-btn" type="button" hidden>Login dengan Google</button>
     </div>
 
     <main class="dashmin-main" id="dashmin-dashboard" hidden>
+        <div class="dashmin-stats" id="dashmin-stats">
+            <div class="dashmin-stat">
+                <span class="dashmin-stat-value" id="dashmin-stat-pending">—</span>
+                <span class="dashmin-stat-label">Pending</span>
+            </div>
+            <div class="dashmin-stat">
+                <span class="dashmin-stat-value" id="dashmin-stat-members">—</span>
+                <span class="dashmin-stat-label">Member</span>
+            </div>
+            <div class="dashmin-stat">
+                <span class="dashmin-stat-value">8</span>
+                <span class="dashmin-stat-label">Room</span>
+            </div>
+        </div>
+
         <section class="dashmin-section">
-            <h2 class="dashmin-section-title">Permintaan Akses Kelas</h2>
+            <h2 class="dashmin-section-title" id="dashmin-pending-title">Permintaan Akses Kelas</h2>
             <div id="dashmin-pending-list"></div>
         </section>
 
         <section class="dashmin-section">
-            <h2 class="dashmin-section-title">Member per Kelas</h2>
+            <h2 class="dashmin-section-title" id="dashmin-members-title">Member per Kelas</h2>
             <div id="dashmin-members-list"></div>
         </section>
     </main>

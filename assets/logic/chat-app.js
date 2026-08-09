@@ -35,6 +35,29 @@
     let currentChannel = null;
     let currentRoomId = null;
 
+    function showChatToast(msg) {
+        let toast = document.getElementById('chat-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'chat-toast';
+            toast.className = 'chat-toast';
+            document.getElementById('chat-view').appendChild(toast);
+        }
+        toast.textContent = msg;
+        toast.classList.add('is-visible');
+        clearTimeout(toast._hideTimer);
+        toast._hideTimer = setTimeout(() => toast.classList.remove('is-visible'), 5000);
+    }
+
+    function firebaseAuthErrorMessage(err) {
+        const code = err && err.code;
+        if (code === 'auth/unauthorized-domain') return 'Domain ini belum diizinkan di Firebase — hubungi admin.';
+        if (code === 'auth/popup-blocked') return 'Popup login diblokir browser, izinkan popup lalu coba lagi.';
+        if (code === 'auth/popup-closed-by-user') return null; // user sengaja nutup, gak perlu toast
+        if (code === 'auth/cancelled-popup-request') return null;
+        return 'Login Google gagal: ' + (err && err.message ? err.message : 'error tidak diketahui');
+    }
+
     function pathToRoomId(pathname) {
         const parts = pathname.replace(/\/+$/, '').split('/').filter(Boolean); // ['chat', 'pemasaran', '1']
         if (parts.length <= 1) return null; // '/chat' saja = landing
@@ -330,7 +353,8 @@
                 try {
                     await firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider());
                 } catch (err) {
-                    console.warn('[chat-app] Google sign-in gagal:', err.message);
+                    const msg = firebaseAuthErrorMessage(err);
+                    if (msg) showChatToast(msg);
                 }
             }
         });
@@ -338,6 +362,7 @@
 
     function updateAccountIcon() {
         const iconEl = document.getElementById('chat-account-icon');
+        const greetEl = document.getElementById('chat-room-greeting');
         if (!iconEl) return;
         if (currentUser && currentUser.photoURL) {
             iconEl.classList.remove('is-locked');
@@ -348,6 +373,15 @@
         } else {
             iconEl.classList.add('is-locked');
             iconEl.textContent = '🔒';
+        }
+        if (greetEl) {
+            if (currentUser) {
+                const firstName = (currentUser.displayName || '').split(' ')[0] || 'Sobat NUFA';
+                greetEl.textContent = 'Halo, ' + firstName + ' 👋';
+                greetEl.hidden = false;
+            } else {
+                greetEl.hidden = true;
+            }
         }
     }
 

@@ -20,9 +20,45 @@
 
     function cacheEls() {
         ['gate', 'gate-text', 'gate-btn', 'dashboard', 'nav-user', 'logout-btn',
-         'pending-list', 'members-list'].forEach((id) => {
+         'pending-list', 'members-list', 'pending-title', 'members-title',
+         'stat-pending', 'stat-members'].forEach((id) => {
             el[id] = document.getElementById('dashmin-' + id);
         });
+    }
+
+    function initials(label) {
+        const parts = String(label).trim().split(/\s+/).slice(0, 2);
+        return parts.map((p) => p[0] || '').join('').toUpperCase() || '?';
+    }
+
+    function avatarEl(label) {
+        const av = document.createElement('div');
+        av.className = 'dashmin-avatar';
+        av.textContent = initials(label);
+        return av;
+    }
+
+    function showToast(msg) {
+        let toast = document.getElementById('dashmin-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'dashmin-toast';
+            toast.className = 'dashmin-toast';
+            document.body.appendChild(toast);
+        }
+        toast.textContent = msg;
+        toast.classList.add('is-visible');
+        clearTimeout(toast._hideTimer);
+        toast._hideTimer = setTimeout(() => toast.classList.remove('is-visible'), 5000);
+    }
+
+    function authErrorMessage(err) {
+        const code = err && err.code;
+        if (code === 'auth/unauthorized-domain') return 'Domain ini belum diizinkan di Firebase — tambahkan di Authorized domains.';
+        if (code === 'auth/popup-blocked') return 'Popup login diblokir browser, izinkan popup lalu coba lagi.';
+        if (code === 'auth/popup-closed-by-user') return null;
+        if (code === 'auth/cancelled-popup-request') return null;
+        return 'Login Google gagal: ' + (err && err.message ? err.message : 'error tidak diketahui');
     }
 
     function personLabel(profile, userId) {
@@ -42,8 +78,10 @@
             el['pending-list'].innerHTML = '<p class="dashmin-empty">Gagal memuat permintaan.</p>';
             return;
         }
+        if (el['stat-pending']) el['stat-pending'].textContent = String(data.length);
+        if (el['pending-title']) el['pending-title'].textContent = 'Permintaan Akses Kelas (' + data.length + ')';
         if (!data.length) {
-            el['pending-list'].innerHTML = '<p class="dashmin-empty">Tidak ada permintaan pending.</p>';
+            el['pending-list'].innerHTML = '<p class="dashmin-empty">🎉 Tidak ada permintaan pending.</p>';
             return;
         }
 
@@ -52,11 +90,14 @@
             const row = document.createElement('div');
             row.className = 'dashmin-row';
 
+            const label = personLabel(req.profiles, req.user_id);
+            row.appendChild(avatarEl(label));
+
             const info = document.createElement('div');
             info.className = 'dashmin-row-info';
             const name = document.createElement('div');
             name.className = 'dashmin-row-name';
-            name.textContent = personLabel(req.profiles, req.user_id);
+            name.textContent = label;
             const sub = document.createElement('div');
             sub.className = 'dashmin-row-sub';
             sub.textContent = (ROOM_LABELS[req.room_id] || req.room_id) + ' — ' + new Date(req.requested_at).toLocaleString('id-ID');
@@ -123,6 +164,8 @@
             el['members-list'].innerHTML = '<p class="dashmin-empty">Gagal memuat member.</p>';
             return;
         }
+        if (el['stat-members']) el['stat-members'].textContent = String(data.length);
+        if (el['members-title']) el['members-title'].textContent = 'Member per Kelas (' + data.length + ')';
         if (!data.length) {
             el['members-list'].innerHTML = '<p class="dashmin-empty">Belum ada member kelas.</p>';
             return;
@@ -142,11 +185,14 @@
             const row = document.createElement('div');
             row.className = 'dashmin-row';
 
+            const personName = personLabel(m.profiles, m.user_id);
+            row.appendChild(avatarEl(personName));
+
             const info = document.createElement('div');
             info.className = 'dashmin-row-info';
             const name = document.createElement('div');
             name.className = 'dashmin-row-name';
-            name.textContent = personLabel(m.profiles, m.user_id);
+            name.textContent = personName;
             const sub = document.createElement('div');
             sub.className = 'dashmin-row-sub';
             sub.textContent = 'Sejak ' + new Date(m.approved_at).toLocaleDateString('id-ID');
@@ -228,7 +274,8 @@
             try {
                 await firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider());
             } catch (err) {
-                console.warn('[dashmin] sign-in gagal:', err.message);
+                const msg = authErrorMessage(err);
+                if (msg) showToast(msg);
             }
         });
         el['logout-btn'].addEventListener('click', () => firebase.auth().signOut());

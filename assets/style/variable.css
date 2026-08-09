@@ -12,6 +12,11 @@
     --chat-nav-height: 56px;
 }
 
+/* Safety net: elemen apa pun dengan display:flex/block/grid eksplisit di
+   file ini tetap kehilangan attribute [hidden] kalau ditoggle lewat JS —
+   aturan ini pastiin [hidden] SELALU menang, gak perlu patch satu-satu lagi. */
+[hidden] { display: none !important; }
+
 .chat-nav {
     position: sticky;
     top: 0;
@@ -132,13 +137,14 @@
     background: rgba(217, 192, 137, 0.05);
     text-decoration: none;
     color: var(--chat-gold);
-    transition: border-color 0.2s ease, background 0.2s ease;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
 }
 
 .chat-room-item:hover,
 .chat-room-item:focus-visible {
     border-color: var(--chat-gold);
     background: rgba(217, 192, 137, 0.1);
+    transform: translateX(2px);
 }
 
 .chat-room-name {
@@ -177,8 +183,6 @@
     align-items: center;
     justify-content: center;
 }
-
-.chat-room-unread[hidden] { display: none; }
 
 .chat-room-group {
     border: 1px solid rgba(217, 192, 137, 0.15);
@@ -367,5 +371,49 @@
     background: rgba(217, 192, 137, 0.15);
     border-color: var(--chat-gold);
     text-shadow: 0 0 8px var(--chat-gold-glow);
+}
+
+/* ── glow gold halus di background nav /chat, biar gak flat polos ── */
+.chat-nav {
+    background-image: radial-gradient(ellipse 240px 60px at 50% 0%, rgba(217, 192, 137, 0.10), transparent 70%);
+}
+
+/* ── greeting bar di atas daftar room ──────────────────────────── */
+.chat-room-greeting {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--chat-gold-bright);
+    margin: 4px 0 2px;
+}
+
+/* ── ikon di kiri tiap room item ────────────────────────────────── */
+.chat-room-icon {
+    font-size: 1rem;
+    line-height: 1;
+    filter: grayscale(0.15);
+}
+
+/* ── toast notifikasi ringan (error login dsb) ─────────────────── */
+.chat-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%) translateY(12px);
+    max-width: 90vw;
+    padding: 10px 16px;
+    background: #1a1206;
+    border: 1px solid var(--chat-gold-dim);
+    color: var(--chat-gold-bright);
+    font-size: 0.72rem;
+    border-radius: 8px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 60;
+}
+
+.chat-toast.is-visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
 }
 
