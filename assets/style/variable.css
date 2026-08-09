@@ -225,6 +225,135 @@
     line-height: 1.6;
 }
 
+/* ── thread pesan per-room ──────────────────────────────────── */
+.chat-room-thread {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - var(--chat-nav-height));
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 14px 14px;
+}
+
+.chat-thread-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+}
+
+.chat-thread-title {
+    font-weight: 700;
+    letter-spacing: 1px;
+    font-size: 0.85rem;
+    color: var(--chat-gold-bright);
+}
+
+.chat-thread-messages {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 6px 2px 12px;
+}
+
+.chat-thread-msg {
+    max-width: 82%;
+    padding: 7px 10px;
+    border-radius: 8px;
+    background: rgba(217, 192, 137, 0.07);
+    border: 1px solid var(--chat-nav-border);
+    align-self: flex-start;
+}
+
+.chat-thread-msg.is-own {
+    align-self: flex-end;
+    background: rgba(217, 192, 137, 0.16);
+    border-color: var(--chat-gold-dim);
+}
+
+.chat-thread-msg-name {
+    display: block;
+    font-size: 0.62rem;
+    letter-spacing: 0.5px;
+    color: var(--chat-gold-dim);
+    margin-bottom: 3px;
+}
+
+.chat-thread-msg-content {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+.chat-thread-msg-time {
+    display: block;
+    font-size: 0.58rem;
+    color: var(--chat-gold-dim);
+    margin-top: 3px;
+    text-align: right;
+}
+
+.chat-thread-empty,
+.chat-thread-loading {
+    color: var(--chat-gold-dim);
+    font-size: 0.75rem;
+    text-align: center;
+    padding: 24px 0;
+}
+
+.chat-thread-readonly-note {
+    font-size: 0.68rem;
+    color: var(--chat-gold-dim);
+    text-align: center;
+    padding: 6px 0;
+}
+
+.chat-thread-form {
+    display: flex;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--chat-nav-border);
+}
+
+.chat-thread-form input {
+    flex: 1;
+    background: rgba(217, 192, 137, 0.05);
+    border: 1px solid var(--chat-nav-border);
+    border-radius: 6px;
+    padding: 9px 12px;
+    color: var(--chat-gold);
+    font-family: inherit;
+    font-size: 0.8rem;
+}
+
+.chat-thread-form input:focus {
+    outline: none;
+    border-color: var(--chat-gold);
+}
+
+.chat-thread-form button {
+    background: rgba(217, 192, 137, 0.15);
+    border: 1px solid var(--chat-gold-dim);
+    color: var(--chat-gold-bright);
+    border-radius: 6px;
+    padding: 0 16px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+.chat-thread-form button:hover { border-color: var(--chat-gold); }
+
+.chat-thread-form.is-disabled input,
+.chat-thread-form.is-disabled button {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
 /* ── tombol nav "CHAT" di main site, arah ke /chat ─────────────── */
 .nav-btn-chat {
     color: var(--chat-gold-bright);
