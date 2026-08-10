@@ -170,6 +170,46 @@
 .chat-room-status[data-state="approved"] { color: #9ee6a0; }
 .chat-room-status[data-state="rejected"] { color: #e68a8a; }
 
+/* ── badge "N online" per room (Supabase Realtime Presence) ────── */
+.chat-room-online {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.62rem;
+    color: #8fe6a0;
+    white-space: nowrap;
+}
+
+.chat-room-online::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4ade6f;
+    box-shadow: 0 0 6px #4ade6f;
+    flex-shrink: 0;
+}
+
+.chat-thread-online {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.66rem;
+    color: #8fe6a0;
+    white-space: nowrap;
+}
+
+.chat-thread-online::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #4ade6f;
+    box-shadow: 0 0 7px #4ade6f;
+    flex-shrink: 0;
+}
+
 .chat-room-unread {
     min-width: 18px;
     height: 18px;

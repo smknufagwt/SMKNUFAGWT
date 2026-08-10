@@ -15,13 +15,15 @@
     let supabase = null;
     let adminUid = null;
     let pendingChannel = null;
+    let allMembers = [];
+    let memberSearchQuery = '';
 
     const el = {};
 
     function cacheEls() {
         ['gate', 'gate-text', 'gate-btn', 'dashboard', 'nav-user', 'logout-btn',
          'pending-list', 'members-list', 'pending-title', 'members-title',
-         'stat-pending', 'stat-members'].forEach((id) => {
+         'stat-pending', 'stat-members', 'member-search', 'member-search-clear'].forEach((id) => {
             el[id] = document.getElementById('dashmin-' + id);
         });
     }
@@ -164,10 +166,31 @@
             el['members-list'].innerHTML = '<p class="dashmin-empty">Gagal memuat member.</p>';
             return;
         }
+        allMembers = data;
         if (el['stat-members']) el['stat-members'].textContent = String(data.length);
-        if (el['members-title']) el['members-title'].textContent = 'Member per Kelas (' + data.length + ')';
-        if (!data.length) {
+        applyMemberFilter();
+    }
+
+    function applyMemberFilter() {
+        const q = memberSearchQuery.trim().toLowerCase();
+        const filtered = !q ? allMembers : allMembers.filter((m) => {
+            const label = personLabel(m.profiles, m.user_id).toLowerCase();
+            const email = (m.profiles && m.profiles.email ? m.profiles.email : '').toLowerCase();
+            return label.includes(q) || email.includes(q);
+        });
+        renderMembers(filtered, q);
+    }
+
+    function renderMembers(data, activeQuery) {
+        if (el['members-title']) {
+            el['members-title'].textContent = 'Member per Kelas (' + (activeQuery ? filteredCountLabel(data.length, allMembers.length) : data.length) + ')';
+        }
+        if (!allMembers.length) {
             el['members-list'].innerHTML = '<p class="dashmin-empty">Belum ada member kelas.</p>';
+            return;
+        }
+        if (!data.length) {
+            el['members-list'].innerHTML = '<p class="dashmin-empty">🔍 Tidak ada member yang cocok dengan pencarian.</p>';
             return;
         }
 
@@ -222,6 +245,26 @@
             el['members-list'].appendChild(row);
         });
     }
+
+    function filteredCountLabel(shown, total) {
+        return shown + '/' + total;
+    }
+
+    function bindMemberSearch() {
+        el['member-search'].addEventListener('input', (e) => {
+            memberSearchQuery = e.target.value;
+            el['member-search-clear'].hidden = !memberSearchQuery;
+            applyMemberFilter();
+        });
+        el['member-search-clear'].addEventListener('click', () => {
+            memberSearchQuery = '';
+            el['member-search'].value = '';
+            el['member-search-clear'].hidden = true;
+            applyMemberFilter();
+            el['member-search'].focus();
+        });
+    }
+
 
     function subscribePending() {
         if (pendingChannel) supabase.removeChannel(pendingChannel);
@@ -284,6 +327,7 @@
     function init() {
         cacheEls();
         bindGate();
+        bindMemberSearch();
 
         if (typeof firebase === 'undefined' || typeof window.supabase === 'undefined') {
             showGate('Layanan belum siap, muat ulang halaman.', false);

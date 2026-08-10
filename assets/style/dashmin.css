@@ -97,6 +97,75 @@ body.dashmin-body {
     margin: 0 0 10px;
 }
 
+/* ── header section (judul + search) ────────────────────────────── */
+.dashmin-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.dashmin-section-head .dashmin-section-title { margin-bottom: 0; }
+
+.dashmin-search {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 220px;
+    flex: 1;
+    max-width: 320px;
+    padding: 7px 12px;
+    border: 1px solid var(--chat-nav-border);
+    border-radius: 999px;
+    background: rgba(217, 192, 137, 0.05);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.dashmin-search:focus-within {
+    border-color: var(--chat-gold);
+    background: rgba(217, 192, 137, 0.09);
+    box-shadow: 0 0 0 3px rgba(217, 192, 137, 0.12), 0 0 10px var(--chat-gold-glow);
+}
+
+.dashmin-search-icon {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    flex-shrink: 0;
+}
+
+.dashmin-search-input {
+    flex: 1;
+    min-width: 0;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--chat-gold-bright);
+    font-family: inherit;
+    font-size: 0.72rem;
+}
+
+.dashmin-search-input::placeholder { color: var(--chat-gold-dim); }
+
+.dashmin-search-clear {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: var(--chat-gold-dim);
+    font-size: 0.7rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 50%;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.dashmin-search-clear:hover {
+    color: var(--chat-gold-bright);
+    background: rgba(217, 192, 137, 0.15);
+}
+
 .dashmin-empty {
     color: var(--chat-gold-dim);
     font-size: 0.75rem;

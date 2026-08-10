@@ -46,6 +46,8 @@
     let hintIndex = 0;
     let unreadChannel = null;
     let unreadMap = {}; // { roomId: count }
+    let presenceChannels = {}; // { roomId: RealtimeChannel }
+    let onlineCounts = {}; // { roomId: number }
 
     function cycleAccountHint(el) {
         if (!window.ScrambleFX) return;
@@ -201,6 +203,7 @@
         document.getElementById('chat-room-thread').hidden = false;
 
         document.getElementById('chat-thread-title').textContent = ROOM_LABELS[roomId] || roomId;
+        renderOnlineBadges();
         const list = document.getElementById('chat-thread-messages');
         const form = document.getElementById('chat-thread-form');
         const note = document.getElementById('chat-thread-readonly-note');
@@ -598,6 +601,59 @@
         }
     }
 
+    // ── presence: "N orang online" per room (Supabase Realtime Presence) ──
+    function renderOnlineBadges() {
+        ALL_ROOM_IDS.forEach((roomId) => {
+            const count = onlineCounts[roomId] || 0;
+            const item = document.querySelector('.chat-room-item[data-room="' + roomId + '"]');
+            if (item) {
+                let badge = item.querySelector('.chat-room-online');
+                if (!badge) {
+                    badge = document.createElement('span');
+                    badge.className = 'chat-room-online';
+                    item.insertBefore(badge, item.querySelector('.chat-room-sub, .chat-room-status') || null);
+                }
+                badge.textContent = count + ' online';
+                badge.hidden = count === 0;
+            }
+            if (roomId === currentRoomId) {
+                const threadBadge = document.getElementById('chat-thread-online');
+                if (threadBadge) {
+                    threadBadge.textContent = count + ' online';
+                    threadBadge.hidden = count === 0;
+                }
+            }
+        });
+    }
+
+    function teardownPresenceChannels() {
+        Object.keys(presenceChannels).forEach((roomId) => {
+            if (supabase) supabase.removeChannel(presenceChannels[roomId]);
+        });
+        presenceChannels = {};
+        onlineCounts = {};
+        renderOnlineBadges();
+    }
+
+    function setupPresenceChannels() {
+        if (!supabase || !currentUser) return;
+        ALL_ROOM_IDS.forEach((roomId) => {
+            if (presenceChannels[roomId]) return;
+            const channel = supabase.channel('presence-' + roomId, {
+                config: { presence: { key: currentUser.uid } },
+            });
+            channel.on('presence', { event: 'sync' }, () => {
+                onlineCounts[roomId] = Object.keys(channel.presenceState()).length;
+                renderOnlineBadges();
+            }).subscribe((status) => {
+                if (status === 'SUBSCRIBED') {
+                    channel.track({ display_name: currentUser.displayName || 'Anonim', online_at: new Date().toISOString() });
+                }
+            });
+            presenceChannels[roomId] = channel;
+        });
+    }
+
     async function upsertProfile(user) {
         if (!supabase || !user) return;
         await supabase.from('profiles').upsert({
@@ -636,9 +692,11 @@
                 maybeRequestNotificationPermission();
                 computeUnreadCounts();
                 setupUnreadChannel();
+                setupPresenceChannels();
             } else {
                 teardownThread();
                 teardownUnreadChannel();
+                teardownPresenceChannels();
                 unreadMap = {};
                 renderUnreadBadges();
             }

@@ -46,7 +46,14 @@
         </section>
 
         <section class="dashmin-section">
-            <h2 class="dashmin-section-title" id="dashmin-members-title">Member per Kelas</h2>
+            <div class="dashmin-section-head">
+                <h2 class="dashmin-section-title" id="dashmin-members-title">Member per Kelas</h2>
+                <div class="dashmin-search">
+                    <span class="dashmin-search-icon">🔍</span>
+                    <input type="text" id="dashmin-member-search" class="dashmin-search-input" placeholder="Cari nama atau email member..." autocomplete="off">
+                    <button type="button" class="dashmin-search-clear" id="dashmin-member-search-clear" hidden aria-label="Bersihkan pencarian">✕</button>
+                </div>
+            </div>
             <div id="dashmin-members-list"></div>
         </section>
     </main>
