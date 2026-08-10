@@ -74,7 +74,7 @@
 .chat-nav-title { margin-right: 2px; }
 
 .chat-account-btn {
-    margin-left: auto;
+    flex-shrink: 0;
     background: none;
     border: 1px solid var(--chat-nav-border);
     border-radius: 50%;
@@ -439,10 +439,19 @@
     background: rgba(217, 192, 137, 0.1);
 }
 
-/* ── hint ticker akun: geser dari kanan (ikon) ke kiri ─────────── */
+/* ── wrap: konteks relative buat anchor hint ke lock icon ──────── */
+.chat-account-wrap {
+    margin-left: auto;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* ── hint ticker akun: narik dari tepi lock icon, geser ke kiri ── */
 .chat-account-hint {
-    flex: 1;
-    min-width: 0;
+    position: absolute;
+    right: 42px; /* lebar tombol (34px) + gap (8px) — anchor tetap ke icon di semua lebar layar */
+    top: 50%;
     text-align: right;
     font-size: 0.66rem;
     color: var(--chat-gold-dim);
@@ -451,15 +460,15 @@
     text-overflow: ellipsis;
     max-width: 0;
     opacity: 0;
-    transform: translateX(8px);
+    pointer-events: none;
+    transform: translateY(-50%) translateX(8px);
     transition: max-width 0.4s ease, opacity 0.3s ease, transform 0.4s ease;
 }
 
 .chat-account-hint.is-visible {
     max-width: 220px;
     opacity: 1;
-    transform: translateX(0);
-    margin-right: 2px;
+    transform: translateY(-50%) translateX(0);
 }
 
 .chat-account-hint.is-identity {

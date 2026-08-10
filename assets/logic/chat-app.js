@@ -69,9 +69,9 @@
             const label = currentUser.email || currentUser.displayName || 'Akun tersambung';
             el.classList.remove('is-scrambling');
             el.classList.add('is-visible');
-            hintHandle = window.ScrambleFX.run(el, label, { perCharMs: 60, tickMs: 30, holdMs: 0, loop: false });
+            hintHandle = window.ScrambleFX.run(el, label, { perCharMs: 100, tickMs: 45, holdMs: 0, loop: false });
             // rainbow nyala setelah teks penuh ter-lock (delay ≈ durasi scramble)
-            setTimeout(() => el.classList.add('is-identity'), label.length * 60 + 120);
+            setTimeout(() => el.classList.add('is-identity'), label.length * 100 + 150);
         } else {
             el.classList.remove('is-identity');
             el.classList.add('is-visible');
