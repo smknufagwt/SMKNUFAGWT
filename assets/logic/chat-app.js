@@ -91,11 +91,11 @@
     }
 
     function showChatToast(msg) {
-        let toast = document.getElementById('chat-toast');
+        let toast = document.getElementById('chatapp-toast');
         if (!toast) {
             toast = document.createElement('div');
-            toast.id = 'chat-toast';
-            toast.className = 'chat-toast';
+            toast.id = 'chatapp-toast';
+            toast.className = 'chatapp-toast';
             document.getElementById('chat-view').appendChild(toast);
         }
         toast.textContent = msg;
