@@ -174,17 +174,25 @@
                 this.color = "#0f0";
                 this.drops = []; this.ripples = [];
                 this.enabled = true; this._running = true;
+                this._lastFrame = 0; this._frameInterval = 1000 / 30;
                 this.resize();
-                window.addEventListener('resize', () => this.resize());
+                let resizeTO;
+                window.addEventListener('resize', () => { clearTimeout(resizeTO); resizeTO = setTimeout(() => this.resize(), 150); });
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) { this._running = false; }
+                    else if (this.enabled && !this._running) { this._running = true; this._lastFrame = 0; this.loop(); }
+                });
                 ['mousemove', 'touchstart'].forEach(evt => window.addEventListener(evt, (e) => this.createRipple(e), {passive: true}));
                 this.loop();
             }
             resize() { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; this.initDrops(); }
             initDrops() {
-                const columns = Math.ceil(this.canvas.width / 20);
+                const targetColumns = 90;
+                const spacing = Math.max(20, this.canvas.width / targetColumns);
+                const columns = Math.ceil(this.canvas.width / spacing);
                 this.drops = [];
                 for (let i = 0; i < columns; i++) {
-                    this.drops.push({ x: i * 20, y: Math.random() * this.canvas.height, speed: Math.random() * 0.5 + 0.5, depth: Math.random() > 0.8 ? 2 : 1 });
+                    this.drops.push({ x: i * spacing, y: Math.random() * this.canvas.height, speed: Math.random() * 0.5 + 0.5, depth: Math.random() > 0.8 ? 2 : 1 });
                 }
             }
             createRipple(e) {
@@ -203,24 +211,26 @@
                 this.ctx.fillStyle = "rgba(0, 0, 0, 0.15)"; 
                 this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
                 this.ctx.strokeStyle = this.color;
-                this.ripples.forEach((r, i) => {
+                for (let i = this.ripples.length - 1; i >= 0; i--) {
+                    const r = this.ripples[i];
                     this.ctx.beginPath(); this.ctx.arc(r.x, r.y, r.size, 0, Math.PI * 2);
                     this.ctx.globalAlpha = r.life * 0.5; this.ctx.stroke(); this.ctx.globalAlpha = 1;
                     r.size += 2; r.life -= 0.05; if(r.life <= 0) this.ripples.splice(i, 1);
-                });
+                }
                 this.ctx.font = "14px monospace";
                 this.drops.forEach(drop => {
                     const text = Math.floor(Math.random() * 10).toString();
-                    if (drop.depth === 2) { this.ctx.fillStyle = "#fff"; this.ctx.shadowBlur = 5; this.ctx.shadowColor = this.color; }
-                    else { this.ctx.fillStyle = this.color; this.ctx.shadowBlur = 0; }
+                    this.ctx.fillStyle = drop.depth === 2 ? "#fff" : this.color;
                     this.ctx.fillText(text, drop.x, drop.y);
                     if (drop.y > this.canvas.height && Math.random() > 0.975) drop.y = 0;
                     drop.y += drop.speed * 22;
                 });
             }
-            loop() {
+            loop(now = 0) {
                 if (!this._running) return;
-                requestAnimationFrame(() => this.loop());
+                requestAnimationFrame((t) => this.loop(t));
+                if (now - this._lastFrame < this._frameInterval) return;
+                this._lastFrame = now;
                 this.draw();
             }
         }
