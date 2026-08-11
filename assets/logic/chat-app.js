@@ -376,7 +376,64 @@
         render();
     }
 
+    const THEME_KEY = 'nufa-chat-theme';
+
+    function getSavedTheme() {
+        try { return localStorage.getItem(THEME_KEY) || 'dark'; } catch (e) { return 'dark'; }
+    }
+
+    function applyTheme(theme) {
+        const view = document.getElementById('chat-view');
+        if (!view) return;
+        if (theme === 'light') {
+            view.setAttribute('data-theme', 'light');
+        } else {
+            view.removeAttribute('data-theme');
+        }
+        const icon = document.getElementById('chat-theme-icon');
+        const label = document.getElementById('chat-theme-label');
+        if (icon) icon.textContent = theme === 'light' ? '☀️' : '🌙';
+        if (label) label.textContent = theme === 'light' ? 'Mode Terang' : 'Mode Gelap';
+    }
+
+    function setupHamburger() {
+        const wrap = document.getElementById('chat-hamburger-wrap');
+        const btn = document.getElementById('chat-hamburger-btn');
+        const panel = document.getElementById('chat-hamburger-panel');
+        const themeBtn = document.getElementById('chat-theme-toggle');
+        if (!wrap || !btn || !panel || !themeBtn) return;
+
+        applyTheme(getSavedTheme());
+
+        const closePanel = () => {
+            panel.hidden = true;
+            btn.classList.remove('is-open');
+            btn.setAttribute('aria-expanded', 'false');
+        };
+
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const willOpen = panel.hidden;
+            panel.hidden = !willOpen;
+            btn.classList.toggle('is-open', willOpen);
+            btn.setAttribute('aria-expanded', String(willOpen));
+        });
+
+        themeBtn.addEventListener('click', () => {
+            const next = getSavedTheme() === 'light' ? 'dark' : 'light';
+            try { localStorage.setItem(THEME_KEY, next); } catch (e) { /* storage penuh/diblok, abaikan */ }
+            applyTheme(next);
+            closePanel();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!panel.hidden && !wrap.contains(e.target)) closePanel();
+        });
+    }
+
     function bindNav() {
+        setupHamburger();
+
         document.getElementById('chat-room-list').addEventListener('click', (e) => {
             const item = e.target.closest('.chat-room-item');
             if (!item) return;
