@@ -472,9 +472,14 @@
     transform: translateX(-50%) translateY(0);
 }
 
-/* ── tombol kembali ke beranda, kiri nav /chat ─────────────────── */
-.chat-home-btn {
+/* ── hamburger: pengganti tombol kembali-beranda, kiri nav /chat ── */
+.chat-hamburger-wrap {
+    position: relative;
     flex-shrink: 0;
+    margin-right: 4px;
+}
+
+.chat-hamburger-btn {
     width: 28px;
     height: 28px;
     display: flex;
@@ -482,16 +487,76 @@
     justify-content: center;
     border: 1px solid var(--chat-nav-border);
     border-radius: 50%;
+    background: transparent;
     color: var(--chat-gold);
-    text-decoration: none;
-    font-size: 0.9rem;
-    margin-right: 4px;
+    font-size: 0.85rem;
+    line-height: 1;
+    cursor: pointer;
     transition: border-color 0.15s ease, background 0.15s ease;
 }
 
-.chat-home-btn:hover {
+.chat-hamburger-btn:hover,
+.chat-hamburger-btn.is-open {
     border-color: var(--chat-gold);
     background: rgba(217, 192, 137, 0.1);
+}
+
+.chat-hamburger-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 180px;
+    background: var(--chat-nav-bg);
+    border: 1px solid var(--chat-nav-border);
+    border-radius: 8px;
+    padding: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    z-index: 50;
+}
+
+.chat-hamburger-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 10px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--chat-gold);
+    font-family: inherit;
+    font-size: 0.78rem;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.chat-hamburger-item:hover {
+    background: rgba(217, 192, 137, 0.12);
+}
+
+.chat-hamburger-item-icon {
+    font-size: 0.9rem;
+    line-height: 1;
+    width: 1.1em;
+    text-align: center;
+}
+
+/* ── tema terang, scoped ke #chat-view aja (bukan seluruh situs) ── */
+#chat-view[data-theme="light"] {
+    --chat-nav-bg: rgba(250, 247, 238, 0.96);
+    --chat-nav-border: rgba(138, 118, 69, 0.3);
+    --chat-gold: #8a6d1f;
+    --chat-gold-bright: #6b5414;
+    --chat-gold-dim: #a89568;
+    color: #2a2418;
+    background: #f7f3e8;
+}
+
+#chat-view[data-theme="light"] .chat-room-item,
+#chat-view[data-theme="light"] .chatapp-toast {
+    background: #fffdf6;
 }
 
 /* ── wrap: flex:1 konsumsi sisa ruang nav — hint gak akan pernah
