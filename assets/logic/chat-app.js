@@ -46,8 +46,8 @@
     let hintIndex = 0;
     let unreadChannel = null;
     let unreadMap = {}; // { roomId: count }
-    let presenceChannels = {}; // { roomId: RealtimeChannel }
-    let onlineCounts = {}; // { roomId: number }
+    let presenceChannel = null;
+    let presenceState = {}; // { uid: { name, room, online_at } }
 
     function cycleAccountHint(el) {
         if (!window.ScrambleFX) return;
@@ -143,6 +143,7 @@
         }
         currentChannel = null;
         currentRoomId = null;
+        trackPresence();
     }
 
     function showRoomList() {
@@ -224,6 +225,7 @@
         if (currentRoomId === roomId && currentChannel) return; // sudah kebuka, cuma toggle permission
         teardownThread();
         currentRoomId = roomId;
+        trackPresence();
 
         list.innerHTML = '<p class="chat-thread-loading">Memuat pesan...</p>';
 
@@ -381,6 +383,14 @@
             e.preventDefault();
             navigate(item.getAttribute('href'));
         });
+
+        const onlineTotalBtn = document.getElementById('chatapp-online-total');
+        if (onlineTotalBtn) {
+            onlineTotalBtn.addEventListener('click', () => {
+                const listEl = document.getElementById('chatapp-online-list');
+                if (listEl) listEl.hidden = !listEl.hidden;
+            });
+        }
 
         document.getElementById('chat-back-btn').addEventListener('click', () => navigate('/chat'));
         document.getElementById('chat-thread-back-btn').addEventListener('click', () => navigate('/chat'));
@@ -601,10 +611,21 @@
         }
     }
 
-    // ── presence: "N orang online" per room (Supabase Realtime Presence) ──
+    // ── presence: 1 channel global (bukan 8 channel per-room — lebih hemat
+    //    koneksi, penting buat device/koneksi low-end). Tiap user nge-track
+    //    { name, room }; room null = lagi di hub /chat, bukan di room manapun.
+    function computeOnlineCounts() {
+        const counts = {};
+        Object.values(presenceState).forEach((entry) => {
+            if (entry && entry.room) counts[entry.room] = (counts[entry.room] || 0) + 1;
+        });
+        return counts;
+    }
+
     function renderOnlineBadges() {
+        const counts = computeOnlineCounts();
         ALL_ROOM_IDS.forEach((roomId) => {
-            const count = onlineCounts[roomId] || 0;
+            const count = counts[roomId] || 0;
             const item = document.querySelector('.chat-room-item[data-room="' + roomId + '"]');
             if (item) {
                 let badge = item.querySelector('.chat-room-online');
@@ -624,34 +645,76 @@
                 }
             }
         });
+        renderGlobalOnlineWidget();
     }
 
-    function teardownPresenceChannels() {
-        Object.keys(presenceChannels).forEach((roomId) => {
-            if (supabase) supabase.removeChannel(presenceChannels[roomId]);
+    function renderGlobalOnlineWidget() {
+        const totalEl = document.getElementById('chatapp-online-total');
+        if (!totalEl) return;
+        const entries = Object.values(presenceState);
+        const countEl = totalEl.querySelector('.chatapp-online-count');
+        if (countEl) countEl.textContent = entries.length;
+        totalEl.hidden = entries.length === 0;
+
+        const listEl = document.getElementById('chatapp-online-list');
+        if (!listEl) return;
+        listEl.innerHTML = '';
+        entries
+            .slice()
+            .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+            .forEach((entry) => {
+                const row = document.createElement('div');
+                row.className = 'chatapp-online-row';
+                const dot = document.createElement('span');
+                dot.className = 'chatapp-online-dot';
+                const name = document.createElement('span');
+                name.className = 'chatapp-online-name';
+                name.textContent = entry.name || 'Anonim';
+                const where = document.createElement('span');
+                where.className = 'chatapp-online-where';
+                where.textContent = entry.room ? (ROOM_LABELS[entry.room] || entry.room) : 'Beranda';
+                row.appendChild(dot);
+                row.appendChild(name);
+                row.appendChild(where);
+                listEl.appendChild(row);
+            });
+    }
+
+    function trackPresence() {
+        if (!presenceChannel || !currentUser) return;
+        presenceChannel.track({
+            name: currentUser.displayName || currentUser.email || 'Anonim',
+            room: currentRoomId || null,
+            online_at: new Date().toISOString(),
         });
-        presenceChannels = {};
-        onlineCounts = {};
+    }
+
+    function teardownPresenceChannel() {
+        if (presenceChannel && supabase) supabase.removeChannel(presenceChannel);
+        presenceChannel = null;
+        presenceState = {};
         renderOnlineBadges();
     }
 
-    function setupPresenceChannels() {
+    function setupPresenceChannel() {
         if (!supabase || !currentUser) return;
-        ALL_ROOM_IDS.forEach((roomId) => {
-            if (presenceChannels[roomId]) return;
-            const channel = supabase.channel('presence-' + roomId, {
-                config: { presence: { key: currentUser.uid } },
-            });
-            channel.on('presence', { event: 'sync' }, () => {
-                onlineCounts[roomId] = Object.keys(channel.presenceState()).length;
-                renderOnlineBadges();
-            }).subscribe((status) => {
-                if (status === 'SUBSCRIBED') {
-                    channel.track({ display_name: currentUser.displayName || 'Anonim', online_at: new Date().toISOString() });
-                }
-            });
-            presenceChannels[roomId] = channel;
+        teardownPresenceChannel();
+        const channel = supabase.channel('presence-chat-global', {
+            config: { presence: { key: currentUser.uid } },
         });
+        channel.on('presence', { event: 'sync' }, () => {
+            const state = channel.presenceState();
+            const flat = {};
+            Object.keys(state).forEach((uid) => {
+                const entry = state[uid] && state[uid][0];
+                if (entry) flat[uid] = entry;
+            });
+            presenceState = flat;
+            renderOnlineBadges();
+        }).subscribe((status) => {
+            if (status === 'SUBSCRIBED') trackPresence();
+        });
+        presenceChannel = channel;
     }
 
     async function upsertProfile(user) {
@@ -692,11 +755,11 @@
                 maybeRequestNotificationPermission();
                 computeUnreadCounts();
                 setupUnreadChannel();
-                setupPresenceChannels();
+                setupPresenceChannel();
             } else {
                 teardownThread();
                 teardownUnreadChannel();
-                teardownPresenceChannels();
+                teardownPresenceChannel();
                 unreadMap = {};
                 renderUnreadBadges();
             }

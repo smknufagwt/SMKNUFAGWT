@@ -398,6 +398,21 @@
 }
 
 /* ── tombol nav "CHAT" di main site, arah ke /chat ─────────────── */
+.nav-chat-wrap {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.nav-chat-label {
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--chat-gold-dim);
+    text-shadow: 0 0 4px var(--chat-gold-glow);
+}
+
 .nav-btn-chat {
     color: var(--chat-gold-bright);
     border-color: var(--chat-gold-dim);
@@ -479,41 +494,36 @@
     background: rgba(217, 192, 137, 0.1);
 }
 
-/* ── wrap: konteks relative buat anchor hint ke lock icon ──────── */
+/* ── wrap: flex:1 konsumsi sisa ruang nav — hint gak akan pernah
+   nabrak title/badge di lebar layar manapun, gak perlu angka ajaib ── */
 .chat-account-wrap {
-    margin-left: auto;
-    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
     display: flex;
     align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
 }
 
-/* ── hint ticker akun: narik dari tepi lock icon, geser ke kiri ── */
+/* ── hint ticker akun: lebar ngikutin sisa ruang beneran (flex),
+   truncate otomatis via ellipsis kalau kepanjangan ─────────────── */
 .chat-account-hint {
-    position: absolute;
-    right: 42px; /* lebar tombol (34px) + gap (8px) — anchor tetap ke icon di semua lebar layar */
-    top: 50%;
-    box-sizing: border-box;
+    flex: 1 1 auto;
+    min-width: 0;
     text-align: right;
-    font-size: 0.56rem; /* diperkecil biar gak nabrak badge BETA di layar sempit */
+    font-size: 0.6rem;
     color: var(--chat-gold-dim);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 0;
     opacity: 0;
-    pointer-events: none;
-    z-index: 1;
-    background: var(--chat-nav-bg);
-    border-radius: 4px;
-    transform: translateY(-50%) translateX(8px);
-    transition: max-width 0.4s ease, opacity 0.3s ease, transform 0.4s ease;
+    transform: translateX(8px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .chat-account-hint.is-visible {
-    max-width: 130px; /* diperkecil dari 220px, berhenti sebelum nabrak title/badge */
     opacity: 1;
-    padding-left: 6px;
-    transform: translateY(-50%) translateX(0);
+    transform: translateX(0);
 }
 
 .chat-account-hint.is-identity {
@@ -565,5 +575,62 @@
 @keyframes chat-fade-up {
     from { opacity: 0; transform: translateY(6px); }
     to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── widget "N orang online" di landing /chat ──────────────────── */
+.chatapp-online-total {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 2px 0 8px;
+    padding: 4px 10px;
+    border: 1px solid var(--chat-nav-border);
+    border-radius: 999px;
+    background: rgba(217, 192, 137, 0.05);
+    color: var(--chat-gold-dim);
+    font-family: inherit;
+    font-size: 0.66rem;
+    cursor: pointer;
+}
+
+.chatapp-online-total:hover { border-color: var(--chat-gold-dim); }
+
+.chatapp-online-count {
+    color: var(--chat-gold-bright);
+    font-weight: 700;
+}
+
+.chatapp-online-list {
+    margin-bottom: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--chat-nav-border);
+}
+
+.chatapp-online-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 4px;
+    font-size: 0.68rem;
+}
+
+.chatapp-online-dot {
+    flex-shrink: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4ade80;
+    box-shadow: 0 0 4px rgba(74, 222, 128, 0.7);
+}
+
+.chatapp-online-name {
+    color: var(--chat-gold);
+    font-weight: 700;
+}
+
+.chatapp-online-where {
+    margin-left: auto;
+    color: var(--chat-gold-dim);
+    font-size: 0.62rem;
 }
 

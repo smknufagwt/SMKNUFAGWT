@@ -1,13 +1,18 @@
-/* chat-beta-scrambler.js — scramble badge "BETA" di nav /chat.
-   Delegate ke ScrambleFX (assets/logic/scramble-engine.js) biar gak ada
-   logic scramble kedobel di banyak file. */
+/* chat-beta-scrambler.js — scramble label "BETA" (badge nav /chat + label
+   kecil di atas tombol CHAT nav utama). Delegate ke ScrambleFX
+   (assets/logic/scramble-engine.js) biar gak ada logic scramble kedobel. */
 (function () {
     'use strict';
 
+    const TARGET_IDS = ['chat-beta-badge', 'nav-chat-beta-label'];
+
     function init() {
-        const el = document.getElementById('chat-beta-badge');
-        if (!el || !window.ScrambleFX) return; // belum masuk /chat atau engine belum kemuat
-        window.ScrambleFX.run(el, 'BETA', { perCharMs: 550, tickMs: 45, holdMs: 4000, loop: true });
+        if (!window.ScrambleFX) return; // engine belum kemuat
+        TARGET_IDS.forEach((id) => {
+            const el = document.getElementById(id);
+            if (!el) return; // elemen ini gak ada di halaman sekarang, skip
+            window.ScrambleFX.run(el, 'BETA', { perCharMs: 550, tickMs: 45, holdMs: 4000, loop: true });
+        });
     }
 
     if (document.readyState === 'loading') {

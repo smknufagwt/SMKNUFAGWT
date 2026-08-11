@@ -69,6 +69,11 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
 
         <main class="chat-room-list" id="chat-room-list">
             <p class="chat-room-greeting" id="chat-room-greeting" hidden></p>
+            <button class="chatapp-online-total" id="chatapp-online-total" type="button" hidden>
+                <span class="chatapp-online-dot"></span>
+                <span class="chatapp-online-count">0</span> orang online
+            </button>
+            <div class="chatapp-online-list" id="chatapp-online-list" hidden></div>
             <p class="chat-room-hint">Pilih ruang percakapan:</p>
 
             <a class="chat-room-item" data-room="public" href="/chat/public">
@@ -265,7 +270,10 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             <button class="nav-btn" onclick="System.nav('prodi', this)">MATERI</button>
             <button class="nav-btn" onclick="System.nav('gallery', this)">GALERI</button>
             <a class="nav-btn nav-btn-secondary" href="https://smknufa-bdp.vercel.app/blog" target="_blank" rel="noopener noreferrer" onclick="AudioFX.click()">BLOG</a>
-            <a class="nav-btn nav-btn-chat" href="/chat" onclick="AudioFX.click()">CHAT<span class="chat-unread-dot" id="nav-chat-unread-dot" hidden></span></a>
+            <span class="nav-chat-wrap">
+                <span class="nav-chat-label" id="nav-chat-beta-label">BETA</span>
+                <a class="nav-btn nav-btn-chat" href="/chat" onclick="AudioFX.click()">CHAT<span class="chat-unread-dot" id="nav-chat-unread-dot" hidden></span></a>
+            </span>
         </nav>
 
         <div id="home" class="slide active">
