@@ -279,8 +279,28 @@
             },
         };
 
+        // Jadwal BGM otomatis berdasar waktu WIB (UTC+7), lepas dari timezone device:
+        // - Sabtu 06:00 s.d. Senin 06:00 (WIB) -> weekend override
+        // - Selain itu: 06:00-18:00 -> bgm.mp3 (pagi/siang), 18:00-06:00 -> aurora-dawn (malam)
+        function getScheduledBgm() {
+            const dayUrl = "bgm.mp3";
+            const nightUrl = "https://raw.githubusercontent.com/Genzz-xyz/Snake-game/main/audio/aurora-dawn.m4a";
+            const weekendUrl = "https://raw.githubusercontent.com/Genzz-xyz/Snake-game/main/audio/spocks-cryo-bed.m4a";
+
+            const now = new Date();
+            const wib = new Date(now.getTime() + now.getTimezoneOffset() * 60000 + 7 * 3600000);
+            const day = wib.getDay(); // 0=Minggu ... 6=Sabtu
+            const hour = wib.getHours();
+
+            const isWeekend = (day === 6 && hour >= 6) || day === 0 || (day === 1 && hour < 6);
+            if (isWeekend) return { key: 'weekend', url: weekendUrl };
+            return (hour >= 6 && hour < 18) ? { key: 'day', url: dayUrl } : { key: 'night', url: nightUrl };
+        }
+
         const System = {
             _galleryFetchedOnce: false,
+            _bgmScheduleKey: null,
+            _bgmSchedulerStarted: false,
             _galleryLastFetch: 0,
             _galleryTTL: 90000, // 90 detik — di atas ini, buka tab galeri bakal refetch otomatis
             accessGapMs: 300000, // 5 menit — dalam rentang ini, alih tab TIDAK perlu klik ulang overlay (kecuali refresh manual)
@@ -354,9 +374,27 @@
                 }, 2400);
             },
 
+            _startBgmScheduler: function() {
+                if (this._bgmSchedulerStarted) return;
+                this._bgmSchedulerStarted = true;
+                const apply = () => {
+                    if (document.body.classList.contains('interlinked-active')) return; // easter egg lagi aktif, jangan diganggu
+                    const sched = getScheduledBgm();
+                    if (sched.key === this._bgmScheduleKey) return;
+                    this._bgmScheduleKey = sched.key;
+                    const wasPlaying = !this.bgm.paused;
+                    this.bgm.src = sched.url;
+                    this.bgm.load();
+                    if (wasPlaying) this.bgm.play().catch(() => {});
+                };
+                apply();
+                setInterval(apply, 60000); // cek tiap 1 menit buat nangkep pergantian jadwal saat tab tetap terbuka
+            },
+
             enter: function(auto) {
                 try { sessionStorage.setItem('nufa_last_access', Date.now()); } catch(e) {}
                 if (!auto) AudioFX.click();
+                this._startBgmScheduler();
                 const playPromise = this.bgm.play();
                 if (playPromise !== undefined) {
                     playPromise.catch(error => { console.log("Audio autoplay prevented."); });
@@ -901,7 +939,9 @@ startLatency: function() {
                     if (mainTitle) { mainTitle.style.animation = ""; mainTitle.style.textShadow = ""; mainTitle.style.filter = ""; }
                     document.body.classList.remove('interlinked-active');
                     if (bgmAudio) {
-                        bgmAudio.src = originalBgmUrl;
+                        const sched = (typeof getScheduledBgm === 'function') ? getScheduledBgm() : { key: null, url: originalBgmUrl };
+                        if (typeof System !== 'undefined') System._bgmScheduleKey = sched.key;
+                        bgmAudio.src = sched.url;
                         bgmAudio.load();
                         bgmAudio.play().catch(e => console.log("Audio play diblokir:", e));
                     }
