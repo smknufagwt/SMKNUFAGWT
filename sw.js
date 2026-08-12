@@ -19,10 +19,22 @@ importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 // ============================================================
 const CONFIG = {
   CACHE_NAME: 'nufa-cache-v1',
+  THUMB_CACHE_NAME: 'nufa-yt-thumb-v1',
   STATIC_ASSETS: [
     '/',
     '/index.html',
     '/notif.png',
+  ],
+  // Domain embed pihak ketiga (iframe live) yang SENGAJA dilepas dari intercept SW —
+  // response cross-origin iframe kayak gini sering "opaque" (gak bisa divalidasi isinya
+  // dari JS), jadi network-first/cache-fallback kita berisiko keliru nyimpen/nge-fallback-in
+  // dan bikin embed blank. Biarin browser handle native, sama seperti Firestore/Firebase.
+  EXCLUDE_EMBED_HOSTS: [
+    'youtube.com',
+    'youtube-nocookie.com',
+    'open.spotify.com',
+    'drive.google.com',
+    'maps.google.com',
   ],
   // Tag untuk background sync antrian pesan chat
   SYNC_TAG_CHAT: 'nufa-sync-chat',
@@ -53,7 +65,7 @@ const CacheModule = {
     const keys = await caches.keys();
     await Promise.all(
       keys
-        .filter(k => k !== CONFIG.CACHE_NAME)
+        .filter(k => k !== CONFIG.CACHE_NAME && k !== CONFIG.THUMB_CACHE_NAME)
         .map(k => caches.delete(k))
     );
   },
@@ -70,6 +82,23 @@ const CacheModule = {
     } catch (_) {
       const cached = await caches.match(request);
       return cached || new Response('Offline', { status: 503 });
+    }
+  },
+
+  // Thumbnail YouTube (i.ytimg.com): cache-first, toleran response "opaque" (no-cors) —
+  // thumbnail statis nan jarang berubah, gak butuh baca isi respons buat divalidasi, jadi
+  // aman disimpan apa adanya. Dipakai facade thumbnail chat biar video yang sama gak
+  // nembak jaringan ulang tiap muncul lagi di riwayat chat.
+  async fetchThumbCacheFirst(request) {
+    const cache = await caches.open(CONFIG.THUMB_CACHE_NAME);
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    try {
+      const response = await fetch(request);
+      cache.put(request, response.clone());
+      return response;
+    } catch (_) {
+      return new Response('', { status: 503 });
     }
   }
 };
@@ -307,6 +336,16 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   const url = event.request.url;
   if (url.includes('firestore.googleapis.com') || url.includes('firebase')) return;
+
+  // Thumbnail YouTube: cache-first khusus (lihat CacheModule.fetchThumbCacheFirst)
+  if (url.includes('i.ytimg.com')) {
+    event.respondWith(CacheModule.fetchThumbCacheFirst(event.request));
+    return;
+  }
+
+  // Embed pihak ketiga (iframe live YouTube/Spotify/Drive/Maps) — jangan diintercept,
+  // biarin browser handle native (lihat CONFIG.EXCLUDE_EMBED_HOSTS).
+  if (CONFIG.EXCLUDE_EMBED_HOSTS.some(host => url.includes(host))) return;
 
   event.respondWith(CacheModule.fetchWithFallback(event.request));
 });

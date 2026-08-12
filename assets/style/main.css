@@ -363,6 +363,20 @@
         }
         /* Auto-sizing per jenis embed — jangan dipaksa 16:9 semua, tiap tipe beda proporsi asli */
         .chat-text iframe.chat-yt-short { aspect-ratio: 9 / 16; max-width: 200px; transition: max-width 0.3s ease; }
+        /* Facade thumbnail YT — dimensi disamain persis sama iframe.chat-yt di atas biar gak ada
+           layout shift pas ChatFormat.mountYouTube gantiin facade ini jadi iframe sungguhan. */
+        .chat-text .chat-yt-facade {
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            width: 100%; max-width: 260px; height: auto; aspect-ratio: 16 / 9;
+            border: 1px solid var(--neon-dim); border-radius: 0; background-color: #000;
+            background-size: cover; background-position: center; transition: max-width 0.3s ease;
+        }
+        .chat-text .chat-yt-facade.chat-yt-short { aspect-ratio: 9 / 16; max-width: 200px; }
+        .yt-facade-play {
+            width: 44px; height: 44px; border-radius: 50%; border: none; pointer-events: none;
+            background: rgba(0,0,0,0.55); color: #ff003c; font-size: 1.1rem;
+            display: flex; align-items: center; justify-content: center;
+        }
         .chat-text iframe.chat-spotify-track { aspect-ratio: auto; height: 152px; max-width: 300px; transition: max-width 0.3s ease; }
         .chat-text iframe.chat-spotify-list { aspect-ratio: auto; height: 352px; max-width: 300px; transition: max-width 0.3s ease; }
         .chat-text iframe.chat-drive-doc { aspect-ratio: 4 / 3; max-width: 300px; transition: max-width 0.3s ease; }
@@ -379,6 +393,8 @@
         #chat-panel.wide .chat-text .chat-media { max-height: 420px; }
         #chat-panel.wide .chat-text iframe.chat-yt { max-width: 480px; }
         #chat-panel.wide .chat-text iframe.chat-yt-short { max-width: 340px; }
+        #chat-panel.wide .chat-text .chat-yt-facade { max-width: 480px; }
+        #chat-panel.wide .chat-text .chat-yt-facade.chat-yt-short { max-width: 340px; }
         #chat-panel.wide .chat-text iframe.chat-spotify-track { max-width: 420px; }
         #chat-panel.wide .chat-text iframe.chat-spotify-list { max-width: 420px; }
         #chat-panel.wide .chat-text iframe.chat-drive-doc { max-width: 440px; }

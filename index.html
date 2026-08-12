@@ -600,6 +600,63 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
                 }
             },
 
+            // Bangun iframe player YouTube asli, gantiin facade thumbnail. Dipicu dari
+            // GlobalChat._observeYtFacades (scroll masuk viewport) atau tap manual user.
+            mountYouTube(facadeEl) {
+                if (!facadeEl || facadeEl.dataset.mounted === '1') return;
+                facadeEl.dataset.mounted = '1';
+                if (typeof GlobalChat !== 'undefined' && GlobalChat._ytFacadeObserver) {
+                    GlobalChat._ytFacadeObserver.unobserve(facadeEl);
+                }
+
+                const ytId = facadeEl.dataset.ytId;
+                const ytCls = facadeEl.dataset.ytCls;
+                const wantAutoplay = facadeEl.dataset.autoplay === '1';
+                const loop = facadeEl.dataset.loop === '1';
+                const sound = facadeEl.dataset.sound === '1';
+                const alt = facadeEl.dataset.alt || '';
+
+                const ytParams = new URLSearchParams({
+                    autoplay: '0',         // sengaja SELALU 0 di URL — play sungguhan ditembak lewat postMessage saat onReady (lihat listener di atas), biar gak bentrok sama loop
+                    mute: sound ? '0' : '1',
+                    loop: loop ? '1' : '0',
+                    playlist: ytId,       // wajib diisi ulang ID sendiri agar loop:1 berfungsi pada single video
+                    rel: '0',             // no related videos dari channel lain
+                    modestbranding: '1',  // sisakan logo YT kecil di pojok
+                    controls: '1',
+                    fs: '0',
+                    iv_load_policy: '3',  // sembunyikan anotasi
+                    disablekb: '1',
+                    playsinline: '1',
+                    enablejsapi: '1'      // dibutuhkan untuk toggle mute & event onReady dari tombol/listener custom
+                });
+                // origin cuma valid kalau halaman disajikan lewat http/https — kalau dibuka via
+                // file:// (double-klik langsung) origin jadi "null"/"file://" dan YouTube API
+                // menolak enablejsapi-nya, muncul error player generik. Jadi origin di-skip saat itu.
+                if (/^https?:$/.test(location.protocol)) {
+                    ytParams.set('origin', location.origin);
+                }
+
+                const ifr = document.createElement('iframe');
+                ifr.className = 'chat-media ' + ytCls;
+                ifr.dataset.autoplay = wantAutoplay ? '1' : '0';
+                ifr.src = `https://www.youtube-nocookie.com/embed/${ytId}?${ytParams.toString()}`;
+                ifr.title = alt;
+                ifr.setAttribute('allow', 'autoplay; encrypted-media');
+                ifr.allowFullscreen = true;
+                ifr.loading = 'lazy';
+                ifr.onerror = () => ifr.closest('.chat-media-wrap')?.remove();
+
+                facadeEl.replaceWith(ifr);
+
+                // Lite mode: iframe yang baru dimount harus ikut diawasi observer
+                // single-active-media yang sama kayak media yang dirender langsung.
+                if (typeof GlobalChat !== 'undefined' && GlobalChat.liteMode) {
+                    const wrap = ifr.closest('.chat-media-wrap');
+                    if (wrap) GlobalChat._setupLiteMediaObserver().observe(wrap);
+                }
+            },
+
             // Versi lengkap (untuk bubble chat) — boleh render gambar/video/link.
             toHtml(raw) {
                 let text = this.esc(raw);
@@ -620,29 +677,14 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
 
                     const ytId = this.parseYouTubeId(safe);
                     if (ytId) {
-                        const ytParams = new URLSearchParams({
-                            autoplay: '0',         // sengaja SELALU 0 di URL — play sungguhan ditembak lewat postMessage saat onReady (lihat listener di atas), biar gak bentrok sama loop
-                            mute: mp.soundDefault ? '0' : '1',
-                            loop: mp.loop ? '1' : '0',
-                            playlist: ytId,       // wajib diisi ulang ID sendiri agar loop:1 berfungsi pada single video
-                            rel: '0',             // no related videos dari channel lain
-                            modestbranding: '1',  // sisakan logo YT kecil di pojok
-                            controls: '1',
-                            fs: '0',
-                            iv_load_policy: '3',  // sembunyikan anotasi
-                            disablekb: '1',
-                            playsinline: '1',
-                            enablejsapi: '1'      // dibutuhkan untuk toggle mute & event onReady dari tombol/listener custom
-                        });
-                        // origin cuma valid kalau halaman disajikan lewat http/https — kalau dibuka via
-                        // file:// (double-klik langsung) origin jadi "null"/"file://" dan YouTube API
-                        // menolak enablejsapi-nya, muncul error player generik. Jadi origin di-skip saat itu.
-                        if (/^https?:$/.test(location.protocol)) {
-                            ytParams.set('origin', location.origin);
-                        }
                         const isShort = /\/shorts\//i.test(safe);
                         const ytCls = isShort ? 'chat-yt-short' : 'chat-yt';
-                        return `<div class="chat-media-wrap" id="${mid}"><iframe class="chat-media ${ytCls}" data-autoplay="${wantAutoplay ? '1' : '0'}" src="https://www.youtube-nocookie.com/embed/${ytId}?${ytParams.toString()}" title="${alt}" allow="autoplay; encrypted-media" allowfullscreen loading="lazy" onerror="this.closest('.chat-media-wrap')?.remove()"></iframe><button type="button" class="media-mute-btn ${mutedCls}" onclick="ChatFormat.toggleMediaMute(this,'yt')" title="Suara"><i class="fa-solid fa-volume-${volIcon}"></i></button></div>`;
+                        const thumbUrl = `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg`;
+                        // Facade: cuma thumbnail statis (image biasa, aman di-cache SW) dulu yang dirender.
+                        // Iframe player sungguhan baru dimount oleh ChatFormat.mountYouTube — dipicu scroll
+                        // masuk viewport (lihat GlobalChat._observeYtFacades) atau tap manual — biar chat
+                        // yang berisi banyak video gak nembak request player YouTube sekaligus di awal.
+                        return `<div class="chat-media-wrap" id="${mid}"><div class="chat-yt-facade ${ytCls}" style="background-image:url('${thumbUrl}')" data-yt-id="${ytId}" data-yt-cls="${ytCls}" data-autoplay="${wantAutoplay ? '1' : '0'}" data-loop="${mp.loop ? '1' : '0'}" data-sound="${mp.soundDefault ? '1' : '0'}" data-alt="${this.esc(alt)}" onclick="ChatFormat.mountYouTube(this)"><button type="button" class="yt-facade-play" tabindex="-1" aria-hidden="true"><i class="fa-solid fa-play"></i></button></div><button type="button" class="media-mute-btn ${mutedCls}" onclick="ChatFormat.toggleMediaMute(this,'yt')" title="Suara"><i class="fa-solid fa-volume-${volIcon}"></i></button></div>`;
                     }
                     if (/(?:youtube(?:-nocookie)?\.com|youtu\.be)/i.test(safe)) {
                         // Domain YouTube tapi bukan format video tunggal yang bisa di-embed (link channel/playlist/dll)
@@ -954,6 +996,15 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             // kayak ipify. Coba beberapa provider berurutan, tiap percobaan dikasih timeout
             // sendiri biar gak nge-hang lama kalau satu provider gak respon sama sekali.
             async _resolveMyIp() {
+                // Cache sessionStorage 10 menit — IP publik jarang berubah dalam satu sesi,
+                // jadi buka/tutup chat berkali-kali gak perlu nembak 4 provider ulang tiap kali.
+                const CACHE_KEY = 'nufa_myip_cache';
+                const TTL_MS = 10 * 60 * 1000;
+                try {
+                    const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
+                    if (cached && cached.ip && (Date.now() - cached.ts) < TTL_MS) return cached.ip;
+                } catch (e) { /* sessionStorage gak tersedia / corrupt, lanjut resolve normal */ }
+
                 const providers = [
                     { url: 'https://api.ipify.org?format=json', pick: d => d.ip },
                     { url: 'https://api64.ipify.org?format=json', pick: d => d.ip },
@@ -963,7 +1014,10 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
                 for (const p of providers) {
                     try {
                         const ip = p.pick(await this._fetchJsonWithTimeout(p.url, 4000));
-                        if (ip && typeof ip === 'string') return ip;
+                        if (ip && typeof ip === 'string') {
+                            try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ip, ts: Date.now() })); } catch (e) {}
+                            return ip;
+                        }
                     } catch (e) { /* lanjut ke provider berikutnya */ }
                 }
                 return 'UNKNOWN';
@@ -1230,6 +1284,28 @@ listEl.innerHTML = ids.map(key => {
 
                 if (nearBottom) box.scrollTop = box.scrollHeight;
                 if (this.liteMode) this._observeLiteMedia();
+                this._observeYtFacades();
+            },
+
+            // ── Lazy-mount facade thumbnail YouTube: player asli baru dibangun begitu
+            // elemennya mendekati viewport (rootMargin lookahead), bukan langsung pas
+            // pesan di-render. Terpisah dari _setupLiteMediaObserver di atas — itu ngatur
+            // play/pause satu media aktif, ini ngatur KAPAN iframe-nya mulai dibuat sama sekali. ──
+            _ytFacadeObserver: null,
+            _setupYtFacadeObserver() {
+                if (this._ytFacadeObserver) return this._ytFacadeObserver;
+                this._ytFacadeObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(en => {
+                        if (!en.isIntersecting) return;
+                        this._ytFacadeObserver.unobserve(en.target);
+                        if (typeof ChatFormat !== 'undefined') ChatFormat.mountYouTube(en.target);
+                    });
+                }, { root: document.getElementById('chat-messages'), rootMargin: '400px 0px', threshold: 0 });
+                return this._ytFacadeObserver;
+            },
+            _observeYtFacades() {
+                const observer = this._setupYtFacadeObserver();
+                document.querySelectorAll('#chat-messages .chat-yt-facade:not([data-mounted="1"])').forEach(el => observer.observe(el));
             },
 
             // ── Muat 50 pesan lebih lama dari Firestore, disisipkan di atas tombolnya sendiri.
@@ -1285,6 +1361,7 @@ listEl.innerHTML = ids.map(key => {
 
                     // Kunci posisi scroll biar viewport gak "loncat" pas 50 pesan lama nyempil di atas.
                     box.scrollTop = prevScrollTop + (box.scrollHeight - prevScrollHeight);
+                    this._observeYtFacades();
 
                     if (older.length < 50) {
                         this.historyExhausted = true;
