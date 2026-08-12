@@ -313,10 +313,11 @@
             colors: [
                 { neon: '#0f0', dim: '#008F11', hex: '#0f0' },       
                 { neon: '#00f0ff', dim: '#008F8F', hex: '#00f0ff' }, 
-                { neon: '#FF0000', dim: '#CC0000', hex: '#FF0000' }, 
-                { neon: '#ffff00', dim: '#808000', hex: '#ffff00' },
-                { neon: '#bf00ff', dim: '#660080', hex: '#bf00ff' }, 
-                { neon: '#ff5500', dim: '#993300', hex: '#ff5500' },
+                { neon: '#FF3333', dim: '#CC1F1F', hex: '#FF3333' }, 
+                { neon: '#FFFF66', dim: '#999900', hex: '#FFFF66' },
+                { neon: '#D966FF', dim: '#8000B3', hex: '#D966FF' }, 
+                { neon: '#FF8040', dim: '#B34700', hex: '#FF8040' },
+                { neon: '#FF10F0', dim: '#B0008C', hex: '#FF10F0' },
                 { neon: '#ffffff', dim: '#8ce6ef', hex: '#ffffff' }  
 
             ],
