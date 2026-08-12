@@ -85,10 +85,11 @@ const CacheModule = {
     }
   },
 
-  // Thumbnail YouTube (i.ytimg.com): cache-first, toleran response "opaque" (no-cors) —
-  // thumbnail statis nan jarang berubah, gak butuh baca isi respons buat divalidasi, jadi
-  // aman disimpan apa adanya. Dipakai facade thumbnail chat biar video yang sama gak
-  // nembak jaringan ulang tiap muncul lagi di riwayat chat.
+  // Thumbnail statis pihak ketiga (i.ytimg.com / drive.google.com/thumbnail): cache-first,
+  // toleran response "opaque" (no-cors) — thumbnail jarang berubah & gak butuh baca isi
+  // respons buat divalidasi, jadi aman disimpan apa adanya. Dipakai facade thumbnail chat
+  // (YouTube & Drive generic) biar media yang sama gak nembak jaringan ulang tiap muncul
+  // lagi di riwayat chat.
   async fetchThumbCacheFirst(request) {
     const cache = await caches.open(CONFIG.THUMB_CACHE_NAME);
     const cached = await cache.match(request);
@@ -337,8 +338,11 @@ self.addEventListener('fetch', event => {
   const url = event.request.url;
   if (url.includes('firestore.googleapis.com') || url.includes('firebase')) return;
 
-  // Thumbnail YouTube: cache-first khusus (lihat CacheModule.fetchThumbCacheFirst)
-  if (url.includes('i.ytimg.com')) {
+  // Thumbnail YouTube & Drive: cache-first khusus (lihat CacheModule.fetchThumbCacheFirst).
+  // Path /thumbnail Drive sengaja dicek DULUAN sebelum EXCLUDE_EMBED_HOSTS di bawah — host-nya
+  // "drive.google.com" sama kayak iframe live /file/.../preview yang justru mau di-exclude,
+  // jadi urutan & kekhususan path ini yang bikin keduanya kebedain dgn benar.
+  if (url.includes('i.ytimg.com') || url.includes('drive.google.com/thumbnail')) {
     event.respondWith(CacheModule.fetchThumbCacheFirst(event.request));
     return;
   }

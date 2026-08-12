@@ -657,6 +657,44 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
                 }
             },
 
+            // Bangun iframe preview Drive asli (video/audio/dokumen tak dikenal), gantiin
+            // facade thumbnail. Sama pola & dipicu dari titik yang sama kayak mountYouTube.
+            mountDrive(facadeEl) {
+                if (!facadeEl || facadeEl.dataset.mounted === '1') return;
+                facadeEl.dataset.mounted = '1';
+                if (typeof GlobalChat !== 'undefined' && GlobalChat._ytFacadeObserver) {
+                    GlobalChat._ytFacadeObserver.unobserve(facadeEl);
+                }
+                const driveId = facadeEl.dataset.driveId;
+                const alt = facadeEl.dataset.alt || '';
+                const ifr = document.createElement('iframe');
+                ifr.className = 'chat-media chat-drive-generic';
+                ifr.src = `https://drive.google.com/file/d/${driveId}/preview`;
+                ifr.title = alt || 'Drive';
+                ifr.setAttribute('allow', 'autoplay');
+                ifr.loading = 'lazy';
+                ifr.onerror = () => ifr.remove();
+                facadeEl.replaceWith(ifr);
+            },
+
+            // Bangun iframe peta Google Maps asli, gantiin facade placeholder ikon.
+            mountMaps(facadeEl) {
+                if (!facadeEl || facadeEl.dataset.mounted === '1') return;
+                facadeEl.dataset.mounted = '1';
+                if (typeof GlobalChat !== 'undefined' && GlobalChat._ytFacadeObserver) {
+                    GlobalChat._ytFacadeObserver.unobserve(facadeEl);
+                }
+                const q = facadeEl.dataset.mapsQ || '';
+                const alt = facadeEl.dataset.alt || '';
+                const ifr = document.createElement('iframe');
+                ifr.className = 'chat-media chat-maps';
+                ifr.src = `https://maps.google.com/maps?q=${encodeURIComponent(q)}&z=15&output=embed`;
+                ifr.title = alt || 'Lokasi Peta';
+                ifr.loading = 'lazy';
+                ifr.onerror = () => ifr.remove();
+                facadeEl.replaceWith(ifr);
+            },
+
             // Versi lengkap (untuk bubble chat) — boleh render gambar/video/link.
             toHtml(raw) {
                 let text = this.esc(raw);
@@ -684,7 +722,7 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
                         // Iframe player sungguhan baru dimount oleh ChatFormat.mountYouTube — dipicu scroll
                         // masuk viewport (lihat GlobalChat._observeYtFacades) atau tap manual — biar chat
                         // yang berisi banyak video gak nembak request player YouTube sekaligus di awal.
-                        return `<div class="chat-media-wrap" id="${mid}"><div class="chat-yt-facade ${ytCls}" style="background-image:url('${thumbUrl}')" data-yt-id="${ytId}" data-yt-cls="${ytCls}" data-autoplay="${wantAutoplay ? '1' : '0'}" data-loop="${mp.loop ? '1' : '0'}" data-sound="${mp.soundDefault ? '1' : '0'}" data-alt="${this.esc(alt)}" onclick="ChatFormat.mountYouTube(this)"><button type="button" class="yt-facade-play" tabindex="-1" aria-hidden="true"><i class="fa-solid fa-play"></i></button></div><button type="button" class="media-mute-btn ${mutedCls}" onclick="ChatFormat.toggleMediaMute(this,'yt')" title="Suara"><i class="fa-solid fa-volume-${volIcon}"></i></button></div>`;
+                        return `<div class="chat-media-wrap" id="${mid}"><div class="chat-yt-facade ${ytCls}" style="background-image:url('${thumbUrl}')" data-yt-id="${ytId}" data-yt-cls="${ytCls}" data-autoplay="${wantAutoplay ? '1' : '0'}" data-loop="${mp.loop ? '1' : '0'}" data-sound="${mp.soundDefault ? '1' : '0'}" data-alt="${alt}" onclick="ChatFormat.mountYouTube(this)"><button type="button" class="yt-facade-play" tabindex="-1" aria-hidden="true"><i class="fa-solid fa-play"></i></button></div><button type="button" class="media-mute-btn ${mutedCls}" onclick="ChatFormat.toggleMediaMute(this,'yt')" title="Suara"><i class="fa-solid fa-volume-${volIcon}"></i></button></div>`;
                     }
                     if (/(?:youtube(?:-nocookie)?\.com|youtu\.be)/i.test(safe)) {
                         // Domain YouTube tapi bukan format video tunggal yang bisa di-embed (link channel/playlist/dll)
@@ -707,7 +745,9 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
                         // Ekstensi tidak diketahui (link share Drive standar TIDAK membawa ekstensi sama sekali —
                         // ini kasus paling umum), atau mp4/webm/mp3: pakai preview universal Drive, yang otomatis
                         // mendeteksi tipe file asli (video/gambar/audio/pdf) dan render dgn benar tanpa risiko hotlink-block.
-                        return `<iframe class="chat-media chat-drive-generic" src="https://drive.google.com/file/d/${driveId}/preview" title="${alt || 'Drive'}" allow="autoplay" loading="lazy" onerror="this.remove()"></iframe>`;
+                        // Facade dulu (thumbnail Drive, endpoint sama kayak gambar di atas) — iframe preview asli
+                        // baru dimount ChatFormat.mountDrive pas kelihatan/di-tap (lihat GlobalChat._observeYtFacades).
+                        return `<div class="chat-media-wrap" id="${mid}"><div class="drive-facade" data-drive-id="${driveId}" data-alt="${alt}" onclick="ChatFormat.mountDrive(this)"><img class="drive-facade-thumb" src="https://drive.google.com/thumbnail?id=${driveId}&sz=w1000" alt="" loading="lazy" onerror="this.remove()"><button type="button" class="yt-facade-play" tabindex="-1" aria-hidden="true"><i class="fa-solid fa-file-arrow-down"></i></button></div></div>`;
                     }
 
                     // ── Spotify ──
@@ -721,7 +761,9 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
                     if (/google\.com\/maps|maps\.app\.goo\.gl|goo\.gl\/maps/i.test(safe)) {
                         const q = this.parseMapsQuery(safe);
                         if (q) {
-                            return `<iframe class="chat-media chat-maps" src="https://maps.google.com/maps?q=${encodeURIComponent(q)}&z=15&output=embed" title="${alt || 'Lokasi Peta'}" loading="lazy" onerror="this.remove()"></iframe>`;
+                            // Facade: gak ada thumbnail statis peta tanpa Static Maps API (berbayar),
+                            // jadi placeholder ikon aja — iframe peta beneran baru dimount pas kelihatan/di-tap.
+                            return `<div class="chat-media-wrap" id="${mid}"><div class="maps-facade" data-maps-q="${this.esc(q)}" data-alt="${alt}" onclick="ChatFormat.mountMaps(this)"><i class="fa-solid fa-location-dot maps-facade-icon"></i><span class="maps-facade-label">${alt || 'Tap buat lihat peta'}</span></div></div>`;
                         }
                         return alt || '';
                     }
@@ -1287,10 +1329,13 @@ listEl.innerHTML = ids.map(key => {
                 this._observeYtFacades();
             },
 
-            // ── Lazy-mount facade thumbnail YouTube: player asli baru dibangun begitu
-            // elemennya mendekati viewport (rootMargin lookahead), bukan langsung pas
-            // pesan di-render. Terpisah dari _setupLiteMediaObserver di atas — itu ngatur
-            // play/pause satu media aktif, ini ngatur KAPAN iframe-nya mulai dibuat sama sekali. ──
+            // ── Lazy-mount facade thumbnail embed pihak ketiga (YouTube, Drive generic, Maps):
+            // player/iframe asli baru dibangun begitu elemennya mendekati viewport (rootMargin
+            // lookahead), bukan langsung pas pesan di-render. Nama fungsi "YtFacade" dipertahankan
+            // (historis, dari implementasi YouTube pertama) tapi observer ini sekarang shared buat
+            // semua jenis facade embed, dibedain lewat data attribute masing-masing target saat
+            // dispatch. Terpisah dari _setupLiteMediaObserver di atas — itu ngatur play/pause satu
+            // media aktif, ini ngatur KAPAN iframe-nya mulai dibuat sama sekali. ──
             _ytFacadeObserver: null,
             _setupYtFacadeObserver() {
                 if (this._ytFacadeObserver) return this._ytFacadeObserver;
@@ -1298,14 +1343,22 @@ listEl.innerHTML = ids.map(key => {
                     entries.forEach(en => {
                         if (!en.isIntersecting) return;
                         this._ytFacadeObserver.unobserve(en.target);
-                        if (typeof ChatFormat !== 'undefined') ChatFormat.mountYouTube(en.target);
+                        if (typeof ChatFormat === 'undefined') return;
+                        const el = en.target;
+                        if (el.dataset.ytId) ChatFormat.mountYouTube(el);
+                        else if (el.dataset.driveId) ChatFormat.mountDrive(el);
+                        else if (el.dataset.mapsQ !== undefined) ChatFormat.mountMaps(el);
                     });
                 }, { root: document.getElementById('chat-messages'), rootMargin: '400px 0px', threshold: 0 });
                 return this._ytFacadeObserver;
             },
             _observeYtFacades() {
                 const observer = this._setupYtFacadeObserver();
-                document.querySelectorAll('#chat-messages .chat-yt-facade:not([data-mounted="1"])').forEach(el => observer.observe(el));
+                document.querySelectorAll(
+                    '#chat-messages .chat-yt-facade:not([data-mounted="1"]), ' +
+                    '#chat-messages .drive-facade:not([data-mounted="1"]), ' +
+                    '#chat-messages .maps-facade:not([data-mounted="1"])'
+                ).forEach(el => observer.observe(el));
             },
 
             // ── Muat 50 pesan lebih lama dari Firestore, disisipkan di atas tombolnya sendiri.
