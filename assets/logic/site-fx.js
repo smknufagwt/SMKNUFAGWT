@@ -1,5 +1,5 @@
 /* site-fx.js — DB konten statis, AudioEngine, ScramblerEngine, ParallaxMatrix, System (nav/tema/galeri) */
-        const GALLERY_API_URL = "https://script.google.com/macros/s/AKfycbzpkD-azAZYDUWmu1WZZME8WE4CYyfKyhyqKccGv6sBaG6FVKbRlX6JVM6GaspObbjmPQ/exec";
+        const GALLERY_API_URL = "https://script.google.com/macros/s/AKfycbyv2ipXqphbZBrrVghfNhZOI80PqVMcMCsHxr-4MV2YD6l9SNu0wSCincivQxsv9IxItw/exec";
         let DATABASE_FOTO = [];
 
         // Fetch + parse JSON dengan timeout & 1x retry. Apps Script kadang balas HTML

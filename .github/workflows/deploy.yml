@@ -23,6 +23,11 @@ jobs:
         run: |
           sed -i "s|%%FIREBASE_API_KEY%%|${{ secrets.FIREBASE_API_KEY }}|g" dashmin.html
 
+      - name: Inject secrets ke assets/logic (gallery.js & notify-throttle.js)
+        run: |
+          sed -i "s|%%ACCESS_CODE_B64%%|${{ secrets.ACCESS_CODE_B64 }}|g" assets/logic/gallery.js
+          sed -i "s|%%NOTIFY_SECRET%%|${{ secrets.NOTIFY_SECRET }}|g"     assets/logic/notify-throttle.js
+
       - name: Deploy ke Vercel
         run: npx vercel --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
         env:
@@ -31,4 +36,4 @@ jobs:
 
       
       - name: Deploy ke Firebase Hosting
-        run: npx firebase-tools deploy --token "${{ secrets.FIREBASE_TOKEN }}"
+        run: npx firebase-tools deploy --only hosting:nufabase --token "${{ secrets.FIREBASE_TOKEN }}"

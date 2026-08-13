@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "server-nufa"
+  },
+  "targets": {
+    "server-nufa": {
+      "hosting": {
+        "nufabase": [
+          "nufabase"
+        ]
+      }
+    }
   }
 }
