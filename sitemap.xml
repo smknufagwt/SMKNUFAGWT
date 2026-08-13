@@ -7,11 +7,6 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://smknufa-bdp.vercel.app/profil</loc>
-    <lastmod>2026-05-04</lastmod>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://smknufa-bdp.vercel.app/blog</loc>
     <lastmod>2026-07-11</lastmod>
     <priority>0.7</priority>

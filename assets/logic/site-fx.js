@@ -283,9 +283,9 @@
         // - Sabtu 06:00 s.d. Senin 06:00 (WIB) -> weekend override
         // - Selain itu: 06:00-18:00 -> bgm.mp3 (pagi/siang), 18:00-06:00 -> aurora-dawn (malam)
         function getScheduledBgm() {
-            const dayUrl = "bgm.mp3";
-            const nightUrl = "https://raw.githubusercontent.com/Genzz-xyz/Snake-game/main/audio/aurora-dawn.m4a";
-            const weekendUrl = "https://raw.githubusercontent.com/Genzz-xyz/Snake-game/main/audio/spocks-cryo-bed.m4a";
+            const dayUrl = "assets/audio/bgm.mp3";
+            const nightUrl = "assets/audio/aurora-dawn.m4a";
+            const weekendUrl = "assets/audio/spocks-cryo-bed.m4a";
 
             const now = new Date();
             const wib = new Date(now.getTime() + now.getTimezoneOffset() * 60000 + 7 * 3600000);
@@ -903,8 +903,8 @@ startLatency: function() {
             let clickTimeout;
             let isInterlinkedMode = false;
 
-            const originalBgmUrl = "bgm.mp3"; 
-            const interlinkedBgmUrl = "interlinked.mp3"; 
+            const originalBgmUrl = "assets/audio/bgm.mp3"; 
+            const interlinkedBgmUrl = "assets/audio/interlinked.mp3"; 
 
             subtitle.addEventListener("click", () => {
                 clickCount++;
