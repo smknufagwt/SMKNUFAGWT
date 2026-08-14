@@ -236,6 +236,12 @@
                     .eq('user_id', m.user_id)
                     .eq('room_id', m.room_id);
                 if (delErr) { revokeBtn.disabled = false; return; }
+                // Hapus juga request-nya biar status balik "belum diminta" — user wajib minta akses lagi, bukan nyangkut "approved"
+                await supabase
+                    .from('room_access_requests')
+                    .delete()
+                    .eq('user_id', m.user_id)
+                    .eq('room_id', m.room_id);
                 loadMembers();
             });
             actions.appendChild(revokeBtn);
