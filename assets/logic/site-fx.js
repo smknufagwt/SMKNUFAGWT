@@ -525,7 +525,7 @@
                         const hud = document.querySelector('#gallery .slide-hud');
                         if (hud) {
                             const lat = this._lastLatency || '--';
-                            hud.innerHTML = `Latency Jaringan : <span class="lat-val">${lat}</span>ms | ${DATABASE_FOTO.length} FOTO DIMUAT`;
+                            hud.innerHTML = `<i class="fa-solid fa-wifi lat-toggle${this._latencyEnabled === false ? ' lat-off' : ''}" onclick="System.toggleLatency(this)" title="Matikan/nyalakan pengukuran latency"></i> Jaringan : <span class="lat-val">${lat}</span>ms | ${DATABASE_FOTO.length} FOTO DIMUAT`;
                         }
                     } else {
                         throw new Error(data.message || "Unknown error");
@@ -542,6 +542,7 @@
 
             
 _latencyTimer: null,
+_latencyEnabled: true,
 startLatency: function() {
     if (this._latencyTimer) clearInterval(this._latencyTimer);
     const updateAll = (val) => {
@@ -555,7 +556,14 @@ startLatency: function() {
             .catch(() => updateAll('ERR'));
     };
     measure();
-    this._latencyTimer = setInterval(() => { if (!document.hidden) measure(); }, 4000);
+    this._latencyTimer = setInterval(() => { if (!document.hidden && this._latencyEnabled) measure(); }, 4000);
+},
+toggleLatency: function() {
+    this._latencyEnabled = !this._latencyEnabled;
+    document.querySelectorAll('.lat-toggle').forEach(i => i.classList.toggle('lat-off', !this._latencyEnabled));
+    if (!this._latencyEnabled) {
+        document.querySelectorAll('.lat-val').forEach(el => el.innerText = 'OFF');
+    }
 },
 
             toggleMusic: function() {

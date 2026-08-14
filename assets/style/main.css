@@ -196,6 +196,11 @@
             font-size: 0.6rem; color: var(--neon); opacity: 0.8;
             letter-spacing: 2px; transition: color 0.5s;
         }
+        .lat-toggle {
+            cursor: pointer; font-size: 0.7rem; margin-right: 3px;
+            opacity: 0.9; transition: opacity 0.3s, color 0.3s;
+        }
+        .lat-toggle.lat-off { opacity: 0.35; color: #888; }
 
         .slide.active { display: block; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
