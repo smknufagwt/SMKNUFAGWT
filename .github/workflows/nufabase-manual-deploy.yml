@@ -1,9 +1,20 @@
-name: Nufa Chat — Build & Deploy
+name: Nufabase — Manual Deploy (Firebase)
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
+    inputs:
+      channel:
+        description: "Target Firebase Hosting channel"
+        required: true
+        default: "live"
+        type: choice
+        options:
+          - live
+          - preview
+      preview_expires:
+        description: "Masa berlaku preview channel (hanya jika channel=preview)"
+        required: false
+        default: "7d"
 
 jobs:
   deploy:
@@ -28,8 +39,10 @@ jobs:
           sed -i "s|%%ACCESS_CODE_B64%%|${{ secrets.ACCESS_CODE_B64 }}|g" assets/logic/gallery.js
           sed -i "s|%%NOTIFY_SECRET%%|${{ secrets.NOTIFY_SECRET }}|g"     assets/logic/notify-throttle.js
 
-      - name: Deploy ke Vercel
-        run: npx vercel --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
-        env:
-          VERCEL_ORG_ID:     team_WAxjsLFh79gZzZGqIxczIcz8
-          VERCEL_PROJECT_ID: prj_gCEeSO4IqIbjEs0oK99EyRIORx8A
+      - name: Deploy — live (hosting:nufabase)
+        if: ${{ inputs.channel == 'live' }}
+        run: npx firebase-tools deploy --only hosting:nufabase --token "${{ secrets.FIREBASE_TOKEN }}"
+
+      - name: Deploy — preview channel (hosting:nufabase)
+        if: ${{ inputs.channel == 'preview' }}
+        run: npx firebase-tools hosting:channel:deploy manual-preview --only nufabase --expires ${{ inputs.preview_expires }} --token "${{ secrets.FIREBASE_TOKEN }}"
