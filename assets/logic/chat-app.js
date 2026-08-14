@@ -177,8 +177,10 @@
     }
 
     function appendMessageEl(container, msg) {
+        const isOwn = !!(currentUser && msg.user_id === currentUser.uid);
         const el = document.createElement('div');
-        el.className = 'chat-thread-msg' + (currentUser && msg.user_id === currentUser.uid ? ' is-own' : '');
+        el.className = 'chat-thread-msg' + (isOwn ? ' is-own' : '');
+        el.dataset.msgId = msg.id;
 
         const name = document.createElement('span');
         name.className = 'chat-thread-msg-name';
@@ -195,8 +197,39 @@
         el.appendChild(name);
         el.appendChild(content);
         el.appendChild(time);
+
+        if (isOwn) {
+            const del = document.createElement('button');
+            del.type = 'button';
+            del.className = 'chat-thread-msg-del';
+            del.title = 'Hapus pesan';
+            del.innerHTML = '<i class="fa-solid fa-trash"></i>';
+            del.onclick = () => deleteMessage(msg.id, el);
+            el.appendChild(del);
+        }
+
         container.appendChild(el);
         while (container.children.length > 200) container.removeChild(container.firstChild);
+    }
+
+    function removeMessageEl(container, id) {
+        const el = container.querySelector('[data-msg-id="' + id + '"]');
+        if (el) el.remove();
+        if (!container.children.length) {
+            container.innerHTML = '<p class="chat-thread-empty">Belum ada pesan.</p>';
+        }
+    }
+
+    async function deleteMessage(id, el) {
+        if (!supabase || !currentUser) return;
+        if (!window.confirm('Hapus pesan ini?')) return;
+        el.classList.add('is-deleting');
+        const { error } = await supabase.from('messages').delete().eq('id', id).eq('user_id', currentUser.uid);
+        if (error) {
+            el.classList.remove('is-deleting');
+            showChatToast('Gagal hapus pesan: ' + error.message);
+        }
+        // penghapusan visual final ditangani event realtime DELETE (lihat openThread)
     }
 
     async function openThread(roomId, writableOverride) {
@@ -260,6 +293,12 @@
                 appendMessageEl(list, payload.new);
                 scrollThreadToBottom(list);
                 markRoomRead(roomId);
+            })
+            .on('postgres_changes', {
+                event: 'DELETE', schema: 'public', table: 'messages', filter: 'room_id=eq.' + roomId,
+            }, (payload) => {
+                if (currentRoomId !== roomId) return;
+                removeMessageEl(list, payload.old.id);
             })
             .subscribe();
     }

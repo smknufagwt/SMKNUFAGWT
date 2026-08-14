@@ -311,10 +311,37 @@
 }
 
 .chat-thread-msg.is-own {
+    position: relative;
     align-self: flex-end;
     background: rgba(217, 192, 137, 0.16);
     border-color: var(--chat-gold-dim);
+    padding-right: 26px;
+    transition: opacity 0.2s ease;
 }
+
+.chat-thread-msg.is-own.is-deleting { opacity: 0.4; pointer-events: none; }
+
+.chat-thread-msg-del {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--chat-gold-dim);
+    font-size: 0.62rem;
+    opacity: 0.55;
+    cursor: pointer;
+    transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.chat-thread-msg-del:hover,
+.chat-thread-msg-del:focus-visible { opacity: 1; color: #e68a8a; }
 
 .chat-thread-msg-name {
     display: block;

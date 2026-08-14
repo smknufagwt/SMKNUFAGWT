@@ -42,8 +42,8 @@ export default async function handler(req, res) {
         headings:            { en: `💬 ${maskedIp} • Global Chat Nufa` },
         contents:            { en: body },
         url:                 'https://smknufagwt.vercel.app/',
-        chrome_web_icon:     'https://smknufagwt.vercel.app/notif.png',
-        chrome_web_badge:    'https://smknufagwt.vercel.app/notif.png',
+        chrome_web_icon:     'https://smknufagwt.vercel.app/favicon.ico',
+        chrome_web_badge:    'https://smknufagwt.vercel.app/favicon.ico',
         // Collapse key — notif lama diganti notif baru (tidak numpuk)
         collapse_id:         'nufa-global-chat',
         // Data ekstra untuk SW handle klik

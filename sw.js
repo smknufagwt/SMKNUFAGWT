@@ -18,14 +18,14 @@ importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 // [1] CONFIG — Ubah sesuai kebutuhan
 // ============================================================
 const CONFIG = {
-  CACHE_NAME: 'nufa-cache-v1',
+  CACHE_NAME: 'nufa-cache-v2',
   THUMB_CACHE_NAME: 'nufa-yt-thumb-v1',
   RUNTIME_CACHE_MAX: 80,
   THUMB_CACHE_MAX: 150,
   STATIC_ASSETS: [
     '/',
     '/index.html',
-    '/notif.png',
+    '/favicon.ico',
   ],
   // Domain embed pihak ketiga (iframe live) yang SENGAJA dilepas dari intercept SW —
   // response cross-origin iframe kayak gini sering "opaque" (gak bisa divalidasi isinya
@@ -44,7 +44,7 @@ const CONFIG = {
   BC_NAME: 'nufa-realtime',
   // Ikon untuk push notification
   ICON: '/appcover.jpg',
-  BADGE: '/notif.png',
+  BADGE: '/favicon.ico',
   // Nama Firestore endpoint (tidak dipakai langsung SW, hanya referensi)
   TAG: 'nufa-global-chat',
 };
