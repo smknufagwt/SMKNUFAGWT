@@ -20,6 +20,8 @@ importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 const CONFIG = {
   CACHE_NAME: 'nufa-cache-v1',
   THUMB_CACHE_NAME: 'nufa-yt-thumb-v1',
+  RUNTIME_CACHE_MAX: 80,
+  THUMB_CACHE_MAX: 150,
   STATIC_ASSETS: [
     '/',
     '/index.html',
@@ -52,6 +54,13 @@ const CONFIG = {
 // [2] CACHE_MODULE — Caching aset statis saat install
 // ============================================================
 const CacheModule = {
+  async trimCache(cacheName, maxEntries) {
+    const cache = await caches.open(cacheName);
+    const keys = await cache.keys();
+    if (keys.length <= maxEntries) return;
+    await Promise.all(keys.slice(0, keys.length - maxEntries).map(k => cache.delete(k)));
+  },
+
   async preCacheStatic() {
     const cache = await caches.open(CONFIG.CACHE_NAME);
     try {
@@ -77,6 +86,7 @@ const CacheModule = {
       if (response && response.ok) {
         const cache = await caches.open(CONFIG.CACHE_NAME);
         cache.put(request, response.clone());
+        this.trimCache(CONFIG.CACHE_NAME, CONFIG.RUNTIME_CACHE_MAX);
       }
       return response;
     } catch (_) {
@@ -97,6 +107,7 @@ const CacheModule = {
     try {
       const response = await fetch(request);
       cache.put(request, response.clone());
+      this.trimCache(CONFIG.THUMB_CACHE_NAME, CONFIG.THUMB_CACHE_MAX);
       return response;
     } catch (_) {
       return new Response('', { status: 503 });

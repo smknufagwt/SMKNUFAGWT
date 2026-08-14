@@ -555,7 +555,7 @@ startLatency: function() {
             .catch(() => updateAll('ERR'));
     };
     measure();
-    this._latencyTimer = setInterval(measure, 4000);
+    this._latencyTimer = setInterval(() => { if (!document.hidden) measure(); }, 4000);
 },
 
             toggleMusic: function() {

@@ -196,6 +196,7 @@
         el.appendChild(content);
         el.appendChild(time);
         container.appendChild(el);
+        while (container.children.length > 200) container.removeChild(container.firstChild);
     }
 
     async function openThread(roomId, writableOverride) {
