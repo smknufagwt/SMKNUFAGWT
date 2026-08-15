@@ -626,7 +626,30 @@ toggleLatency: function() {
             } catch (e) {}
         })();
 
-        
+        const chaosTexts = ["SYSTEM_FAILURE", "0x00_FATAL_ERR", "S#K N@R*L F!L^H", "404_NOT_FOUND", "CONNECTING...", "ENCRYPT_//_99%", "µ-sys$-Hacked"];
+        function startChaosMode() {
+            const title = document.querySelector('.glitch');
+            if (!title) return;
+            const originalText = "SEKOLAH MENENGAH KEJURUAN";
+            function randomGlitchLoop() {
+                const randomTime = Math.random() * 15000 + 5000;
+                setTimeout(() => {
+                    const randomString = chaosTexts[Math.floor(Math.random() * chaosTexts.length)];
+                    title.innerText = randomString;
+                    title.setAttribute('data-text', randomString);
+                    title.classList.add('critical-error');
+
+                    setTimeout(() => {
+                        title.innerText = originalText;
+                        title.setAttribute('data-text', originalText);
+                        title.classList.remove('critical-error');
+                        randomGlitchLoop();
+                    }, 100 + Math.random() * 200);
+                }, randomTime);
+            }
+            randomGlitchLoop();
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             // --- INJEKSI ANIMATION KEYFRAME UNTUK SKEW INFINITE ---
             const styleInterlinked = document.createElement('style');
