@@ -1,0 +1,25 @@
+{
+  "name": "SMK Nurul Falah - The Glimpse of Future",
+  "short_name": "SMK Nufa",
+  "description": "Portal Kreatif Sistem Hub Informasi Digital dan Galeri Highlight kegiatan SMK Nurul Falah.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#050505",
+  "theme_color": "#0f0",
+  "lang": "id",
+  "icons": [
+    {
+      "src": "/appcover.jpg",
+      "sizes": "612x408",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    }
+  ]
+}
