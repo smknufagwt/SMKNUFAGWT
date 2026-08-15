@@ -466,6 +466,8 @@
     font-weight: 700;
     color: var(--chat-gold-bright);
     margin: 4px 0 2px;
+    white-space: pre-line;
+    line-height: 1.5;
 }
 
 /* ── ikon di kiri tiap room item ────────────────────────────────── */

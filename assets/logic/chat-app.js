@@ -334,7 +334,7 @@
 
         const note = document.getElementById('chat-thread-readonly-note');
         if (myStatus === 'pending') {
-            note.textContent = 'Permintaan akses kamu ke "' + ROOM_LABELS[roomId] + '" masih menunggu approval admin. Sementara cuma bisa baca.';
+            note.textContent = 'Permintaan akses kamu ke "' + ROOM_LABELS[roomId] + '" masih menunggu persetujuan admin. Sementara cuma bisa baca.';
         } else if (myStatus === 'rejected') {
             note.textContent = 'Permintaan akses ke "' + ROOM_LABELS[roomId] + '" ditolak admin. Sementara cuma bisa baca.';
         } else if (hasActiveElsewhere) {
@@ -356,9 +356,9 @@
                     btn.textContent = 'Minta Akses ke Kelas Ini';
                     btn.disabled = false;
                 } else {
-                    showChatToast('Permintaan terkirim, tunggu approval admin.');
+                    showChatToast('Permintaan terkirim, tunggu persetujuan admin.');
                     btn.remove();
-                    note.textContent = 'Permintaan akses ke "' + ROOM_LABELS[roomId] + '" masih menunggu approval admin. Sementara cuma bisa baca.';
+                    note.textContent = 'Permintaan akses ke "' + ROOM_LABELS[roomId] + '" masih menunggu persetujuan admin. Sementara cuma bisa baca.';
                     refreshRoomStatuses();
                 }
             });
@@ -479,7 +479,7 @@
         if (greetEl) {
             if (currentUser) {
                 const firstName = (currentUser.displayName || '').split(' ')[0] || 'Sobat NUFA';
-                greetEl.textContent = 'Halo, ' + firstName + ' 👋';
+                greetEl.textContent = 'Selamat datang di obrolan NufaBase, ' + firstName + ' 🖐️\nMasih dalam tahap pengembangan (Beta).\nTips: ganti nama di akun Google kamu, nama di sini otomatis ikut berubah.';
                 greetEl.hidden = false;
             } else {
                 greetEl.hidden = true;
@@ -511,7 +511,7 @@
                         el.textContent = 'Belum diminta';
                         el.removeAttribute('data-state');
                     } else if (status === 'pending') {
-                        el.textContent = 'Menunggu approval';
+                        el.textContent = 'Menunggu persetujuan';
                         el.setAttribute('data-state', 'pending');
                     } else if (status === 'approved') {
                         el.textContent = 'Disetujui';
