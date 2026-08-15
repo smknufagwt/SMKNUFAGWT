@@ -244,7 +244,7 @@
         // yang otomatis clear sendiri, jadi ringan di device low-end. Ikon juga dipetakan ke navigator.onLine
         // biar bukan cuma kosmetik — kalau beneran offline, labelnya jujur bilang gitu.
         const NetLabel = {
-            phrases: ['JARINGAN AKTIF', 'UPLINK STABIL', 'NODE TERKONEKSI', 'SINYAL TERKUNCI', 'GRID TERSAMBUNG'],
+            phrases: ['JARINGAN AKTIF', 'KONEKSI STABIL', 'NODE TERKONEKSI', 'SINYAL TERKUNCI', 'GRID TERSAMBUNG'],
             idx: 0,
             _timer: null,
             start() {
@@ -311,14 +311,15 @@
             colorBtn: document.getElementById('color-btn'),
             colorIndex: 0,
             colors: [
+           { neon: '#ffffff', dim: '#8ce6ef', hex: '#ffffff' },
                 { neon: '#0f0', dim: '#008F11', hex: '#0f0' },       
                 { neon: '#00f0ff', dim: '#008F8F', hex: '#00f0ff' }, 
                 { neon: '#FF3333', dim: '#CC1F1F', hex: '#FF3333' }, 
                 { neon: '#FFFF66', dim: '#999900', hex: '#FFFF66' },
                 { neon: '#D966FF', dim: '#8000B3', hex: '#D966FF' }, 
                 { neon: '#FF8040', dim: '#B34700', hex: '#FF8040' },
-                { neon: '#FF10F0', dim: '#B0008C', hex: '#FF10F0' },
-                { neon: '#ffffff', dim: '#8ce6ef', hex: '#ffffff' }  
+                { neon: '#FF10F0', dim: '#B0008C', hex: '#FF10F0' }
+                 
 
             ],
             baseOffset: 6340,
@@ -626,29 +627,7 @@ toggleLatency: function() {
             } catch (e) {}
         })();
 
-        const chaosTexts = ["SYSTEM_FAILURE", "0x00_FATAL_ERR", "S#K N@R*L F!L^H", "404_NOT_FOUND", "CONNECTING...", "ENCRYPT_//_99%", "µ-sys$-Hacked"];
-        function startChaosMode() {
-            const title = document.querySelector('.glitch');
-            if (!title) return;
-            const originalText = "SMK NURUL FALAH";
-            function randomGlitchLoop() {
-                const randomTime = Math.random() * 15000 + 5000; 
-                setTimeout(() => {
-                    const randomString = chaosTexts[Math.floor(Math.random() * chaosTexts.length)];
-                    title.innerText = randomString;          
-                    title.setAttribute('data-text', randomString); 
-                    title.classList.add('critical-error');   
-                    
-                    setTimeout(() => {
-                        title.innerText = originalText;
-                        title.setAttribute('data-text', originalText);
-                        title.classList.remove('critical-error');
-                        randomGlitchLoop(); 
-                    }, 100 + Math.random() * 200);
-                }, randomTime);
-            }
-            randomGlitchLoop();
-        }
+        
 
         document.addEventListener("DOMContentLoaded", () => {
             // --- INJEKSI ANIMATION KEYFRAME UNTUK SKEW INFINITE ---
