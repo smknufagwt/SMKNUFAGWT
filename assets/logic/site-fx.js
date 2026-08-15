@@ -918,7 +918,7 @@ toggleLatency: function() {
                     if (typeof AudioFX !== 'undefined') AudioFX.click();
                 } else {
                     isInterlinkedMode = false;
-                    subtitle.textContent = "(BDP) PEMASARAN";
+                    subtitle.textContent = "NURUL FALAH";
                     subtitle.style.color = "";
                     subtitle.style.textShadow = "";
                     subtitle.style.letterSpacing = "";
