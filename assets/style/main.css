@@ -63,29 +63,29 @@
             background: var(--bg-color);
         }
         .glitch::before {
-            left: 2px; text-shadow: -1px 0 var(--glitch-red); clip: rect(24px, 550px, 90px, 0);
+            left: 2px; text-shadow: -1px 0 var(--glitch-red); clip: rect(2px, 9999px, 10px, 0);
             animation: glitch-anim-2 3s infinite linear alternate-reverse;
         }
         .glitch::after {
-            left: -2px; text-shadow: -1px 0 var(--glitch-blue); clip: rect(85px, 550px, 140px, 0);
+            left: -2px; text-shadow: -1px 0 var(--glitch-blue); clip: rect(24px, 9999px, 34px, 0);
             animation: glitch-anim 2.5s infinite linear alternate-reverse;
         }
 
         @keyframes glitch-anim {
-            0% { clip: rect(10px, 9999px, 30px, 0); transform: skew(0.5deg); }
-            20% { clip: rect(80px, 9999px, 100px, 0); transform: skew(0.3deg); }
-            40% { clip: rect(10px, 9999px, 80px, 0); transform: skew(0.8deg); }
-            60% { clip: rect(50px, 9999px, 20px, 0); transform: skew(0.2deg); }
-            80% { clip: rect(20px, 9999px, 90px, 0); transform: skew(0.6deg); }
-            100% { clip: rect(90px, 9999px, 10px, 0); transform: skew(0.4deg); }
+            0%   { clip: rect(2px, 9999px, 8px, 0); transform: skew(4deg); }
+            20%  { clip: rect(20px, 9999px, 28px, 0); transform: skew(-3deg); }
+            40%  { clip: rect(6px, 9999px, 16px, 0); transform: skew(5deg); }
+            60%  { clip: rect(26px, 9999px, 36px, 0); transform: skew(-4deg); }
+            80%  { clip: rect(10px, 9999px, 20px, 0); transform: skew(3deg); }
+            100% { clip: rect(30px, 9999px, 40px, 0); transform: skew(-5deg); }
         }
         @keyframes glitch-anim-2 {
-            0% { clip: rect(60px, 9999px, 10px, 0); transform: skew(0.8deg); }
-            20% { clip: rect(20px, 9999px, 40px, 0); transform: skew(0.2deg); }
-            40% { clip: rect(90px, 9999px, 30px, 0); transform: skew(0.6deg); }
-            60% { clip: rect(10px, 9999px, 80px, 0); transform: skew(0.4deg); }
-            80% { clip: rect(50px, 9999px, 20px, 0); transform: skew(0.1deg); }
-            100% { clip: rect(30px, 9999px, 70px, 0); transform: skew(0.7deg); }
+            0%   { clip: rect(28px, 9999px, 36px, 0); transform: skew(-4deg); }
+            20%  { clip: rect(4px, 9999px, 12px, 0); transform: skew(3deg); }
+            40%  { clip: rect(18px, 9999px, 28px, 0); transform: skew(-5deg); }
+            60%  { clip: rect(2px, 9999px, 10px, 0); transform: skew(4deg); }
+            80%  { clip: rect(14px, 9999px, 24px, 0); transform: skew(-3deg); }
+            100% { clip: rect(8px, 9999px, 18px, 0); transform: skew(5deg); }
         }
 
         .critical-error { color: red !important; text-shadow: 2px 2px 0px #000; }
