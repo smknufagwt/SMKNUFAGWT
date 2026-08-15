@@ -71,10 +71,10 @@
         };
 
         const DATABASE_MATERI = {
-            'dm': 'Strategi pemasaran komprehensif menggunakan platform digital (Facebook Ads, Instagram, TikTok, Marketplace) untuk menjangkau audiens tertarget, meningkatkan brand awareness, dan mengoptimalkan retensi penjualan secara online.',
-            'rb': 'Pengelolaan manajemen toko ritel modern yang mencakup teknik display produk (Visual Merchandising), manajemen persediaan (Stock Opname), administrasi transaksi (Kasir), serta standar pelayanan prima (Service Excellence).',
-            'ps': 'Pengembangan soft-skill komunikasi bisnis untuk keperluan presentasi produk, negosiasi dengan klien, serta kemampuan Public Speaking yang persuasif dan percaya diri di hadapan audiens secara profesional.',
-            'kwu': 'Implementasi mata pelajaran Produk Kreatif dan Kewirausahaan (PKK) dimana siswa dibimbing untuk merancang, memproduksi, dan memasarkan produk inovatif serta menyusun rencana bisnis (Business Plan) yang layak jual.'
+            'dm': 'Kompetensi keahlian Pemasaran membekali siswa dengan kemampuan menyusun strategi promosi produk, mengelola transaksi penjualan, memahami perilaku konsumen, serta mengoperasikan platform pemasaran digital maupun konvensional secara profesional dan terukur.',
+            'rb': 'Kompetensi keahlian Otomotif melatih siswa memahami sistem kerja kendaraan bermotor, teknik perawatan dan perbaikan mesin, kelistrikan otomotif, serta prosedur keselamatan kerja sesuai standar industri bengkel profesional.',
+            'ps': 'Kompetensi keahlian Menjahit mengasah keterampilan siswa dalam pembuatan pola, memotong kain, mengoperasikan mesin jahit, hingga menyelesaikan produk busana sesuai standar kualitas dan teknik tata busana yang benar.',
+            'kwu': 'Kompetensi keahlian Pengelasan membekali siswa dengan teknik menyambung logam menggunakan berbagai metode las, membaca gambar teknik, serta menerapkan standar keselamatan kerja sesuai prosedur industri manufaktur dan konstruksi.'
         };
 
       class AudioEngine {

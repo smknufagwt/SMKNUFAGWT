@@ -3,8 +3,8 @@
 > **Real-Time Centralized Notification & Communication System**  
 > A cyberpunk-themed, edge-optimized communication hub built entirely on vanilla JavaScript, Firebase, and OneSignal.
 
-[![Live Demo](https://img.shields.io/badge/🔗%20Live%20Demo-smknufa--bdp.vercel.app-00ff41?style=for-the-badge&logo=vercel)](https://smknufa-bdp.vercel.app/)
-[![Blog](https://img.shields.io/badge/📖%20Blog%20&%20Changelog-Journal-00f0ff?style=for-the-badge)](https://smknufa-bdp.vercel.app/blog)
+[![Live Demo](https://img.shields.io/badge/🔗%20Live%20Demo-nufabase.web.app-00ff41?style=for-the-badge&logo=vercel)](https://nufabase.web.app/)
+[![Blog](https://img.shields.io/badge/📖%20Blog%20&%20Changelog-Journal-00f0ff?style=for-the-badge)](https://nufabase.web.app/blog)
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-1f4788?style=for-the-badge)](LICENSE)
 
 ---
@@ -103,7 +103,7 @@ SMKNUFAGWT/
 ## 🚀 Quick Start
 
 ### **Live Demo**
-Just visit: **[smknufa-bdp.vercel.app](https://smknufa-bdp.vercel.app/)**
+Just visit: **[nufabase.web.app](https://nufabase.web.app/)**
 
 ### **Local Development**
 
@@ -388,7 +388,7 @@ If this project inspired you or helped you learn something new:
 
 <div align="center">
 
-### 🚀 **[Visit Live Demo](https://smknufa-bdp.vercel.app/)**
+### 🚀 **[Visit Live Demo](https://nufabase.web.app/)**
 
 **Made with ❤️ on a mobile phone | Deployed to the edge | Optimized for scale**
 
