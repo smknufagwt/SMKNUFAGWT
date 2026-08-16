@@ -1,8 +1,10 @@
 /* chat-app.js — router SPA untuk /chat (landing page + navigasi room + thread realtime).
-   Auth: Firebase Google Sign-In (reuse FIREBASE_CONFIG dari index.html),
-   di-bridge ke Supabase lewat Third-Party Auth (accessToken = Firebase ID token).
-   Google Cloud OAuth client terpisah belum di-setup — makanya pakai Firebase,
-   bukan supabase.auth.signInWithOAuth('google') langsung. */
+   Auth: Supabase Auth native, Google via signInWithOAuth (redirect ke Google,
+   balik lewat callback tetap di domain Supabase — gak ikut domain frontend,
+   jadi aman dari redirect_uri_mismatch pas ganti hosting). Session dipegang
+   penuh sama supabase-js sendiri, gak ada lagi ketergantungan Firebase.
+   currentUser dinormalisasi ke shape {uid,email,displayName,photoURL} biar
+   kode lain di file ini gak perlu berubah. */
 (function () {
     'use strict';
 
@@ -104,13 +106,15 @@
         toast._hideTimer = setTimeout(() => toast.classList.remove('is-visible'), 5000);
     }
 
-    function firebaseAuthErrorMessage(err) {
-        const code = err && err.code;
-        if (code === 'auth/unauthorized-domain') return 'Domain ini belum diizinkan di Firebase — hubungi admin.';
-        if (code === 'auth/popup-blocked') return 'Popup login diblokir browser, izinkan popup lalu coba lagi.';
-        if (code === 'auth/popup-closed-by-user') return null; // user sengaja nutup, gak perlu toast
-        if (code === 'auth/cancelled-popup-request') return null;
-        return 'Login Google gagal: ' + (err && err.message ? err.message : 'error tidak diketahui');
+    function normalizeUser(sessionUser) {
+        if (!sessionUser) return null;
+        const meta = sessionUser.user_metadata || {};
+        return {
+            uid: sessionUser.id,
+            email: sessionUser.email || null,
+            displayName: meta.full_name || meta.name || null,
+            photoURL: meta.avatar_url || meta.picture || null,
+        };
     }
 
     function pathToRoomId(pathname) {
@@ -448,16 +452,15 @@
         window.addEventListener('popstate', render);
 
         document.getElementById('chat-account-btn').addEventListener('click', async () => {
-            if (typeof firebase === 'undefined' || !firebase.apps || !firebase.apps.length) return;
+            if (!supabase) return;
             if (currentUser) {
-                await firebase.auth().signOut();
+                await supabase.auth.signOut();
             } else {
-                try {
-                    await firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider());
-                } catch (err) {
-                    const msg = firebaseAuthErrorMessage(err);
-                    if (msg) showChatToast(msg);
-                }
+                const { error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: { redirectTo: window.location.origin + window.location.pathname },
+                });
+                if (error) showChatToast('Login Google gagal: ' + error.message);
             }
         });
     }
@@ -768,29 +771,19 @@
     }
 
     function initServices() {
-        if (typeof firebase === 'undefined' || typeof window.supabase === 'undefined' || !window.supabase.createClient) {
+        if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
             return; // SDK belum kemuat (mis. diblok jaringan), landing page tetap jalan tanpa auth
         }
-        if (typeof FIREBASE_CONFIG === 'undefined' || !FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey.startsWith('%%')) {
-            return; // secret belum ke-inject (build lokal tanpa GitHub Actions)
-        }
-        if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
 
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            accessToken: async () => {
-                const user = firebase.auth().currentUser;
-                if (!user) return null;
-                return await user.getIdToken();
-            },
-        });
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        firebase.auth().onAuthStateChanged(async (user) => {
-            currentUser = user;
+        supabase.auth.onAuthStateChange(async (event, session) => {
+            currentUser = normalizeUser(session && session.user);
             isAdmin = false;
             updateAccountIcon();
-            if (user) {
-                await upsertProfile(user);
-                const { data } = await supabase.from('profiles').select('is_admin').eq('id', user.uid).maybeSingle();
+            if (currentUser) {
+                await upsertProfile(currentUser);
+                const { data } = await supabase.from('profiles').select('is_admin').eq('id', currentUser.uid).maybeSingle();
                 isAdmin = !!(data && data.is_admin);
                 maybeRequestNotificationPermission();
                 computeUnreadCounts();

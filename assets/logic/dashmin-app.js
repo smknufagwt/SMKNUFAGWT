@@ -1,5 +1,5 @@
 /* dashmin-app.js — admin dashboard: approve/reject akses room kelas & kelola member.
-   Auth: Firebase Google Sign-In yang sama dengan /chat, digate oleh profiles.is_admin di Supabase. */
+   Auth: Supabase Auth native (signInWithOAuth google), digate oleh profiles.is_admin. */
 (function () {
     'use strict';
 
@@ -54,13 +54,14 @@
         toast._hideTimer = setTimeout(() => toast.classList.remove('is-visible'), 5000);
     }
 
-    function authErrorMessage(err) {
-        const code = err && err.code;
-        if (code === 'auth/unauthorized-domain') return 'Domain ini belum diizinkan di Firebase — tambahkan di Authorized domains.';
-        if (code === 'auth/popup-blocked') return 'Popup login diblokir browser, izinkan popup lalu coba lagi.';
-        if (code === 'auth/popup-closed-by-user') return null;
-        if (code === 'auth/cancelled-popup-request') return null;
-        return 'Login Google gagal: ' + (err && err.message ? err.message : 'error tidak diketahui');
+    function normalizeUser(sessionUser) {
+        if (!sessionUser) return null;
+        const meta = sessionUser.user_metadata || {};
+        return {
+            uid: sessionUser.id,
+            email: sessionUser.email || null,
+            displayName: meta.full_name || meta.name || null,
+        };
     }
 
     function personLabel(profile, userId) {
@@ -320,39 +321,30 @@
 
     function bindGate() {
         el['gate-btn'].addEventListener('click', async () => {
-            try {
-                await firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider());
-            } catch (err) {
-                const msg = authErrorMessage(err);
-                if (msg) showToast(msg);
-            }
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: window.location.origin + window.location.pathname },
+            });
+            if (error) showToast('Login Google gagal: ' + error.message);
         });
-        el['logout-btn'].addEventListener('click', () => firebase.auth().signOut());
+        el['logout-btn'].addEventListener('click', () => supabase.auth.signOut());
     }
 
     function init() {
         cacheEls();
-        bindGate();
         bindMemberSearch();
 
-        if (typeof firebase === 'undefined' || typeof window.supabase === 'undefined') {
+        if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
             showGate('Layanan belum siap, muat ulang halaman.', false);
             return;
         }
-        if (typeof FIREBASE_CONFIG === 'undefined' || !FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey.startsWith('%%')) {
-            showGate('Konfigurasi belum lengkap.', false);
-            return;
-        }
-        if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
 
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            accessToken: async () => {
-                const user = firebase.auth().currentUser;
-                return user ? await user.getIdToken() : null;
-            },
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        bindGate();
+
+        supabase.auth.onAuthStateChange((event, session) => {
+            handleAuthChange(normalizeUser(session && session.user));
         });
-
-        firebase.auth().onAuthStateChanged(handleAuthChange);
     }
 
     if (document.readyState === 'loading') {
