@@ -66,35 +66,33 @@ By leveraging **highly structured Vanilla JS** without bloated modern frameworks
 
 ```
 SMKNUFAGWT/
-├── 📄 index.html              ⭐ Main app (157 KB single file)
-│   ├─ Embedded CSS (cyberpunk theme, animations)
-│   ├─ Firebase + OneSignal initialization
-│   ├─ Real-time chat logic & UI controllers
-│   ├─ Gallery viewer & theme switcher
-│   └─ BroadcastChannel message routing
+├── 📄 index.html              ⭐ Main app (single-file frontend)
+├── 📄 dashmin.html            🛠️  Admin dashboard
+├── 📄 404.html                Custom error page
 │
 ├── 📝 blog/
 │   └─ index.html              🎨 Development journal & roadmap
-│       ├─ Timeline with scroll animations
-│       ├─ Filterable update feed
-│       └─ About section (story of the build)
 │
-├── ⚙️ sw.js                    Service worker module:
-│   ├─ CONFIG: cache settings & OneSignal config
-│   ├─ CacheModule: network-first fetch strategy
-│   ├─ PushModule: notification handler
-│   ├─ SyncModule: offline message queue (IndexedDB)
-│   ├─ MessageModule: SW ↔ page communication
-│   └─ Lifecycle: install, activate, fetch handlers
+├── 🔌 api/
+│   └─ notify.js               OneSignal push notification endpoint
 │
-├── 🎵 bgm.mp3 (1.9 MB)         Ambient background music
-├── 🎵 interlinked.mp3 (3.8 MB) Scene audio
+├── 🎨 assets/
+│   ├─ audio/                  BGM & scene audio
+│   ├─ logic/                  Chat, transitions, site FX modules
+│   └─ style/                  CSS variables & theming
+│
+├── 🖼️ images/                  Gallery & static image assets
+├── ⚙️ sw.js                    Service worker (cache, push, offline sync)
+├── ⚙️ .github/workflows/       CI: deploy, manual deploy, notify-cron
+├── 📋 manifest.json            PWA manifest
+│
 ├── 🖼️ appcover.jpg             Social share image
+├── 📋 firebase.json / .firebaserc   Firebase Hosting config
 ├── 📋 vercel.json              Edge deployment config
 ├── 📋 .env.example             Environment variables template
-├── 📋 robots.txt               SEO metadata
-├── 📋 sitemap.xml              Sitemap for indexing
+├── 📋 robots.txt / sitemap.xml SEO metadata
 ├── 📋 LICENSE                  BSD 2-Clause "Simplified"
+├── 📋 SECURITY.md              Vulnerability reporting policy
 └── 📋 README.md                ← You are here
 ```
 
@@ -294,6 +292,8 @@ Create new `.html` files in root; link from main nav buttons in header.
 - **HTTPS enforced** on production (Vercel auto-HTTPS)
 - **CORS configured** to allow only same-origin requests
 - **Service Worker scope** limited to `/` (single domain)
+
+Found a vulnerability? See [SECURITY.md](SECURITY.md) for how to report it.
 
 ---
 
