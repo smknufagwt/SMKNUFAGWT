@@ -394,6 +394,8 @@
             },
 
             enter: function(auto) {
+                if (this._entered) return; // guard: cegah dobel-enter (autoResumeAccess vs transisi blog)
+                this._entered = true;
                 try { sessionStorage.setItem('nufa_last_access', Date.now()); } catch(e) {}
                 if (!auto) AudioFX.click();
                 this._startBgmScheduler();
