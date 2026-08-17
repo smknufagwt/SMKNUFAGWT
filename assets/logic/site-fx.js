@@ -357,6 +357,15 @@
                 document.documentElement.style.setProperty('--neon', theme.neon);
                 document.documentElement.style.setProperty('--neon-dim', theme.dim);
                 MatrixFX.setColor(theme.hex);
+
+                // Sinkronkan warna address bar mobile dgn tema aktif
+                let metaTheme = document.querySelector('meta[name="theme-color"]');
+                if (!metaTheme) {
+                    metaTheme = document.createElement('meta');
+                    metaTheme.name = 'theme-color';
+                    document.head.appendChild(metaTheme);
+                }
+                metaTheme.setAttribute('content', theme.hex);
             },
 
             initLog: function() {
