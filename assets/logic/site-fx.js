@@ -439,8 +439,14 @@
                 this.syncVisitorCount().catch(()=>{});
 
                 document.getElementById('overlay').style.opacity = '0';
+                const scanlinesEl = document.querySelector('.scanlines');
+                const scanBeamEl = document.querySelector('.scan-beam');
+                if (scanlinesEl) scanlinesEl.style.opacity = '0';
+                if (scanBeamEl) scanBeamEl.style.opacity = '0';
                 setTimeout(() => {
                     document.getElementById('overlay').style.display = 'none';
+                    if (scanlinesEl) scanlinesEl.style.display = 'none';
+                    if (scanBeamEl) scanBeamEl.style.display = 'none';
                     document.getElementById('main-content').style.display = 'block';
                     startChaosMode(); 
                 }, 500);
