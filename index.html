@@ -851,25 +851,8 @@
                 this.presenceId = sessionStorage.getItem('nufa_presence_id') || ('U-' + Math.random().toString(36).slice(2, 9));
                 sessionStorage.setItem('nufa_presence_id', this.presenceId);
 
-                const devIconEl = document.getElementById('chat-device-icon');
-                const devLabelEl = document.getElementById('chat-device-label');
-                if (devIconEl) { devIconEl.className = 'fa-brands ' + this.myDevice.icon + (
-                    // fa-android, fa-apple, fa-windows, fa-linux semuanya brands
-                    // fa-question-circle adalah solid
-                    this.myDevice.icon === 'fa-question-circle' ? ' fa-solid' : ' fa-brands'
-                ).replace('fa-brands fa-brands', 'fa-brands'); }
-                if (devLabelEl) devLabelEl.textContent = this.myDevice.label;
-
-                // Ambil IP publik pengirim (dipakai untuk ditampilkan ke semua orang, tanpa login)
-                const ipDisplayEl = document.getElementById('chat-myip-display');
-                if (ipDisplayEl) ipDisplayEl.textContent = 'Mengambil...';
+                // Ambil IP publik pengirim (dipakai di payload pesan, bukan ditampilkan lokal)
                 this.myIp = await this._resolveMyIp();
-                if (ipDisplayEl) ipDisplayEl.textContent = this.myIp;
-                // Perbaiki ikon device setelah kita punya semua info
-                if (devIconEl) {
-                    const isBrand = ['fa-android','fa-apple','fa-windows','fa-linux'].includes(this.myDevice.icon);
-                    devIconEl.className = (isBrand ? 'fa-brands ' : 'fa-solid ') + this.myDevice.icon;
-                }
 
                 const configured = FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith('GANTI');
                 if (configured && typeof firebase !== 'undefined') {
