@@ -319,7 +319,7 @@ Fullstack Dev Engineer | Backend | DevOps | Frontend | AI Engineering
 
 📧 **Email:** [smknufagwt@gmail.com](mailto:smknufagwt@gmail.com)  
 💬 **WhatsApp:** [+62 831-9975-3711](https://wa.me/6283199753711)  
-🎨 **TikTok:** [@arlingkin](https://tiktok.com/@arlingkin)
+🤖 **Github:** [arlingkin](https://github.com/arlingkin)
 
 ### **About the Build**
 This project was built over several months on a **Xiaomi Redmi A8 Pro** (3GB RAM / 32GB ROM) using **Claude AI** as a coding partner. Every line was typed on a mobile keyboard, optimized for performance, and deployed to Vercel edge runtime.
@@ -380,7 +380,7 @@ If this project inspired you or helped you learn something new:
 
 **Questions?** Reach out anytime:
 - 📧 Email: smknufagwt@gmail.com
-- 💬 WhatsApp: [+62 831-9975-3711](https://wa.me/6283199753711)
+- 🤖 **Github:** [arlingkin](https://github.com/arlingkin)
 - 🐙 GitHub Issues: [@smknufagwt](https://github.com/smknufagwt)
 
 ---
