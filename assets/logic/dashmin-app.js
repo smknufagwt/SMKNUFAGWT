@@ -1,10 +1,7 @@
 /* dashmin-app.js — admin dashboard: approve/reject akses room kelas & kelola member.
-   Auth: Firebase Google Sign-In yang sama dengan /chat, digate oleh profiles.is_admin di Supabase. */
+   Auth: Firebase Google Sign-In yang sama dengan /chat, digate oleh profiles/{uid}.is_admin di Firestore. */
 (function () {
     'use strict';
-
-    const SUPABASE_URL = 'https://yzmtmhpjfrlqsewpdonr.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6bXRtaHBqZnJscXNld3Bkb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwMTQyNzAsImV4cCI6MjEwMTU5MDI3MH0.IXOlT_QUEGaDZ9bppmM_GQrvzcSEw5PgZzhyklMKBfQ';
 
     const ROOM_LABELS = {
         'pemasaran-1': 'Pemasaran 1', 'otomotif-1': 'Otomotif 1',
@@ -12,9 +9,9 @@
         'pemasaran-3': 'Pemasaran 3', 'otomotif-3': 'Otomotif 3',
     };
 
-    let supabase = null;
+    let db = null;
     let adminUid = null;
-    let pendingChannel = null;
+    let pendingUnsub = null;
     let allMembers = [];
     let memberSearchQuery = '';
 
@@ -54,101 +51,98 @@
         toast._hideTimer = setTimeout(() => toast.classList.remove('is-visible'), 5000);
     }
 
-    function authErrorMessage(err) {
-        const code = err && err.code;
-        if (code === 'auth/unauthorized-domain') return 'Domain ini belum diizinkan di Firebase — tambahkan di Authorized domains.';
-        if (code === 'auth/popup-blocked') return 'Popup login diblokir browser, izinkan popup lalu coba lagi.';
-        if (code === 'auth/popup-closed-by-user') return null;
-        if (code === 'auth/cancelled-popup-request') return null;
-        return 'Login Google gagal: ' + (err && err.message ? err.message : 'error tidak diketahui');
-    }
-
-    function personLabel(profile, userId) {
-        if (!profile) return userId;
-        return (profile.full_name || profile.email || userId);
+    function personLabel(req) {
+        return (req && (req.user_name || req.user_email)) || (req && req.user_id) || 'Anonim';
     }
 
     async function loadPending() {
         el['pending-list'].innerHTML = '<p class="dashmin-empty">Memuat...</p>';
-        const { data, error } = await supabase
-            .from('room_access_requests')
-            .select('id, user_id, room_id, requested_at, profiles!room_access_requests_user_id_fkey(full_name, email)')
-            .eq('status', 'pending')
-            .order('requested_at', { ascending: true });
+        try {
+            const snap = await db.collection('room_access_requests')
+                .where('status', '==', 'pending')
+                .orderBy('requested_at', 'asc')
+                .get();
+            const data = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
-        if (error) {
+            if (el['stat-pending']) el['stat-pending'].textContent = String(data.length);
+            if (el['pending-title']) el['pending-title'].textContent = 'Permintaan Akses Kelas (' + data.length + ')';
+            if (!data.length) {
+                el['pending-list'].innerHTML = '<p class="dashmin-empty">🎉 Tidak ada permintaan pending.</p>';
+                return;
+            }
+
+            el['pending-list'].innerHTML = '';
+            data.forEach((req) => {
+                const row = document.createElement('div');
+                row.className = 'dashmin-row';
+
+                const label = personLabel(req);
+                row.appendChild(avatarEl(label));
+
+                const info = document.createElement('div');
+                info.className = 'dashmin-row-info';
+                const name = document.createElement('div');
+                name.className = 'dashmin-row-name';
+                name.textContent = label;
+                const sub = document.createElement('div');
+                sub.className = 'dashmin-row-sub';
+                const when = req.requested_at && typeof req.requested_at.toDate === 'function'
+                    ? req.requested_at.toDate()
+                    : (req.requested_at ? new Date(req.requested_at) : new Date());
+                sub.textContent = (ROOM_LABELS[req.room_id] || req.room_id) + ' — ' + when.toLocaleString('id-ID');
+                info.appendChild(name);
+                info.appendChild(sub);
+
+                const actions = document.createElement('div');
+                actions.className = 'dashmin-row-actions';
+
+                const approveBtn = document.createElement('button');
+                approveBtn.className = 'dashmin-action-btn is-approve';
+                approveBtn.type = 'button';
+                approveBtn.textContent = 'Setujui';
+                approveBtn.addEventListener('click', () => decideRequest(req, 'approved', approveBtn, rejectBtn));
+
+                const rejectBtn = document.createElement('button');
+                rejectBtn.className = 'dashmin-action-btn is-reject';
+                rejectBtn.type = 'button';
+                rejectBtn.textContent = 'Tolak';
+                rejectBtn.addEventListener('click', () => decideRequest(req, 'rejected', approveBtn, rejectBtn));
+
+                actions.appendChild(approveBtn);
+                actions.appendChild(rejectBtn);
+
+                row.appendChild(info);
+                row.appendChild(actions);
+                el['pending-list'].appendChild(row);
+            });
+        } catch (e) {
             el['pending-list'].innerHTML = '<p class="dashmin-empty">Gagal memuat permintaan.</p>';
-            return;
         }
-        if (el['stat-pending']) el['stat-pending'].textContent = String(data.length);
-        if (el['pending-title']) el['pending-title'].textContent = 'Permintaan Akses Kelas (' + data.length + ')';
-        if (!data.length) {
-            el['pending-list'].innerHTML = '<p class="dashmin-empty">🎉 Tidak ada permintaan pending.</p>';
-            return;
-        }
-
-        el['pending-list'].innerHTML = '';
-        data.forEach((req) => {
-            const row = document.createElement('div');
-            row.className = 'dashmin-row';
-
-            const label = personLabel(req.profiles, req.user_id);
-            row.appendChild(avatarEl(label));
-
-            const info = document.createElement('div');
-            info.className = 'dashmin-row-info';
-            const name = document.createElement('div');
-            name.className = 'dashmin-row-name';
-            name.textContent = label;
-            const sub = document.createElement('div');
-            sub.className = 'dashmin-row-sub';
-            sub.textContent = (ROOM_LABELS[req.room_id] || req.room_id) + ' — ' + new Date(req.requested_at).toLocaleString('id-ID');
-            info.appendChild(name);
-            info.appendChild(sub);
-
-            const actions = document.createElement('div');
-            actions.className = 'dashmin-row-actions';
-
-            const approveBtn = document.createElement('button');
-            approveBtn.className = 'dashmin-action-btn is-approve';
-            approveBtn.type = 'button';
-            approveBtn.textContent = 'Setujui';
-            approveBtn.addEventListener('click', () => decideRequest(req, 'approved', approveBtn, rejectBtn));
-
-            const rejectBtn = document.createElement('button');
-            rejectBtn.className = 'dashmin-action-btn is-reject';
-            rejectBtn.type = 'button';
-            rejectBtn.textContent = 'Tolak';
-            rejectBtn.addEventListener('click', () => decideRequest(req, 'rejected', approveBtn, rejectBtn));
-
-            actions.appendChild(approveBtn);
-            actions.appendChild(rejectBtn);
-
-            row.appendChild(info);
-            row.appendChild(actions);
-            el['pending-list'].appendChild(row);
-        });
     }
 
     async function decideRequest(req, status, approveBtn, rejectBtn) {
         approveBtn.disabled = true;
         rejectBtn.disabled = true;
 
-        const { error } = await supabase
-            .from('room_access_requests')
-            .update({ status: status, decided_at: new Date().toISOString(), decided_by: adminUid })
-            .eq('id', req.id);
-
-        if (error) {
+        try {
+            await db.collection('room_access_requests').doc(req.id).update({
+                status: status,
+                decided_at: firebase.firestore.FieldValue.serverTimestamp(),
+                decided_by: adminUid,
+            });
+            if (status === 'approved') {
+                await db.collection('room_members').doc(req.user_id + '_' + req.room_id).set({
+                    user_id: req.user_id,
+                    room_id: req.room_id,
+                    user_name: req.user_name || '',
+                    user_email: req.user_email || '',
+                    approved_at: firebase.firestore.FieldValue.serverTimestamp(),
+                });
+            }
+        } catch (e) {
             approveBtn.disabled = false;
             rejectBtn.disabled = false;
             return;
-        }
-
-        if (status === 'approved') {
-            await supabase
-                .from('room_members')
-                .upsert({ user_id: req.user_id, room_id: req.room_id }, { onConflict: 'user_id,room_id' });
         }
 
         loadPending();
@@ -157,25 +151,24 @@
 
     async function loadMembers() {
         el['members-list'].innerHTML = '<p class="dashmin-empty">Memuat...</p>';
-        const { data, error } = await supabase
-            .from('room_members')
-            .select('user_id, room_id, approved_at, profiles(full_name, email)')
-            .order('room_id', { ascending: true });
-
-        if (error) {
+        try {
+            const snap = await db.collection('room_members').get();
+            allMembers = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            allMembers.sort((a, b) => (a.room_id === b.room_id
+                ? (a.user_name || '').localeCompare(b.user_name || '')
+                : (a.room_id || '').localeCompare(b.room_id || '')));
+            if (el['stat-members']) el['stat-members'].textContent = String(allMembers.length);
+            applyMemberFilter();
+        } catch (e) {
             el['members-list'].innerHTML = '<p class="dashmin-empty">Gagal memuat member.</p>';
-            return;
         }
-        allMembers = data;
-        if (el['stat-members']) el['stat-members'].textContent = String(data.length);
-        applyMemberFilter();
     }
 
     function applyMemberFilter() {
         const q = memberSearchQuery.trim().toLowerCase();
         const filtered = !q ? allMembers : allMembers.filter((m) => {
-            const label = personLabel(m.profiles, m.user_id).toLowerCase();
-            const email = (m.profiles && m.profiles.email ? m.profiles.email : '').toLowerCase();
+            const label = personLabel(m).toLowerCase();
+            const email = (m.user_email || '').toLowerCase();
             return label.includes(q) || email.includes(q);
         });
         renderMembers(filtered, q);
@@ -208,7 +201,7 @@
             const row = document.createElement('div');
             row.className = 'dashmin-row';
 
-            const personName = personLabel(m.profiles, m.user_id);
+            const personName = personLabel(m);
             row.appendChild(avatarEl(personName));
 
             const info = document.createElement('div');
@@ -218,7 +211,10 @@
             name.textContent = personName;
             const sub = document.createElement('div');
             sub.className = 'dashmin-row-sub';
-            sub.textContent = 'Sejak ' + new Date(m.approved_at).toLocaleDateString('id-ID');
+            const since = m.approved_at && typeof m.approved_at.toDate === 'function'
+                ? m.approved_at.toDate()
+                : (m.approved_at ? new Date(m.approved_at) : new Date());
+            sub.textContent = 'Sejak ' + since.toLocaleDateString('id-ID');
             info.appendChild(name);
             info.appendChild(sub);
 
@@ -230,18 +226,11 @@
             revokeBtn.textContent = 'Cabut';
             revokeBtn.addEventListener('click', async () => {
                 revokeBtn.disabled = true;
-                const { error: delErr } = await supabase
-                    .from('room_members')
-                    .delete()
-                    .eq('user_id', m.user_id)
-                    .eq('room_id', m.room_id);
-                if (delErr) { revokeBtn.disabled = false; return; }
-                // Hapus juga request-nya biar status balik "belum diminta" — user wajib minta akses lagi, bukan nyangkut "approved"
-                await supabase
-                    .from('room_access_requests')
-                    .delete()
-                    .eq('user_id', m.user_id)
-                    .eq('room_id', m.room_id);
+                try {
+                    await db.collection('room_members').doc(m.id).delete();
+                    // Hapus juga request-nya biar status balik "belum diminta" — user wajib minta akses lagi, bukan nyangkut "approved"
+                    await db.collection('room_access_requests').doc(m.user_id + '_' + m.room_id).delete().catch(() => {});
+                } catch (e) { revokeBtn.disabled = false; return; }
                 loadMembers();
             });
             actions.appendChild(revokeBtn);
@@ -271,15 +260,11 @@
         });
     }
 
-
     function subscribePending() {
-        if (pendingChannel) supabase.removeChannel(pendingChannel);
-        pendingChannel = supabase
-            .channel('dashmin-pending')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'room_access_requests' }, () => {
-                loadPending();
-            })
-            .subscribe();
+        if (pendingUnsub) { pendingUnsub(); pendingUnsub = null; }
+        pendingUnsub = db.collection('room_access_requests')
+            .where('status', '==', 'pending')
+            .onSnapshot(() => loadPending(), () => {});
     }
 
     function showGate(text, showBtn) {
@@ -299,7 +284,7 @@
     }
 
     async function handleAuthChange(user) {
-        if (pendingChannel) { supabase.removeChannel(pendingChannel); pendingChannel = null; }
+        if (pendingUnsub) { pendingUnsub(); pendingUnsub = null; }
 
         if (!user) {
             adminUid = null;
@@ -307,8 +292,8 @@
             return;
         }
 
-        const { data, error } = await supabase.from('profiles').select('is_admin').eq('id', user.uid).maybeSingle();
-        if (error || !data || !data.is_admin) {
+        const profileSnap = await db.collection('profiles').doc(user.uid).get().catch(() => null);
+        if (!profileSnap || !profileSnap.exists || !profileSnap.data().is_admin) {
             adminUid = null;
             showGate('Akun ini tidak punya akses admin.', false);
             return;
@@ -321,9 +306,11 @@
     function bindGate() {
         el['gate-btn'].addEventListener('click', async () => {
             try {
-                await firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider());
+                const out = await window.AuthHelper.signIn();
+                if (!out) return;
+                if (out.ok) return; // onAuthStateChanged yang lanjutin
             } catch (err) {
-                const msg = authErrorMessage(err);
+                const msg = window.AuthHelper.authErrorMessage(err);
                 if (msg) showToast(msg);
             }
         });
@@ -335,7 +322,7 @@
         bindGate();
         bindMemberSearch();
 
-        if (typeof firebase === 'undefined' || typeof window.supabase === 'undefined') {
+        if (typeof firebase === 'undefined' || !firebase.firestore || !firebase.auth) {
             showGate('Layanan belum siap, muat ulang halaman.', false);
             return;
         }
@@ -344,15 +331,13 @@
             return;
         }
         if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+        db = firebase.firestore();
 
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            accessToken: async () => {
-                const user = firebase.auth().currentUser;
-                return user ? await user.getIdToken() : null;
-            },
-        });
+        const auth = firebase.auth();
+        if (auth.useDeviceLanguage) auth.useDeviceLanguage();
+        if (window.AuthHelper) window.AuthHelper.settleRedirectResult(auth).catch(() => {});
 
-        firebase.auth().onAuthStateChanged(handleAuthChange);
+        auth.onAuthStateChanged(handleAuthChange);
     }
 
     if (document.readyState === 'loading') {

@@ -411,7 +411,9 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
       /* chat.js — Firebase config, IpMask, WordFilter, PrivacyBoard, MediaPrefs, ChatFormat, GlobalChat */
         const FIREBASE_CONFIG = {
             apiKey: "%%FIREBASE_API_KEY%%",
-            authDomain: window.location.hostname,
+            // Tetap ke domain proyek Firebase (server-nufa.firebaseapp.com) biar popup OAuth
+            // gak kena auth/unauthorized-domain pas di-deploy ke domain kustom (Vercel/web.app).
+            authDomain: "server-nufa.firebaseapp.com",
             projectId: "server-nufa",
             storageBucket: "server-nufa.firebasestorage.app",
             messagingSenderId: "168660687360",
@@ -1844,7 +1846,7 @@ listEl.innerHTML = ids.map(key => {
         <script src="assets/logic/headline.js"></script>
         <script src="assets/logic/scramble-engine.js"></script>
         <script src="assets/logic/chat-beta-scrambler.js"></script>
-        <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+        <script defer src="assets/logic/auth-helper.js"></script>
         <script defer src="assets/logic/chat-app.js"></script>
         <script src="assets/logic/sw-register.js"></script>
         <script>

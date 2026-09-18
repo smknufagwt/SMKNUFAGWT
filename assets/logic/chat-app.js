@@ -1,13 +1,14 @@
 /* chat-app.js — router SPA untuk /chat (landing page + navigasi room + thread realtime).
-   Auth: Firebase Google Sign-In (reuse FIREBASE_CONFIG dari index.html),
-   di-bridge ke Supabase lewat Third-Party Auth (accessToken = Firebase ID token).
-   Google Cloud OAuth client terpisah belum di-setup — makanya pakai Firebase,
-   bukan supabase.auth.signInWithOAuth('google') langsung. */
+   Auth: Firebase Google Sign-In (reuse FIREBASE_CONFIG dari index.html).
+   Data: semua collection di Cloud Firestore project server-nufa:
+     - profiles/{uid}                → profil user (termasuk is_admin)
+     - messages/{autoId}             → pesan per room
+     - room_access_requests/{uid}_{room} → permintaan akses room kelas
+     - room_members/{uid}_{room}     → member kelas (di-set admin)
+     - chat_presence/{uid}           → heartbeat online
+   Firestore rules & composite index ada di firestore.rules / firestore.indexes.json. */
 (function () {
     'use strict';
-
-    const SUPABASE_URL = 'https://yzmtmhpjfrlqsewpdonr.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6bXRtaHBqZnJscXNld3Bkb25yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwMTQyNzAsImV4cCI6MjEwMTU5MDI3MH0.IXOlT_QUEGaDZ9bppmM_GQrvzcSEw5PgZzhyklMKBfQ';
 
     const CLASS_ROOM_IDS = [
         'pemasaran-1', 'otomotif-1',
@@ -37,17 +38,20 @@
         'Aman & privat, cukup 1x klik',
     ];
 
-    let supabase = null;
+    let db = null;
     let currentUser = null;
     let isAdmin = false;
-    let currentChannel = null;
+    let threadUnsub = null;
     let currentRoomId = null;
     let hintHandle = null;
     let hintIndex = 0;
-    let unreadChannel = null;
+    let unreadUnsub = null;
     let unreadMap = {}; // { roomId: count }
-    let presenceChannel = null;
-    let presenceState = {}; // { uid: { name, room, online_at } }
+    let presenceUnsub = null;
+    let presenceInterval = null;
+    let presenceBeat = null;
+    let currentPresenceUid = null;
+    let presenceState = {}; // { uid: { name, room, ts } }
 
     function cycleAccountHint(el) {
         if (!window.ScrambleFX) return;
@@ -104,15 +108,6 @@
         toast._hideTimer = setTimeout(() => toast.classList.remove('is-visible'), 5000);
     }
 
-    function firebaseAuthErrorMessage(err) {
-        const code = err && err.code;
-        if (code === 'auth/unauthorized-domain') return 'Domain ini belum diizinkan di Firebase — hubungi admin.';
-        if (code === 'auth/popup-blocked') return 'Popup login diblokir browser, izinkan popup lalu coba lagi.';
-        if (code === 'auth/popup-closed-by-user') return null; // user sengaja nutup, gak perlu toast
-        if (code === 'auth/cancelled-popup-request') return null;
-        return 'Login Google gagal: ' + (err && err.message ? err.message : 'error tidak diketahui');
-    }
-
     function pathToRoomId(pathname) {
         const parts = pathname.replace(/\/+$/, '').split('/').filter(Boolean); // ['chat', 'pemasaran', '1']
         if (parts.length <= 1) return null; // '/chat' saja = landing
@@ -138,10 +133,8 @@
     }
 
     function teardownThread() {
-        if (currentChannel && supabase) {
-            supabase.removeChannel(currentChannel);
-        }
-        currentChannel = null;
+        if (threadUnsub) threadUnsub();
+        threadUnsub = null;
         currentRoomId = null;
         trackPresence();
     }
@@ -176,6 +169,15 @@
         el.scrollTop = el.scrollHeight;
     }
 
+    function msgTime(ts) {
+        let d = new Date(Date.now());
+        if (ts && typeof ts.toDate === 'function') d = ts.toDate();
+        else if (ts instanceof Date) d = ts;
+        else if (ts && ts.seconds) d = new Date(ts.seconds * 1000);
+        else if (ts) d = new Date(ts);
+        return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    }
+
     function appendMessageEl(container, msg) {
         const isOwn = !!(currentUser && msg.user_id === currentUser.uid);
         const el = document.createElement('div');
@@ -192,7 +194,7 @@
 
         const time = document.createElement('span');
         time.className = 'chat-thread-msg-time';
-        time.textContent = new Date(msg.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        time.textContent = msgTime(msg.created_at);
 
         el.appendChild(name);
         el.appendChild(content);
@@ -221,15 +223,16 @@
     }
 
     async function deleteMessage(id, el) {
-        if (!supabase || !currentUser) return;
+        if (!db || !currentUser) return;
         if (!window.confirm('Hapus pesan ini?')) return;
         el.classList.add('is-deleting');
-        const { error } = await supabase.from('messages').delete().eq('id', id).eq('user_id', currentUser.uid);
-        if (error) {
+        try {
+            await db.collection('messages').doc(id).delete();
+            // penghapusan visual final ditangani listener onSnapshot (lihat openThread)
+        } catch (e) {
             el.classList.remove('is-deleting');
-            showChatToast('Gagal hapus pesan: ' + error.message);
+            showChatToast('Gagal hapus pesan: ' + (e.message || e.code));
         }
-        // penghapusan visual final ditangani event realtime DELETE (lihat openThread)
     }
 
     async function openThread(roomId, writableOverride) {
@@ -256,62 +259,61 @@
 
         markRoomRead(roomId);
 
-        if (currentRoomId === roomId && currentChannel) return; // sudah kebuka, cuma toggle permission
+        if (currentRoomId === roomId && threadUnsub) return; // sudah kebuka, cuma toggle permission
         teardownThread();
         currentRoomId = roomId;
         trackPresence();
 
         list.innerHTML = '<p class="chat-thread-loading">Memuat pesan...</p>';
 
-        const { data, error } = await supabase
-            .from('messages')
-            .select('id, user_id, display_name, content, created_at')
-            .eq('room_id', roomId)
-            .order('created_at', { ascending: true })
+        const q = db.collection('messages')
+            .where('room_id', '==', roomId)
+            .orderBy('created_at', 'asc')
             .limit(200);
 
-        if (currentRoomId !== roomId) return; // pindah room selagi masih loading
-
-        list.innerHTML = '';
-        if (error) {
-            list.innerHTML = '<p class="chat-thread-empty">Gagal memuat pesan.</p>';
-        } else if (!data.length) {
-            list.innerHTML = '<p class="chat-thread-empty">Belum ada pesan.</p>';
-        } else {
-            data.forEach((m) => appendMessageEl(list, m));
-            scrollThreadToBottom(list);
-        }
-
-        currentChannel = supabase
-            .channel('messages-' + roomId)
-            .on('postgres_changes', {
-                event: 'INSERT', schema: 'public', table: 'messages', filter: 'room_id=eq.' + roomId,
-            }, (payload) => {
-                if (currentRoomId !== roomId) return;
-                const empty = list.querySelector('.chat-thread-empty');
-                if (empty) empty.remove();
-                appendMessageEl(list, payload.new);
-                scrollThreadToBottom(list);
-                markRoomRead(roomId);
-            })
-            .on('postgres_changes', {
-                event: 'DELETE', schema: 'public', table: 'messages', filter: 'room_id=eq.' + roomId,
-            }, (payload) => {
-                if (currentRoomId !== roomId) return;
-                removeMessageEl(list, payload.old.id);
-            })
-            .subscribe();
+        threadUnsub = q.onSnapshot((snap) => {
+            if (currentRoomId !== roomId || !threadUnsub) return; // kepindah room selagi loading
+            if (list.querySelector('.chat-thread-loading') || list.querySelector('.chat-thread-empty')) {
+                list.innerHTML = '';
+            }
+            let changed = false;
+            snap.docChanges().forEach((change) => {
+                if (change.type === 'removed') {
+                    removeMessageEl(list, change.doc.id);
+                    changed = true;
+                } else if (change.type === 'added') {
+                    appendMessageEl(list, { id: change.doc.id, ...change.doc.data() });
+                    changed = true;
+                }
+            });
+            if (changed) scrollThreadToBottom(list);
+            if (!snap.docs.length && !list.children.length) {
+                list.innerHTML = '<p class="chat-thread-empty">Belum ada pesan.</p>';
+            }
+        }, (err) => {
+            if (currentRoomId !== roomId) return;
+            list.innerHTML = '<p class="chat-thread-empty">Gagal memuat pesan' +
+                (err && err.code === 'permission-denied' ? ', atau kamu tidak punya akses.' : '') + '.</p>';
+        });
     }
 
     async function sendMessage(roomId, content) {
-        if (!supabase || !currentUser || !content.trim()) return;
-        const { error } = await supabase.from('messages').insert({
-            room_id: roomId,
-            user_id: currentUser.uid,
-            display_name: currentUser.displayName || 'Anonim',
-            content: content.trim(),
-        });
-        if (error) console.warn('[chat-app] gagal kirim pesan:', error.message);
+        if (!db || !currentUser || !content.trim()) return;
+        try {
+            await db.collection('messages').add({
+                room_id: roomId,
+                user_id: currentUser.uid,
+                display_name: currentUser.displayName || 'Anonim',
+                content: content.trim(),
+                created_at: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+        } catch (e) {
+            console.warn('[chat-app] gagal kirim pesan:', e.code || e.message);
+        }
+    }
+
+    function accessRequestDocId(uid, roomId) {
+        return uid + '_' + roomId;
     }
 
     async function renderClassRoomGate(roomId) {
@@ -320,13 +322,18 @@
             return;
         }
 
-        const [mineRes, othersRes] = await Promise.all([
-            supabase.from('room_access_requests').select('status').eq('user_id', currentUser.uid).eq('room_id', roomId).maybeSingle(),
-            supabase.from('room_access_requests').select('room_id, status').eq('user_id', currentUser.uid).neq('room_id', roomId).in('status', ['pending', 'approved']),
+        const uid = currentUser.uid;
+        const [mineSnap, othersSnap] = await Promise.all([
+            db.collection('room_access_requests').doc(accessRequestDocId(uid, roomId)).get().catch(() => null),
+            db.collection('room_access_requests')
+                .where('user_id', '==', uid)
+                .where('status', 'in', ['pending', 'approved'])
+                .get()
+                .catch(() => ({ empty: true, docs: [] })),
         ]);
 
-        const myStatus = mineRes.data ? mineRes.data.status : null;
-        const hasActiveElsewhere = !othersRes.error && othersRes.data && othersRes.data.length > 0;
+        const myStatus = mineSnap && mineSnap.exists ? mineSnap.data().status : null;
+        const hasActiveElsewhere = othersSnap && !othersSnap.empty && othersSnap.docs.length > 0;
         const writable = myStatus === 'approved';
 
         await openThread(roomId, writable);
@@ -336,7 +343,7 @@
         if (myStatus === 'pending') {
             note.textContent = 'Permintaan akses kamu ke "' + ROOM_LABELS[roomId] + '" masih menunggu approval admin. Sementara cuma bisa baca.';
         } else if (myStatus === 'rejected') {
-            note.textContent = 'Permintaan akses ke "' + ROOM_LABELS[roomId] + '" ditolak admin. Sementara cuma bisa baca.';
+            note.textContent = 'Permintaan akses ke "' + ROOM_LABELS[roomId] + '" ditolak admin. Kamu bisa minta ulang kapan saja.';
         } else if (hasActiveElsewhere) {
             note.textContent = 'Kamu udah aktif di kelas lain — room ini cuma bisa dibaca.';
         } else {
@@ -348,18 +355,23 @@
             btn.addEventListener('click', async () => {
                 btn.disabled = true;
                 btn.textContent = 'Mengirim...';
-                const { error: insertErr } = await supabase
-                    .from('room_access_requests')
-                    .insert({ user_id: currentUser.uid, room_id: roomId });
-                if (insertErr) {
-                    showChatToast(insertErr.message.includes('aktif') ? insertErr.message : 'Gagal mengirim permintaan.');
-                    btn.textContent = 'Minta Akses ke Kelas Ini';
-                    btn.disabled = false;
-                } else {
+                try {
+                    await db.collection('room_access_requests').doc(accessRequestDocId(uid, roomId)).set({
+                        user_id: uid,
+                        room_id: roomId,
+                        status: 'pending',
+                        user_name: currentUser.displayName || '',
+                        user_email: currentUser.email || '',
+                        requested_at: firebase.firestore.FieldValue.serverTimestamp(),
+                    });
                     showChatToast('Permintaan terkirim, tunggu approval admin.');
                     btn.remove();
                     note.textContent = 'Permintaan akses ke "' + ROOM_LABELS[roomId] + '" masih menunggu approval admin. Sementara cuma bisa baca.';
                     refreshRoomStatuses();
+                } catch (e) {
+                    showChatToast(e.code === 'permission-denied' ? 'Kamu udah punya permintaan/kondisi lain yang ditolak sistem.' : 'Gagal mengirim permintaan.');
+                    btn.textContent = 'Minta Akses ke Kelas Ini';
+                    btn.disabled = false;
                 }
             });
             note.insertAdjacentElement('afterend', btn);
@@ -375,7 +387,7 @@
             showPlaceholderText('Login dengan Google dulu buat mengakses "' + (ROOM_LABELS[roomId] || roomId) + '".');
             return;
         }
-        if (!supabase) {
+        if (!db) {
             showPlaceholderText('Layanan chat belum siap, coba lagi sebentar.');
             return;
         }
@@ -453,9 +465,11 @@
                 await firebase.auth().signOut();
             } else {
                 try {
-                    await firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider());
+                    const out = await window.AuthHelper.signIn();
+                    if (!out) return;
+                    if (out.ok) return; // onAuthStateChanged yang lanjutin
                 } catch (err) {
-                    const msg = firebaseAuthErrorMessage(err);
+                    const msg = window.AuthHelper.authErrorMessage(err);
                     if (msg) showChatToast(msg);
                 }
             }
@@ -489,21 +503,22 @@
     }
 
     function refreshRoomStatuses() {
-        if (!supabase || !currentUser) {
+        if (!db || !currentUser) {
             document.querySelectorAll('.chat-room-status').forEach((el) => {
                 el.textContent = 'Login untuk minta akses';
                 el.removeAttribute('data-state');
             });
             return;
         }
-        supabase
-            .from('room_access_requests')
-            .select('room_id, status')
-            .eq('user_id', currentUser.uid)
-            .then(({ data, error }) => {
-                if (error || !data) return;
+        db.collection('room_access_requests')
+            .where('user_id', '==', currentUser.uid)
+            .get()
+            .then((snap) => {
                 const byRoom = {};
-                data.forEach((r) => { byRoom[r.room_id] = r.status; });
+                snap.docs.forEach((doc) => {
+                    const r = doc.data();
+                    byRoom[r.room_id] = r.status;
+                });
                 document.querySelectorAll('.chat-room-status').forEach((el) => {
                     const roomId = el.getAttribute('data-status');
                     const status = byRoom[roomId];
@@ -521,7 +536,8 @@
                         el.setAttribute('data-state', 'rejected');
                     }
                 });
-            });
+            })
+            .catch(() => {});
     }
 
     function lastReadStorageKey() {
@@ -578,21 +594,21 @@
         notifyServiceWorkerBadge(total);
     }
 
-    async function countUnread(roomId, sinceIso) {
+    async function countUnread(roomId, sinceDate) {
         try {
-            const { count } = await supabase
-                .from('messages')
-                .select('id', { count: 'exact', head: true })
-                .eq('room_id', roomId)
-                .gt('created_at', sinceIso);
-            return count || 0;
+            const snap = await db.collection('messages')
+                .where('room_id', '==', roomId)
+                .where('created_at', '>', sinceDate)
+                .get();
+            return snap.size || 0;
         } catch (e) {
+            // index belum ada / permission: jangan jadi blocker
             return 0;
         }
     }
 
     async function computeUnreadCounts() {
-        if (!supabase || !currentUser) return;
+        if (!db || !currentUser) return;
         const map = getLastReadMap();
         if (!Object.keys(map).length) {
             // baru pertama kali: jangan hitung histori lama sebagai unread
@@ -601,7 +617,7 @@
             setLastReadMap(map);
         }
         const counts = await Promise.all(
-            ALL_ROOM_IDS.map((id) => countUnread(id, map[id] || '1970-01-01T00:00:00Z'))
+            ALL_ROOM_IDS.map((id) => countUnread(id, new Date(map[id] || '1970-01-01T00:00:00Z')))
         );
         ALL_ROOM_IDS.forEach((id, i) => { unreadMap[id] = counts[i]; });
         renderUnreadBadges();
@@ -624,24 +640,34 @@
     }
 
     function teardownUnreadChannel() {
-        if (unreadChannel && supabase) supabase.removeChannel(unreadChannel);
-        unreadChannel = null;
+        if (unreadUnsub) unreadUnsub();
+        unreadUnsub = null;
     }
 
     function setupUnreadChannel() {
         teardownUnreadChannel();
-        if (!supabase || !currentUser) return;
-        unreadChannel = supabase
-            .channel('messages-unread-watch')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
-                const msg = payload.new;
-                if (msg.user_id === currentUser.uid) return; // pesan sendiri gak dihitung unread
-                if (msg.room_id === currentRoomId) return;   // lagi kebuka, otomatis "read"
+        if (!db || !currentUser) return;
+        const uid = currentUser.uid;
+        let ready = false;
+        const seen = new Set();
+        unreadUnsub = db.collection('messages').onSnapshot((snap) => {
+            if (!ready) {
+                // baseline awal: pesan yang udah ada gak dihitung sebagai unread
+                snap.docs.forEach((doc) => seen.add(doc.id));
+                ready = true;
+                return;
+            }
+            snap.docChanges().forEach((change) => {
+                if (change.type !== 'added') return;
+                if (seen.has(change.doc.id)) return;
+                const msg = change.doc.data();
+                if (msg.user_id === uid) return;    // pesan sendiri gak dihitung unread
+                if (msg.room_id === currentRoomId) return; // lagi kebuka, otomatis "read"
                 unreadMap[msg.room_id] = (unreadMap[msg.room_id] || 0) + 1;
                 renderUnreadBadges();
-                maybeNotify(msg);
-            })
-            .subscribe();
+                maybeNotify({ room_id: msg.room_id, display_name: msg.display_name, content: msg.content });
+            });
+        }, () => {});
     }
 
     function maybeRequestNotificationPermission() {
@@ -651,7 +677,7 @@
         }
     }
 
-    // ── presence: 1 channel global (bukan 8 channel per-room — lebih hemat
+    // ── presence: 1 koleksi global (bukan 8 koleksi per-room — lebih hemat
     //    koneksi, penting buat device/koneksi low-end). Tiap user nge-track
     //    { name, room }; room null = lagi di hub /chat, bukan di room manapun.
     function computeOnlineCounts() {
@@ -720,78 +746,103 @@
             });
     }
 
+    function onPresenceVisibility() {
+        if (document.visibilityState === 'visible' && presenceBeat) presenceBeat();
+        else if (document.visibilityState === 'hidden' && currentPresenceUid && db) {
+            db.collection('chat_presence').doc(currentPresenceUid).delete().catch(() => {});
+        }
+    }
+
+    function onPresencePageHide() {
+        if (currentPresenceUid && db) {
+            db.collection('chat_presence').doc(currentPresenceUid).delete().catch(() => {});
+        }
+    }
+
     function trackPresence() {
-        if (!presenceChannel || !currentUser) return;
-        presenceChannel.track({
-            name: currentUser.displayName || currentUser.email || 'Anonim',
-            room: currentRoomId || null,
-            online_at: new Date().toISOString(),
-        });
+        if (presenceBeat) presenceBeat();
     }
 
     function teardownPresenceChannel() {
-        if (presenceChannel && supabase) supabase.removeChannel(presenceChannel);
-        presenceChannel = null;
+        if (presenceInterval) { clearInterval(presenceInterval); presenceInterval = null; }
+        if (presenceUnsub) { presenceUnsub(); presenceUnsub = null; }
+        if (currentPresenceUid && db) {
+            db.collection('chat_presence').doc(currentPresenceUid).delete().catch(() => {});
+        }
+        currentPresenceUid = null;
+        presenceBeat = null;
+        document.removeEventListener('visibilitychange', onPresenceVisibility);
+        window.removeEventListener('pagehide', onPresencePageHide);
         presenceState = {};
         renderOnlineBadges();
     }
 
     function setupPresenceChannel() {
-        if (!supabase || !currentUser) return;
         teardownPresenceChannel();
-        const channel = supabase.channel('presence-chat-global', {
-            config: { presence: { key: currentUser.uid } },
-        });
-        channel.on('presence', { event: 'sync' }, () => {
-            const state = channel.presenceState();
-            const flat = {};
-            Object.keys(state).forEach((uid) => {
-                const entry = state[uid] && state[uid][0];
-                if (entry) flat[uid] = entry;
+        if (!db || !currentUser) return;
+        const uid = currentUser.uid;
+        currentPresenceUid = uid;
+
+        const beat = () => {
+            db.collection('chat_presence').doc(uid).set({
+                name: currentUser.displayName || currentUser.email || 'Anonim',
+                room: currentRoomId || null,
+                ts: Date.now(),
+                online_at: firebase.firestore.FieldValue.serverTimestamp(),
+            }).catch(() => {});
+        };
+        presenceBeat = beat;
+        beat();
+        presenceInterval = setInterval(beat, 10000);
+
+        document.addEventListener('visibilitychange', onPresenceVisibility);
+        window.addEventListener('pagehide', onPresencePageHide);
+
+        const ttl = 30000;
+        presenceUnsub = db.collection('chat_presence').onSnapshot((snap) => {
+            const now = Date.now();
+            const data = {};
+            snap.forEach((doc) => {
+                const d = doc.data();
+                if (d && d.ts && now - d.ts < ttl) data[doc.id] = d;
             });
-            presenceState = flat;
+            presenceState = data;
             renderOnlineBadges();
-        }).subscribe((status) => {
-            if (status === 'SUBSCRIBED') trackPresence();
-        });
-        presenceChannel = channel;
+        }, () => {});
     }
 
     async function upsertProfile(user) {
-        if (!supabase || !user) return;
-        await supabase.from('profiles').upsert({
-            id: user.uid,
+        if (!db || !user) return;
+        await db.collection('profiles').doc(user.uid).set({
             email: user.email || null,
             full_name: user.displayName || null,
             avatar_url: user.photoURL || null,
-        }, { onConflict: 'id' });
+        }, { merge: true }).catch(() => {});
     }
 
     function initServices() {
-        if (typeof firebase === 'undefined' || typeof window.supabase === 'undefined' || !window.supabase.createClient) {
+        if (typeof firebase === 'undefined' || !firebase.firestore || !firebase.auth) {
             return; // SDK belum kemuat (mis. diblok jaringan), landing page tetap jalan tanpa auth
         }
         if (typeof FIREBASE_CONFIG === 'undefined' || !FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey.startsWith('%%')) {
             return; // secret belum ke-inject (build lokal tanpa GitHub Actions)
         }
         if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+        db = firebase.firestore();
 
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            accessToken: async () => {
-                const user = firebase.auth().currentUser;
-                if (!user) return null;
-                return await user.getIdToken();
-            },
-        });
+        const auth = firebase.auth();
+        if (auth.useDeviceLanguage) auth.useDeviceLanguage();
+        // Selesaikan redirect login yang tertunda (kalau page sempat pindah selama OAuth).
+        if (window.AuthHelper) window.AuthHelper.settleRedirectResult(auth).catch(() => {});
 
-        firebase.auth().onAuthStateChanged(async (user) => {
+        auth.onAuthStateChanged(async (user) => {
             currentUser = user;
             isAdmin = false;
             updateAccountIcon();
             if (user) {
                 await upsertProfile(user);
-                const { data } = await supabase.from('profiles').select('is_admin').eq('id', user.uid).maybeSingle();
-                isAdmin = !!(data && data.is_admin);
+                const profileSnap = await db.collection('profiles').doc(user.uid).get().catch(() => null);
+                isAdmin = !!(profileSnap && profileSnap.exists && profileSnap.data().is_admin);
                 maybeRequestNotificationPermission();
                 computeUnreadCounts();
                 setupUnreadChannel();
