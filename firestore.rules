@@ -1,0 +1,93 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── helper ──────────────────────────────────────────────
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function ownerOf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return signedIn() &&
+        get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.is_admin == true;
+    }
+
+    function isClassRoom(room) {
+      return room in ['pemasaran-1','pemasaran-2','pemasaran-3','otomotif-1','otomotif-2','otomotif-3'];
+    }
+
+    // ── profil user ─────────────────────────────────────────
+    // Siapa pun yang login boleh buat/mutakhirkan profilnya sendiri.
+    // Field is_admin gak boleh diubah dari sisi client (hanya via SP/manual).
+    match /profiles/{uid} {
+      allow read: if signedIn();
+      allow create: if ownerOf(uid) && !('is_admin' in request.resource.data);
+      allow update: if ownerOf(uid) && request.resource.data.is_admin == resource.data.is_admin;
+      allow delete: if false;
+    }
+
+    // ── pesan chat ──────────────────────────────────────────
+    // Semua room dilindungi auth: hanya user terdaftar yang bisa baca/tulis.
+    // Hapus pesan cuma oleh pemiliknya.
+    match /messages/{msg} {
+      allow read: if signedIn();
+      allow create: if signedIn() &&
+        request.resource.data.user_id == request.auth.uid &&
+        (request.resource.data.room_id == 'public' ||
+         request.resource.data.room_id == 'announcement' ||
+         isClassRoom(request.resource.data.room_id));
+      allow update: if false;
+      allow delete: if signedIn() && resource.data.user_id == request.auth.uid;
+    }
+
+    // ── permintaan akses room kelas ─────────────────────────
+    // User bisa baca request-nya sendiri; admin bisa baca semua.
+    // Update status (approve/reject) hanya admin; user boleh reset ke 'pending' (minta ulang).
+    match /room_access_requests/{id} {
+      allow read: if signedIn() &&
+        (resource.data.user_id == request.auth.uid || isAdmin());
+      allow create: if signedIn() &&
+        request.resource.data.user_id == request.auth.uid &&
+        request.resource.data.status == 'pending' &&
+        isClassRoom(request.resource.data.room_id);
+      allow update: if (isAdmin() && request.resource.data.status in ['approved','rejected']) ||
+        (resource.data.user_id == request.auth.uid && request.resource.data.status == 'pending');
+      allow delete: if isAdmin() ||
+        (resource.data.user_id == request.auth.uid && resource.data.status == 'rejected');
+    }
+
+    // ── keanggotaan room (dikelola admin) ───────────────────
+    match /room_members/{id} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ── presence /chat ──────────────────────────────────────
+    match /chat_presence/{uid} {
+      allow read: if signedIn();
+      allow create, update, delete: if ownerOf(uid);
+    }
+
+    // ── legacy: GlobalChat anonim (index.html) — DI BIAKKAN
+    //    BUKA sesuai desain (chat tanpa login). Kalau mau dikunci,
+    //    pindahin fitur ini ke chat /chat yang butuh login.
+    match /global_chat/{doc} {
+      allow read, create: if true;
+      allow update, delete: if false;
+    }
+    match /presence_global/{doc} {
+      allow read, write: if true;
+    }
+
+    // ── notify state ────────────────────────────────────────
+    // Dibaca/ditulis notify-throttle.js (client) & notif-cron. Tetap terbuka
+    // karena token notif milik klien; batasan spam dipegang throttle + cron.
+    match /_notify_state/{doc} {
+      allow read, write: if true;
+    }
+  }
+}
