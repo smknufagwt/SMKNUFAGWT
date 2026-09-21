@@ -882,7 +882,7 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
                     devIconEl.className = (isBrand ? 'fa-brands ' : 'fa-solid ') + this.myDevice.icon;
                 }
 
-                const configured = FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith('GANTI');
+                const configured = FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith('GANTI') && !FIREBASE_CONFIG.apiKey.startsWith('%%');
                 if (configured && typeof firebase !== 'undefined') {
                     try {
                         if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);

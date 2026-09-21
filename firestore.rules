@@ -38,7 +38,7 @@ service cloud.firestore {
       allow create: if signedIn() &&
         request.resource.data.user_id == request.auth.uid &&
         (request.resource.data.room_id == 'public' ||
-         request.resource.data.room_id == 'announcement' ||
+         (request.resource.data.room_id == 'announcement' && isAdmin()) ||
          isClassRoom(request.resource.data.room_id));
       allow update: if false;
       allow delete: if signedIn() && resource.data.user_id == request.auth.uid;

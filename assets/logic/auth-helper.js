@@ -35,7 +35,6 @@
             // Error popup yang bisa dipulihkan → pindah ke redirect flow.
             if (code === 'auth/popup-blocked' ||
                 code === 'auth/operation-not-supported-in-this-environment' ||
-                code === 'auth/unauthorized-domain' ||
                 code === 'auth/cross-origin-confirmation-required' ||
                 code === 'auth/network-request-failed') {
                 try {

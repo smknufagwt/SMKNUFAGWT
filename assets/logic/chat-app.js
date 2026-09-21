@@ -147,7 +147,7 @@
         if (currentUser) computeUnreadCounts();
     }
 
-    function showPlaceholderText(msg) {
+    function showPlaceholderText(msg, showLoginBtn) {
         document.getElementById('chat-room-list').hidden = true;
         document.getElementById('chat-room-thread').hidden = true;
         teardownThread();
@@ -157,6 +157,33 @@
         text.textContent = msg;
         const existingBtn = box.querySelector('.chat-request-btn');
         if (existingBtn) existingBtn.remove();
+        const existingLoginBtn = box.querySelector('.chat-placeholder-login-btn');
+        if (existingLoginBtn) existingLoginBtn.remove();
+
+        if (showLoginBtn) {
+            const loginBtn = document.createElement('button');
+            loginBtn.type = 'button';
+            loginBtn.className = 'chat-back-btn chat-placeholder-login-btn';
+            loginBtn.style.marginTop = '12px';
+            loginBtn.textContent = '🔑 Login dengan Google';
+            loginBtn.onclick = async () => {
+                if (window.AuthHelper) {
+                    try {
+                        loginBtn.disabled = true;
+                        loginBtn.textContent = 'Menghubungkan...';
+                        const out = await window.AuthHelper.signIn();
+                        if (out && out.ok) return;
+                    } catch (err) {
+                        const m = window.AuthHelper.authErrorMessage(err);
+                        if (m) showChatToast(m);
+                    } finally {
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = '🔑 Login dengan Google';
+                    }
+                }
+            };
+            box.appendChild(loginBtn);
+        }
     }
 
     function canWriteToRoom(roomId) {
@@ -384,7 +411,7 @@
             return;
         }
         if (!currentUser) {
-            showPlaceholderText('Login dengan Google dulu buat mengakses "' + (ROOM_LABELS[roomId] || roomId) + '".');
+            showPlaceholderText('Login dengan Google dulu buat mengakses "' + (ROOM_LABELS[roomId] || roomId) + '".', true);
             return;
         }
         if (!db) {
