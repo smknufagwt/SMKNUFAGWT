@@ -23,6 +23,7 @@
         'pemasaran-3': 'Pemasaran 3', 'otomotif-3': 'Otomotif 3',
     };
     const ALL_ROOM_IDS = ['public', 'announcement'].concat(CLASS_ROOM_IDS);
+    const ADMIN_EMAILS = ['smknufagwt@gmail.com'];
 
     // Elemen main-site yang perlu disembunyikan selagi di /chat
     const MAIN_SITE_SELECTORS = [
@@ -820,12 +821,12 @@
         };
         presenceBeat = beat;
         beat();
-        presenceInterval = setInterval(beat, 10000);
+        presenceInterval = setInterval(beat, 30000);
 
         document.addEventListener('visibilitychange', onPresenceVisibility);
         window.addEventListener('pagehide', onPresencePageHide);
 
-        const ttl = 30000;
+        const ttl = 90000;
         presenceUnsub = db.collection('chat_presence').onSnapshot((snap) => {
             const now = Date.now();
             const data = {};
@@ -840,11 +841,15 @@
 
     async function upsertProfile(user) {
         if (!db || !user) return;
-        await db.collection('profiles').doc(user.uid).set({
+        const data = {
             email: user.email || null,
             full_name: user.displayName || null,
             avatar_url: user.photoURL || null,
-        }, { merge: true }).catch(() => {});
+        };
+        if (user.email && ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+            data.is_admin = true;
+        }
+        await db.collection('profiles').doc(user.uid).set(data, { merge: true }).catch(() => {});
     }
 
     function initServices() {
@@ -868,8 +873,9 @@
             updateAccountIcon();
             if (user) {
                 await upsertProfile(user);
+                const isEmailAdmin = !!(user.email && ADMIN_EMAILS.includes(user.email.toLowerCase()));
                 const profileSnap = await db.collection('profiles').doc(user.uid).get().catch(() => null);
-                isAdmin = !!(profileSnap && profileSnap.exists && profileSnap.data().is_admin);
+                isAdmin = isEmailAdmin || !!(profileSnap && profileSnap.exists && profileSnap.data().is_admin);
                 maybeRequestNotificationPermission();
                 computeUnreadCounts();
                 setupUnreadChannel();

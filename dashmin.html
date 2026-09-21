@@ -35,6 +35,10 @@
                 <span class="dashmin-stat-label">Member</span>
             </div>
             <div class="dashmin-stat">
+                <span class="dashmin-stat-value" id="dashmin-stat-admins">—</span>
+                <span class="dashmin-stat-label">Admin</span>
+            </div>
+            <div class="dashmin-stat">
                 <span class="dashmin-stat-value">8</span>
                 <span class="dashmin-stat-label">Room</span>
             </div>
@@ -55,6 +59,17 @@
                 </div>
             </div>
             <div id="dashmin-members-list"></div>
+        </section>
+
+        <section class="dashmin-section">
+            <div class="dashmin-section-head">
+                <h2 class="dashmin-section-title" id="dashmin-admins-title">Kelola Admin</h2>
+            </div>
+            <form id="dashmin-add-admin-form" style="display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;">
+                <input type="email" id="dashmin-add-admin-email" class="dashmin-search-input" placeholder="Ketik email Google yang ingin dijadikan admin..." required style="flex: 1; min-width: 200px;">
+                <button type="submit" class="dashmin-action-btn is-approve" id="dashmin-add-admin-btn">+ Angkat Admin</button>
+            </form>
+            <div id="dashmin-admins-list"></div>
         </section>
     </main>
 

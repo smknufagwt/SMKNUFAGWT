@@ -12,8 +12,11 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return signedIn() &&
-        get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.is_admin == true;
+      return signedIn() && (
+        request.auth.token.email in ['smknufagwt@gmail.com'] ||
+        (exists(/databases/$(database)/documents/profiles/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.is_admin == true)
+      );
     }
 
     function isClassRoom(room) {
@@ -22,11 +25,11 @@ service cloud.firestore {
 
     // ── profil user ─────────────────────────────────────────
     // Siapa pun yang login boleh buat/mutakhirkan profilnya sendiri.
-    // Field is_admin gak boleh diubah dari sisi client (hanya via SP/manual).
+    // Field is_admin boleh diubah jika admin atau whitelist master.
     match /profiles/{uid} {
       allow read: if signedIn();
-      allow create: if ownerOf(uid) && !('is_admin' in request.resource.data);
-      allow update: if ownerOf(uid) && request.resource.data.is_admin == resource.data.is_admin;
+      allow create: if ownerOf(uid) && (!('is_admin' in request.resource.data) || isAdmin());
+      allow update: if (ownerOf(uid) && request.resource.data.is_admin == resource.data.is_admin) || isAdmin();
       allow delete: if false;
     }
 

@@ -8,6 +8,7 @@
         'pemasaran-2': 'Pemasaran 2', 'otomotif-2': 'Otomotif 2',
         'pemasaran-3': 'Pemasaran 3', 'otomotif-3': 'Otomotif 3',
     };
+    const ADMIN_EMAILS = ['smknufagwt@gmail.com'];
 
     let db = null;
     let adminUid = null;
@@ -20,7 +21,9 @@
     function cacheEls() {
         ['gate', 'gate-text', 'gate-btn', 'dashboard', 'nav-user', 'logout-btn',
          'pending-list', 'members-list', 'pending-title', 'members-title',
-         'stat-pending', 'stat-members', 'member-search', 'member-search-clear'].forEach((id) => {
+         'stat-pending', 'stat-members', 'stat-admins', 'admins-list', 'admins-title',
+         'add-admin-form', 'add-admin-email', 'add-admin-btn',
+         'member-search', 'member-search-clear'].forEach((id) => {
             el[id] = document.getElementById('dashmin-' + id);
         });
     }
@@ -274,12 +277,131 @@
         el['gate-btn'].hidden = !showBtn;
     }
 
+    async function loadAdmins() {
+        if (!el['admins-list']) return;
+        el['admins-list'].innerHTML = '<p class="dashmin-empty">Memuat admin...</p>';
+        try {
+            const snap = await db.collection('profiles').where('is_admin', '==', true).get();
+            let adminList = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+            // Pastikan master admin selalu ada di list
+            ADMIN_EMAILS.forEach((email) => {
+                if (!adminList.some((a) => (a.email || '').toLowerCase() === email.toLowerCase())) {
+                    adminList.push({ id: 'master_' + email, email: email, full_name: 'Master Admin', is_master: true });
+                }
+            });
+
+            if (el['stat-admins']) el['stat-admins'].textContent = String(adminList.length);
+            if (el['admins-title']) el['admins-title'].textContent = 'Kelola Admin (' + adminList.length + ')';
+
+            if (!adminList.length) {
+                el['admins-list'].innerHTML = '<p class="dashmin-empty">Belum ada admin terdaftar.</p>';
+                return;
+            }
+
+            el['admins-list'].innerHTML = '';
+            adminList.forEach((adm) => {
+                const row = document.createElement('div');
+                row.className = 'dashmin-row';
+
+                const label = adm.full_name || adm.email || 'Admin';
+                row.appendChild(avatarEl(label));
+
+                const info = document.createElement('div');
+                info.className = 'dashmin-row-info';
+                const name = document.createElement('div');
+                name.className = 'dashmin-row-name';
+                name.textContent = label;
+                const sub = document.createElement('div');
+                sub.className = 'dashmin-row-sub';
+                sub.textContent = adm.email || adm.id;
+                info.appendChild(name);
+                info.appendChild(sub);
+
+                const actions = document.createElement('div');
+                actions.className = 'dashmin-row-actions';
+
+                const isMaster = ADMIN_EMAILS.includes((adm.email || '').toLowerCase()) || adm.is_master;
+                if (isMaster) {
+                    const badge = document.createElement('span');
+                    badge.style.fontSize = '0.72rem';
+                    badge.style.color = 'var(--chat-gold)';
+                    badge.style.fontWeight = '700';
+                    badge.style.padding = '4px 8px';
+                    badge.textContent = '👑 Master';
+                    actions.appendChild(badge);
+                } else {
+                    const revokeBtn = document.createElement('button');
+                    revokeBtn.className = 'dashmin-action-btn is-revoke';
+                    revokeBtn.type = 'button';
+                    revokeBtn.textContent = 'Cabut Admin';
+                    revokeBtn.addEventListener('click', async () => {
+                        if (!window.confirm('Cabut status admin dari ' + (adm.email || label) + '?')) return;
+                        revokeBtn.disabled = true;
+                        try {
+                            await db.collection('profiles').doc(adm.id).update({ is_admin: false });
+                            showToast('Status admin dicabut dari ' + (adm.email || label));
+                            loadAdmins();
+                        } catch (e) {
+                            showToast('Gagal mencabut admin: ' + (e.message || e.code));
+                            revokeBtn.disabled = false;
+                        }
+                    });
+                    actions.appendChild(revokeBtn);
+                }
+
+                row.appendChild(info);
+                row.appendChild(actions);
+                el['admins-list'].appendChild(row);
+            });
+        } catch (e) {
+            el['admins-list'].innerHTML = '<p class="dashmin-empty">Gagal memuat admin: ' + (e.message || e.code) + '</p>';
+        }
+    }
+
+    function bindAdminForm() {
+        if (!el['add-admin-form']) return;
+        el['add-admin-form'].addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const emailInput = el['add-admin-email'];
+            const targetEmail = (emailInput.value || '').trim().toLowerCase();
+            if (!targetEmail) return;
+
+            const submitBtn = el['add-admin-btn'];
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Memproses...';
+
+            try {
+                const snap = await db.collection('profiles')
+                    .where('email', '==', targetEmail)
+                    .limit(1)
+                    .get();
+
+                if (snap.empty) {
+                    showToast('User ' + targetEmail + ' belum terdaftar. Minta calon admin login ke /chat sekali dulu.');
+                } else {
+                    const targetDoc = snap.docs[0];
+                    await db.collection('profiles').doc(targetDoc.id).update({ is_admin: true });
+                    showToast('🎉 ' + targetEmail + ' berhasil diangkat sebagai admin!');
+                    emailInput.value = '';
+                    loadAdmins();
+                }
+            } catch (err) {
+                showToast('Gagal mengangkat admin: ' + (err.message || err.code));
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '+ Angkat Admin';
+            }
+        });
+    }
+
     function showDashboard(user) {
         el.gate.hidden = true;
         el.dashboard.hidden = false;
         el['nav-user'].textContent = user.displayName || user.email || '';
         loadPending();
         loadMembers();
+        loadAdmins();
         subscribePending();
     }
 
@@ -292,11 +414,22 @@
             return;
         }
 
+        const isEmailAdmin = !!(user.email && ADMIN_EMAILS.includes(user.email.toLowerCase()));
         const profileSnap = await db.collection('profiles').doc(user.uid).get().catch(() => null);
-        if (!profileSnap || !profileSnap.exists || !profileSnap.data().is_admin) {
+        const isProfileAdmin = !!(profileSnap && profileSnap.exists && profileSnap.data().is_admin);
+
+        if (!isEmailAdmin && !isProfileAdmin) {
             adminUid = null;
-            showGate('Akun ini tidak punya akses admin.', false);
+            showGate('Akun ini (' + (user.email || user.displayName) + ') tidak punya akses admin.', false);
             return;
+        }
+
+        if (isEmailAdmin && (!profileSnap || !profileSnap.exists || !profileSnap.data().is_admin)) {
+            await db.collection('profiles').doc(user.uid).set({
+                email: user.email,
+                full_name: user.displayName || 'Master Admin',
+                is_admin: true
+            }, { merge: true }).catch(() => {});
         }
 
         adminUid = user.uid;
@@ -321,6 +454,7 @@
         cacheEls();
         bindGate();
         bindMemberSearch();
+        bindAdminForm();
 
         if (typeof firebase === 'undefined' || !firebase.firestore || !firebase.auth) {
             showGate('Layanan belum siap, muat ulang halaman.', false);
