@@ -13,9 +13,10 @@ service cloud.firestore {
 
     function isAdmin() {
       return signedIn() && (
-        request.auth.token.email in ['smknufagwt@gmail.com'] ||
+        (request.auth.token.email_verified == true &&
+         request.auth.token.email in ['smknufagwt@gmail.com']) ||
         (exists(/databases/$(database)/documents/profiles/$(request.auth.uid)) &&
-         get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.is_admin == true)
+         get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.get('is_admin', false) == true)
       );
     }
 
@@ -23,49 +24,91 @@ service cloud.firestore {
       return room in ['pemasaran-1','pemasaran-2','pemasaran-3','otomotif-1','otomotif-2','otomotif-3'];
     }
 
+    // Member kelas = ada dokumen room_members/{uid}_{room} (ditulis admin)
+    function isMember(room) {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/room_members/$(request.auth.uid + '_' + room));
+    }
+
+    function canReadRoom(room) {
+      return signedIn() && (
+        room in ['public', 'announcement'] ||
+        (isClassRoom(room) && (isAdmin() || isMember(room)))
+      );
+    }
+
+    function canWriteRoom(room) {
+      return signedIn() && (
+        room == 'public' ||
+        (room == 'announcement' && isAdmin()) ||
+        (isClassRoom(room) && (isAdmin() || isMember(room)))
+      );
+    }
+
+    function validMsg(room) {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['room_id','user_id','display_name','content','created_at']) &&
+        d.room_id == room &&
+        d.user_id == request.auth.uid &&
+        d.content is string && d.content.size() > 0 && d.content.size() <= 1000 &&
+        d.display_name is string && d.display_name.size() <= 60 &&
+        d.created_at == request.time;
+    }
+
     // ── profil user ─────────────────────────────────────────
-    // Siapa pun yang login boleh buat/mutakhirkan profilnya sendiri.
-    // Field is_admin boleh diubah jika admin atau whitelist master.
+    // Email dikunci = email token (anti-spoof untuk fitur angkat admin by email).
+    // is_admin hanya bisa diubah admin.
     match /profiles/{uid} {
-      allow read: if signedIn();
-      allow create: if ownerOf(uid) && (!('is_admin' in request.resource.data) || isAdmin());
-      allow update: if (ownerOf(uid) && request.resource.data.is_admin == resource.data.is_admin) || isAdmin();
+      allow read: if ownerOf(uid) || isAdmin();
+      allow create: if ownerOf(uid) &&
+        request.resource.data.email == request.auth.token.email &&
+        (request.resource.data.get('is_admin', false) == false || isAdmin());
+      allow update: if (ownerOf(uid) &&
+          request.resource.data.email == request.auth.token.email &&
+          request.resource.data.get('is_admin', false) == resource.data.get('is_admin', false)) ||
+        isAdmin();
       allow delete: if false;
     }
 
-    // ── pesan chat ──────────────────────────────────────────
-    // Semua room dilindungi auth: hanya user terdaftar yang bisa baca/tulis.
-    // Hapus pesan cuma oleh pemiliknya.
-    match /messages/{msg} {
-      allow read: if signedIn();
-      allow create: if signedIn() &&
-        request.resource.data.user_id == request.auth.uid &&
-        (request.resource.data.room_id == 'public' ||
-         (request.resource.data.room_id == 'announcement' && isAdmin()) ||
-         isClassRoom(request.resource.data.room_id));
+    // ── pesan per room: rooms/{roomId}/messages ─────────────
+    // Tiap room = subkoleksi sendiri. Kelas hanya bisa dibaca/ditulis member/admin.
+    match /rooms/{roomId}/messages/{msg} {
+      allow read: if canReadRoom(roomId);
+      allow create: if canWriteRoom(roomId) && validMsg(roomId);
       allow update: if false;
-      allow delete: if signedIn() && resource.data.user_id == request.auth.uid;
+      allow delete: if signedIn() && canReadRoom(roomId) &&
+        (resource.data.user_id == request.auth.uid || isAdmin());
+    }
+
+    // Legacy (sebelum per-room): read-only untuk admin, buat arsip/migrasi.
+    match /messages/{msg} {
+      allow read: if isAdmin();
+      allow write: if false;
     }
 
     // ── permintaan akses room kelas ─────────────────────────
-    // User bisa baca request-nya sendiri; admin bisa baca semua.
-    // Update status (approve/reject) hanya admin; user boleh reset ke 'pending' (minta ulang).
+    // Doc ID wajib {uid}_{room}. User hanya bisa minta ulang kalau status 'rejected'.
     match /room_access_requests/{id} {
       allow read: if signedIn() &&
         (resource.data.user_id == request.auth.uid || isAdmin());
       allow create: if signedIn() &&
         request.resource.data.user_id == request.auth.uid &&
         request.resource.data.status == 'pending' &&
-        isClassRoom(request.resource.data.room_id);
+        isClassRoom(request.resource.data.room_id) &&
+        id == request.auth.uid + '_' + request.resource.data.room_id;
       allow update: if (isAdmin() && request.resource.data.status in ['approved','rejected']) ||
-        (resource.data.user_id == request.auth.uid && request.resource.data.status == 'pending');
+        (resource.data.user_id == request.auth.uid &&
+         resource.data.status == 'rejected' &&
+         request.resource.data.status == 'pending' &&
+         request.resource.data.user_id == resource.data.user_id &&
+         request.resource.data.room_id == resource.data.room_id);
       allow delete: if isAdmin() ||
         (resource.data.user_id == request.auth.uid && resource.data.status == 'rejected');
     }
 
     // ── keanggotaan room (dikelola admin) ───────────────────
     match /room_members/{id} {
-      allow read: if signedIn();
+      allow read: if signedIn() && (resource.data.user_id == request.auth.uid || isAdmin());
       allow create, update, delete: if isAdmin();
     }
 
@@ -75,9 +118,7 @@ service cloud.firestore {
       allow create, update, delete: if ownerOf(uid);
     }
 
-    // ── legacy: GlobalChat anonim (index.html) — DI BIAKKAN
-    //    BUKA sesuai desain (chat tanpa login). Kalau mau dikunci,
-    //    pindahin fitur ini ke chat /chat yang butuh login.
+    // ── legacy: GlobalChat anonim (index.html) — sengaja terbuka ──
     match /global_chat/{doc} {
       allow read, create: if true;
       allow update, delete: if false;
@@ -86,9 +127,6 @@ service cloud.firestore {
       allow read, write: if true;
     }
 
-    // ── notify state ────────────────────────────────────────
-    // Dibaca/ditulis notify-throttle.js (client) & notif-cron. Tetap terbuka
-    // karena token notif milik klien; batasan spam dipegang throttle + cron.
     match /_notify_state/{doc} {
       allow read, write: if true;
     }

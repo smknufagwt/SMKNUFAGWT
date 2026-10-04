@@ -127,24 +127,23 @@
         approveBtn.disabled = true;
         rejectBtn.disabled = true;
 
-        try {
-            await db.collection('room_access_requests').doc(req.id).update({
-                status: status,
-                decided_at: firebase.firestore.FieldValue.serverTimestamp(),
-                decided_by: adminUid,
+        const batch = db.batch();
+        batch.update(db.collection('room_access_requests').doc(req.id), {
+            status: status,
+            decided_at: firebase.firestore.FieldValue.serverTimestamp(),
+            decided_by: adminUid,
+        });
+        if (status === 'approved') {
+            batch.set(db.collection('room_members').doc(req.user_id + '_' + req.room_id), {
+                user_id: req.user_id, room_id: req.room_id,
+                user_name: req.user_name || '', user_email: req.user_email || '',
+                approved_at: firebase.firestore.FieldValue.serverTimestamp(),
             });
-            if (status === 'approved') {
-                await db.collection('room_members').doc(req.user_id + '_' + req.room_id).set({
-                    user_id: req.user_id,
-                    room_id: req.room_id,
-                    user_name: req.user_name || '',
-                    user_email: req.user_email || '',
-                    approved_at: firebase.firestore.FieldValue.serverTimestamp(),
-                });
-            }
-        } catch (e) {
+        }
+        try { await batch.commit(); } catch (e) {
             approveBtn.disabled = false;
             rejectBtn.disabled = false;
+            showToast('Gagal memproses: ' + (e.code || e.message));
             return;
         }
 
@@ -230,9 +229,10 @@
             revokeBtn.addEventListener('click', async () => {
                 revokeBtn.disabled = true;
                 try {
-                    await db.collection('room_members').doc(m.id).delete();
-                    // Hapus juga request-nya biar status balik "belum diminta" — user wajib minta akses lagi, bukan nyangkut "approved"
-                    await db.collection('room_access_requests').doc(m.user_id + '_' + m.room_id).delete().catch(() => {});
+                    const b = db.batch();
+                    b.delete(db.collection('room_members').doc(m.id));
+                    b.delete(db.collection('room_access_requests').doc(m.user_id + '_' + m.room_id));
+                    await b.commit();
                 } catch (e) { revokeBtn.disabled = false; return; }
                 loadMembers();
             });
@@ -414,24 +414,13 @@
             return;
         }
 
-        const isEmailAdmin = !!(user.email && ADMIN_EMAILS.includes(user.email.toLowerCase()));
-        const profileSnap = await db.collection('profiles').doc(user.uid).get().catch(() => null);
-        const isProfileAdmin = !!(profileSnap && profileSnap.exists && profileSnap.data().is_admin);
-
-        if (!isEmailAdmin && !isProfileAdmin) {
+        const role = await window.AuthHelper.resolveRole(user);
+        if (!role.isAdmin) {
             adminUid = null;
             showGate('Akun ini (' + (user.email || user.displayName) + ') tidak punya akses admin.', false);
             return;
         }
-
-        if (isEmailAdmin && (!profileSnap || !profileSnap.exists || !profileSnap.data().is_admin)) {
-            await db.collection('profiles').doc(user.uid).set({
-                email: user.email,
-                full_name: user.displayName || 'Master Admin',
-                is_admin: true
-            }, { merge: true }).catch(() => {});
-        }
-
+        await window.AuthHelper.ensureProfile(user);
         adminUid = user.uid;
         showDashboard(user);
     }

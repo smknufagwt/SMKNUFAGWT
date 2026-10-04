@@ -1,18 +1,33 @@
-/* auth-helper.js — shared Google sign-in helper untuk Firebase Auth.
-   Popup-first dengan fallback redirect (iOS Safari & embedded browser sering
-   block popup jadi dipaksa redirect). Dipakai barengan sama chat-app.js dan
-   dashmin-app.js. Requirement: firebase-auth-compat sudah dimuat. */
+/* auth-helper.js — helper Firebase Auth bersama (chat-app.js & dashmin-app.js).
+   Popup-first + fallback redirect, guard double-click, blok in-app browser,
+   resolveRole() & ensureProfile() jadi satu sumber logic. Butuh firebase-auth-compat + firestore. */
 (function () {
     'use strict';
 
+    const MASTER_EMAILS = ['smknufagwt@gmail.com'];
+    let signingIn = false;
+
+    // WebView TikTok/IG/FB/Android wv memblokir OAuth Google (disallowed_useragent)
+    function isInAppBrowser() {
+        return /FBAN|FBAV|Instagram|Line\/|MicroMessenger|TikTok|musical_ly|BytedanceWebview|; wv\)/i
+            .test(navigator.userAgent || '');
+    }
+
     function authErrorMessage(err) {
         const code = err && err.code;
-        if (code === 'auth/unauthorized-domain') return 'Domain ini belum diizinkan di Firebase — tambahkan di Firebase console › Authentication › Settings › Authorized domains.';
-        if (code === 'auth/popup-blocked') return 'Popup login diblokir browser. Coba klik tombol login lagi — akan dialihkan lewat redirect.';
-        if (code === 'auth/popup-closed-by-user') return null;
-        if (code === 'auth/cancelled-popup-request') return null;
-        if (code === 'auth/operation-not-supported-in-this-environment') return 'Login popup tidak didukung di browser ini.';
-        if (code === 'auth/web-storage-unsupported') return 'Browser kamu menonaktifkan storage — aktifkan dulu untuk bisa login.';
+        const map = {
+            'app/in-app-browser': 'Login Google tidak jalan di browser dalam aplikasi (TikTok/Instagram/dll). Buka lewat Chrome/Safari.',
+            'auth/unauthorized-domain': 'Domain ini belum diizinkan di Firebase — tambahkan di Authentication › Settings › Authorized domains.',
+            'auth/popup-blocked': 'Popup login diblokir browser. Klik login lagi — akan dialihkan lewat redirect.',
+            'auth/operation-not-supported-in-this-environment': 'Login popup tidak didukung di browser ini.',
+            'auth/web-storage-unsupported': 'Browser menonaktifkan storage — aktifkan dulu untuk bisa login.',
+            'auth/network-request-failed': 'Koneksi bermasalah, coba lagi.',
+            'auth/too-many-requests': 'Terlalu banyak percobaan, tunggu sebentar.',
+            'auth/user-disabled': 'Akun ini dinonaktifkan.',
+            'auth/account-exists-with-different-credential': 'Email ini sudah terdaftar dengan metode login lain.',
+        };
+        if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return null;
+        if (map[code]) return map[code];
         return 'Login Google gagal: ' + (err && err.message ? err.message : 'error tidak diketahui');
     }
 
@@ -25,33 +40,44 @@
     }
 
     async function signIn() {
-        const auth = firebase.auth();
-        if (auth.useDeviceLanguage) auth.useDeviceLanguage();
+        if (signingIn) return { ok: false, busy: true };
+        if (isInAppBrowser()) {
+            const e = new Error('in-app browser');
+            e.code = 'app/in-app-browser';
+            throw e;
+        }
+        signingIn = true;
         try {
-            const res = await auth.signInWithPopup(googleProvider());
-            return { ok: true, redirect: false, cancelled: false, user: res.user };
-        } catch (err) {
-            const code = err && err.code;
-            // Error popup yang bisa dipulihkan → pindah ke redirect flow.
-            if (code === 'auth/popup-blocked' ||
-                code === 'auth/operation-not-supported-in-this-environment' ||
-                code === 'auth/cross-origin-confirmation-required' ||
-                code === 'auth/network-request-failed') {
-                try {
+            const auth = firebase.auth();
+            if (auth.useDeviceLanguage) auth.useDeviceLanguage();
+            await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(() => {});
+            try {
+                const res = await auth.signInWithPopup(googleProvider());
+                return { ok: true, redirect: false, cancelled: false, user: res.user };
+            } catch (err) {
+                const code = err && err.code;
+                if (code === 'auth/popup-blocked' ||
+                    code === 'auth/operation-not-supported-in-this-environment' ||
+                    code === 'auth/cross-origin-confirmation-required' ||
+                    code === 'auth/network-request-failed') {
                     await auth.signInWithRedirect(googleProvider());
                     return { ok: false, redirect: true, cancelled: false };
-                } catch (err2) {
-                    throw err2;
                 }
+                if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+                    return { ok: false, redirect: false, cancelled: true };
+                }
+                throw err;
             }
-            if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
-                return { ok: false, redirect: false, cancelled: true };
-            }
-            throw err;
+        } finally {
+            signingIn = false;
         }
     }
 
-    // Panggil setelah page load: selesaikan login redirect yang tertunda.
+    function signOut() {
+        return firebase.auth().signOut();
+    }
+
+    // Selesaikan login redirect yang tertunda setelah page load.
     async function settleRedirectResult(auth) {
         try {
             const res = await auth.getRedirectResult();
@@ -61,5 +87,33 @@
         }
     }
 
-    window.AuthHelper = { signIn, authErrorMessage, settleRedirectResult };
+    // Master = email whitelist + emailVerified (sinkron dengan isAdmin() di firestore.rules).
+    async function resolveRole(user) {
+        if (!user) return { isAdmin: false, isMaster: false };
+        const isMaster = !!(user.emailVerified && user.email && MASTER_EMAILS.includes(user.email.toLowerCase()));
+        let isAdmin = isMaster;
+        if (!isAdmin) {
+            try {
+                const snap = await firebase.firestore().collection('profiles').doc(user.uid).get();
+                isAdmin = !!(snap.exists && snap.data().is_admin === true);
+            } catch (e) { /* rules menolak/offline → anggap non-admin */ }
+        }
+        return { isAdmin, isMaster };
+    }
+
+    // Upsert profil tanpa menyentuh is_admin (hanya admin yang boleh ubah, lewat dashmin).
+    async function ensureProfile(user) {
+        if (!user) return;
+        await firebase.firestore().collection('profiles').doc(user.uid).set({
+            email: user.email || null,
+            full_name: user.displayName || null,
+            avatar_url: user.photoURL || null,
+            last_login: firebase.firestore.FieldValue.serverTimestamp(),
+        }, { merge: true }).catch(() => {});
+    }
+
+    window.AuthHelper = {
+        MASTER_EMAILS, signIn, signOut, authErrorMessage,
+        settleRedirectResult, resolveRole, ensureProfile, isInAppBrowser,
+    };
 })();
