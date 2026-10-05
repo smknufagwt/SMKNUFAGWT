@@ -5,6 +5,9 @@
 (function () {
     'use strict';
 
+    // Handler OAuth Google hanya terdaftar di domain bawaan proyek (bukan nufabase.web.app)
+    const AUTH_DOMAIN = 'server-nufa.firebaseapp.com';
+
     const CLASS_ROOM_IDS = [
         'pemasaran-1', 'otomotif-1',
         'pemasaran-2', 'otomotif-2',
@@ -768,7 +771,7 @@
     function initServices() {
         if (typeof firebase === 'undefined' || !firebase.firestore || !firebase.auth || !window.AuthHelper) return;
         if (typeof FIREBASE_CONFIG === 'undefined' || !FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey.startsWith('%%')) return;
-        const app = firebase.apps.find((a) => a.name === 'chat') || firebase.initializeApp(FIREBASE_CONFIG, 'chat');
+        const app = firebase.apps.find((a) => a.name === 'chat') || firebase.initializeApp({ ...FIREBASE_CONFIG, authDomain: AUTH_DOMAIN }, 'chat');
         window.AuthHelper.use(app);
         db = app.firestore();
 
