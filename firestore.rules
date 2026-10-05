@@ -1,0 +1,134 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── helper ──────────────────────────────────────────────
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function ownerOf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return signedIn() && (
+        (request.auth.token.email_verified == true &&
+         request.auth.token.email in ['smknufagwt@gmail.com']) ||
+        (exists(/databases/$(database)/documents/profiles/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.get('is_admin', false) == true)
+      );
+    }
+
+    function isClassRoom(room) {
+      return room in ['pemasaran-1','pemasaran-2','pemasaran-3','otomotif-1','otomotif-2','otomotif-3'];
+    }
+
+    // Member kelas = ada dokumen room_members/{uid}_{room} (ditulis admin)
+    function isMember(room) {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/room_members/$(request.auth.uid + '_' + room));
+    }
+
+    function canReadRoom(room) {
+      return signedIn() && (
+        room in ['public', 'announcement'] ||
+        (isClassRoom(room) && (isAdmin() || isMember(room)))
+      );
+    }
+
+    function canWriteRoom(room) {
+      return signedIn() && (
+        room == 'public' ||
+        (room == 'announcement' && isAdmin()) ||
+        (isClassRoom(room) && (isAdmin() || isMember(room)))
+      );
+    }
+
+    function validMsg(room) {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['room_id','user_id','display_name','content','created_at']) &&
+        d.room_id == room &&
+        d.user_id == request.auth.uid &&
+        d.content is string && d.content.size() > 0 && d.content.size() <= 1000 &&
+        d.display_name is string && d.display_name.size() <= 60 &&
+        d.created_at == request.time;
+    }
+
+    // ── profil user ─────────────────────────────────────────
+    // Email dikunci = email token (anti-spoof untuk fitur angkat admin by email).
+    // is_admin hanya bisa diubah admin.
+    match /profiles/{uid} {
+      allow read: if ownerOf(uid) || isAdmin();
+      allow create: if ownerOf(uid) &&
+        request.resource.data.email == request.auth.token.email &&
+        (request.resource.data.get('is_admin', false) == false || isAdmin());
+      allow update: if (ownerOf(uid) &&
+          request.resource.data.email == request.auth.token.email &&
+          request.resource.data.get('is_admin', false) == resource.data.get('is_admin', false)) ||
+        isAdmin();
+      allow delete: if false;
+    }
+
+    // ── pesan per room: rooms/{roomId}/messages ─────────────
+    // Tiap room = subkoleksi sendiri. Kelas hanya bisa dibaca/ditulis member/admin.
+    match /rooms/{roomId}/messages/{msg} {
+      allow read: if canReadRoom(roomId);
+      allow create: if canWriteRoom(roomId) && validMsg(roomId);
+      allow update: if false;
+      allow delete: if signedIn() && canReadRoom(roomId) &&
+        (resource.data.user_id == request.auth.uid || isAdmin());
+    }
+
+    // Legacy (sebelum per-room): read-only untuk admin, buat arsip/migrasi.
+    match /messages/{msg} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // ── permintaan akses room kelas ─────────────────────────
+    // Doc ID wajib {uid}_{room}. User hanya bisa minta ulang kalau status 'rejected'.
+    match /room_access_requests/{id} {
+      allow read: if signedIn() &&
+        (resource.data.user_id == request.auth.uid || isAdmin());
+      allow create: if signedIn() &&
+        request.resource.data.user_id == request.auth.uid &&
+        request.resource.data.status == 'pending' &&
+        isClassRoom(request.resource.data.room_id) &&
+        id == request.auth.uid + '_' + request.resource.data.room_id;
+      allow update: if (isAdmin() && request.resource.data.status in ['approved','rejected']) ||
+        (resource.data.user_id == request.auth.uid &&
+         resource.data.status == 'rejected' &&
+         request.resource.data.status == 'pending' &&
+         request.resource.data.user_id == resource.data.user_id &&
+         request.resource.data.room_id == resource.data.room_id);
+      allow delete: if isAdmin() ||
+        (resource.data.user_id == request.auth.uid && resource.data.status == 'rejected');
+    }
+
+    // ── keanggotaan room (dikelola admin) ───────────────────
+    match /room_members/{id} {
+      allow read: if signedIn() && (resource.data.user_id == request.auth.uid || isAdmin());
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ── presence /chat ──────────────────────────────────────
+    match /chat_presence/{uid} {
+      allow read: if signedIn();
+      allow create, update, delete: if ownerOf(uid);
+    }
+
+    // ── legacy: GlobalChat anonim (index.html) — sengaja terbuka ──
+    match /global_chat/{doc} {
+      allow read, create: if true;
+      allow update, delete: if false;
+    }
+    match /presence_global/{doc} {
+      allow read, write: if true;
+    }
+
+    match /_notify_state/{doc} {
+      allow read, write: if true;
+    }
+  }
+}

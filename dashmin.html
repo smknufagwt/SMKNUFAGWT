@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="assets/style/dashmin.css">
     <script defer src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
     <script defer src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
 </head>
 <body class="dashmin-body">
     <nav class="dashmin-nav">
@@ -35,6 +35,10 @@
                 <span class="dashmin-stat-label">Member</span>
             </div>
             <div class="dashmin-stat">
+                <span class="dashmin-stat-value" id="dashmin-stat-admins">—</span>
+                <span class="dashmin-stat-label">Admin</span>
+            </div>
+            <div class="dashmin-stat">
                 <span class="dashmin-stat-value">8</span>
                 <span class="dashmin-stat-label">Room</span>
             </div>
@@ -56,6 +60,17 @@
             </div>
             <div id="dashmin-members-list"></div>
         </section>
+
+        <section class="dashmin-section">
+            <div class="dashmin-section-head">
+                <h2 class="dashmin-section-title" id="dashmin-admins-title">Kelola Admin</h2>
+            </div>
+            <form id="dashmin-add-admin-form" style="display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;">
+                <input type="email" id="dashmin-add-admin-email" class="dashmin-search-input" placeholder="Ketik email Google yang ingin dijadikan admin..." required style="flex: 1; min-width: 200px;">
+                <button type="submit" class="dashmin-action-btn is-approve" id="dashmin-add-admin-btn">+ Angkat Admin</button>
+            </form>
+            <div id="dashmin-admins-list"></div>
+        </section>
     </main>
 
     <script>
@@ -68,6 +83,7 @@
             appId: "1:168660687360:web:bdb56f6ea15e3cd44756e5"
         };
     </script>
+    <script src="assets/logic/auth-helper.js"></script>
     <script src="assets/logic/dashmin-app.js"></script>
 </body>
 </html>
