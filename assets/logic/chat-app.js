@@ -47,13 +47,20 @@
 
     function roomMsgs(roomId) { return db.collection('rooms').doc(roomId).collection('messages'); }
 
+    // Format: 14.35 · 6 Okt 26 (jam.menit · tanggal bulan tahun-2-digit)
     function msgTime(ts) {
         let d = new Date(Date.now());
         if (ts && typeof ts.toDate === 'function') d = ts.toDate();
         else if (ts instanceof Date) d = ts;
         else if (ts && ts.seconds) d = new Date(ts.seconds * 1000);
         else if (ts) d = new Date(ts);
-        return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        const p = (n) => String(n).padStart(2, '0');
+        const mon = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        return p(d.getHours()) + '.' + p(d.getMinutes()) + ' · ' + d.getDate() + ' ' + mon[d.getMonth()] + ' ' + String(d.getFullYear()).slice(-2);
+    }
+
+    function msgTimeLabel(msg) {
+        return msgTime(msg.created_at) + (msg.edited_at !== undefined ? ' · diedit' : '');
     }
 
     function cycleAccountHint(el) {
@@ -165,40 +172,130 @@
         el.scrollTop = el.scrollHeight;
     }
 
-    function appendMessageEl(container, msg) {
+    function buildMessageEl(msg) {
         const isOwn = !!(currentUser && msg.user_id === currentUser.uid);
         const el = document.createElement('div');
         el.className = 'chat-thread-msg' + (isOwn ? ' is-own' : '');
         el.dataset.msgId = msg.id;
+        el._raw = msg.content;
 
         const name = document.createElement('span');
         name.className = 'chat-thread-msg-name';
         name.textContent = msg.display_name || 'Anonim';
 
         const content = document.createElement('span');
-        content.className = 'chat-thread-msg-content';
-        content.textContent = msg.content;
+        content.className = 'chat-thread-msg-content chat-text';
+        content.innerHTML = ChatFormat.toHtml(msg.content);
 
         const time = document.createElement('span');
         time.className = 'chat-thread-msg-time';
-        time.textContent = msgTime(msg.created_at);
+        time.textContent = msgTimeLabel(msg);
 
         el.appendChild(name);
         el.appendChild(content);
         el.appendChild(time);
 
         if (isOwn) {
+            const edit = document.createElement('button');
+            edit.type = 'button';
+            edit.className = 'chat-thread-msg-edit';
+            edit.title = 'Edit pesan';
+            edit.innerHTML = '<i class="fa-solid fa-pen"></i>';
+            edit.onclick = () => startEdit(el);
             const del = document.createElement('button');
             del.type = 'button';
             del.className = 'chat-thread-msg-del';
             del.title = 'Hapus pesan';
             del.innerHTML = '<i class="fa-solid fa-trash"></i>';
             del.onclick = () => deleteMessage(msg.id, el);
+            el.appendChild(edit);
             el.appendChild(del);
         }
+        return el;
+    }
 
-        container.appendChild(el);
+    function appendMessageEl(container, msg) {
+        container.appendChild(buildMessageEl(msg));
         while (container.children.length > 200) container.removeChild(container.firstChild);
+    }
+
+    // Dipanggil saat dokumen 'modified': edit (isi + tanda diedit) atau created_at server terisi
+    function updateMessageEl(container, msg) {
+        const el = container.querySelector('[data-msg-id="' + msg.id + '"]');
+        if (!el) return;
+        el._raw = msg.content;
+        if (!el.classList.contains('is-editing')) {
+            el.querySelector('.chat-thread-msg-content').innerHTML = ChatFormat.toHtml(msg.content);
+        }
+        el.querySelector('.chat-thread-msg-time').textContent = msgTimeLabel(msg);
+        ChatFormat.observe(container);
+    }
+
+    function endEdit(el) {
+        const box = el.querySelector('.chat-edit-box');
+        if (box) box.remove();
+        el.querySelector('.chat-thread-msg-content').hidden = false;
+        el.classList.remove('is-editing');
+    }
+
+    // Edit inline: hanya pemilik pesan (rules Firestore juga memaksa user_id == auth.uid)
+    function startEdit(el) {
+        if (el.classList.contains('is-editing')) return;
+        const id = el.dataset.msgId, roomId = currentRoomId;
+        el.classList.add('is-editing');
+        el.querySelector('.chat-thread-msg-content').hidden = true;
+
+        const box = document.createElement('div');
+        box.className = 'chat-edit-box';
+        const ta = document.createElement('textarea');
+        ta.className = 'chat-edit-input';
+        ta.maxLength = 1000;
+        ta.rows = 3;
+        ta.value = el._raw || '';
+        const row = document.createElement('div');
+        row.className = 'chat-edit-actions';
+        const save = document.createElement('button');
+        save.type = 'button';
+        save.className = 'chat-edit-save';
+        save.textContent = 'Simpan';
+        const cancel = document.createElement('button');
+        cancel.type = 'button';
+        cancel.className = 'chat-edit-cancel';
+        cancel.textContent = 'Batal';
+        row.appendChild(save);
+        row.appendChild(cancel);
+        box.appendChild(ta);
+        box.appendChild(row);
+        el.insertBefore(box, el.querySelector('.chat-thread-msg-time'));
+        ta.focus();
+
+        const doSave = async () => {
+            const text = ta.value.trim().slice(0, 1000);
+            if (!text) { showChatToast('Pesan tidak boleh kosong.'); return; }
+            if (text === el._raw) { endEdit(el); return; }
+            const bad = ChatFormat.validateEmbeds(text);
+            if (bad) { showChatToast('Format .' + bad + ' tak didukung — edit tidak disimpan.'); return; }
+            save.disabled = true;
+            try {
+                await roomMsgs(roomId).doc(id).update({
+                    content: text,
+                    edited_at: firebase.firestore.FieldValue.serverTimestamp(),
+                });
+                el._raw = text;
+                el.querySelector('.chat-thread-msg-content').innerHTML = ChatFormat.toHtml(text);
+                endEdit(el);
+                ChatFormat.observe(el.parentElement);
+            } catch (e) {
+                save.disabled = false;
+                showChatToast(e.code === 'permission-denied' ? 'Tidak bisa mengedit pesan ini.' : 'Gagal menyimpan edit.');
+            }
+        };
+        save.onclick = doSave;
+        cancel.onclick = () => endEdit(el);
+        ta.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); doSave(); }
+            else if (e.key === 'Escape') endEdit(el);
+        });
     }
 
     function removeMessageEl(container, id) {
@@ -257,12 +354,16 @@
         threadUnsub = roomMsgs(roomId).orderBy('created_at', 'desc').limit(100).onSnapshot((snap) => {
             if (currentRoomId !== roomId || !threadUnsub) return;
             if (list.querySelector('.chat-thread-loading') || list.querySelector('.chat-thread-empty')) list.innerHTML = '';
-            snap.docChanges().forEach((c) => { if (c.type === 'removed') removeMessageEl(list, c.doc.id); });
+            snap.docChanges().forEach((c) => {
+                if (c.type === 'removed') removeMessageEl(list, c.doc.id);
+                else if (c.type === 'modified') updateMessageEl(list, { id: c.doc.id, ...c.doc.data() });
+            });
             const added = snap.docChanges().filter((c) => c.type === 'added')
                 .map((c) => ({ id: c.doc.id, ...c.doc.data() }));
             if (first) added.reverse(); // snapshot awal desc -> balik ke urutan lama->baru
             first = false;
             added.forEach((m) => appendMessageEl(list, m));
+            ChatFormat.observe(list);
             if (added.length) { scrollThreadToBottom(list); markRoomRead(roomId); }
             if (!snap.docs.length && !list.children.length) list.innerHTML = '<p class="chat-thread-empty">Belum ada pesan.</p>';
         }, (err) => {
@@ -418,13 +519,55 @@
         const infoBack = document.getElementById('chat-info-back-btn');
         if (infoBack) infoBack.addEventListener('click', () => navigate('/chat'));
 
-        document.getElementById('chat-thread-form').addEventListener('submit', (e) => {
+        const form = document.getElementById('chat-thread-form');
+        const input = document.getElementById('chat-thread-input');
+        const grow = () => { input.style.height = 'auto'; input.style.height = input.scrollHeight + 'px'; };
+        input.addEventListener('input', grow);
+        input.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                if (form.requestSubmit) form.requestSubmit();
+                else form.dispatchEvent(new Event('submit', { cancelable: true }));
+            }
+        });
+
+        // Sisip pasangan simbol di sekitar teks terpilih (atau placeholder kalau belum memilih)
+        const wrap = (before, after, placeholder) => {
+            input.focus();
+            const start = input.selectionStart, end = input.selectionEnd, val = input.value;
+            const sel = val.slice(start, end) || placeholder;
+            input.value = val.slice(0, start) + before + sel + after + val.slice(end);
+            input.setSelectionRange(start + before.length, start + before.length + sel.length);
+            grow();
+        };
+        document.getElementById('chat-format-bar').addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-fmt]');
+            if (!btn) return;
+            switch (btn.dataset.fmt) {
+                case 'bold': wrap('*', '*', 'tebal'); break;
+                case 'underline': wrap('_', '_', 'garis bawah'); break;
+                case 'strike': wrap('~', '~', 'coret'); break;
+                case 'quote-inline': wrap('"', '"', 'kutip'); break;
+                case 'link': wrap('[', '](https://)', 'teks link'); break;
+                case 'media': wrap('[', ']{https://}', 'alt gambar-video-Display'); break;
+                case 'info': {
+                    const help = document.getElementById('chat-format-help');
+                    help.hidden = !help.hidden;
+                    btn.classList.toggle('on', !help.hidden);
+                    break;
+                }
+            }
+        });
+
+        form.addEventListener('submit', (e) => {
             e.preventDefault();
             if (!currentRoomId) return;
-            const input = document.getElementById('chat-thread-input');
             const value = input.value;
             if (!value.trim()) return;
+            const bad = ChatFormat.validateEmbeds(value);
+            if (bad) { showChatToast('Format .' + bad + ' tak didukung — pesan tidak dikirim.'); return; }
             input.value = '';
+            input.style.height = '';
             sendMessage(currentRoomId, value);
         });
 
@@ -587,7 +730,7 @@
         if (!('Notification' in window) || Notification.permission !== 'granted') return;
         try {
             const n = new Notification((ROOM_LABELS[msg.room_id] || msg.room_id) + ' • ' + (msg.display_name || 'Pesan baru'), {
-                body: msg.content,
+                body: window.ChatFormat ? ChatFormat.toPlainText(msg.content) : msg.content,
                 icon: '/appcover.jpg',
                 tag: 'chat-' + msg.room_id,
             });

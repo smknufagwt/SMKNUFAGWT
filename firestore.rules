@@ -75,7 +75,13 @@ service cloud.firestore {
     match /rooms/{roomId}/messages/{msg} {
       allow read: if canReadRoom(roomId);
       allow create: if canWriteRoom(roomId) && validMsg(roomId);
-      allow update: if false;
+      // Edit: hanya pemilik pesan, hanya isi (+ penanda edited_at), tetap harus punya akses tulis
+      allow update: if canWriteRoom(roomId) &&
+        resource.data.user_id == request.auth.uid &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['content','edited_at']) &&
+        request.resource.data.content is string &&
+        request.resource.data.content.size() > 0 && request.resource.data.content.size() <= 1000 &&
+        request.resource.data.edited_at == request.time;
       allow delete: if signedIn() && canReadRoom(roomId) &&
         (resource.data.user_id == request.auth.uid || isAdmin());
     }

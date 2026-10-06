@@ -140,7 +140,25 @@
             <div class="chat-thread-messages" id="chat-thread-messages"></div>
             <p class="chat-thread-readonly-note" id="chat-thread-readonly-note" hidden></p>
             <form class="chat-thread-form" id="chat-thread-form">
-                <input type="text" id="chat-thread-input" placeholder="Tulis pesan..." autocomplete="off" maxlength="1000">
+                <div class="chat-input-wrap">
+                    <div id="chat-format-bar">
+                        <button type="button" class="fmt-btn" data-fmt="bold" title="Tebal"><b>B</b></button>
+                        <button type="button" class="fmt-btn" data-fmt="underline" title="Garis bawah"><u>U</u></button>
+                        <button type="button" class="fmt-btn" data-fmt="strike" title="Coret"><s>S</s></button>
+                        <button type="button" class="fmt-btn" data-fmt="quote-inline" title='Kutip "teks"'>&quot;</button>
+                        <button type="button" class="fmt-btn" data-fmt="link" title="Tautan [teks](url)"><i class="fa-solid fa-link"></i></button>
+                        <button type="button" class="fmt-btn" data-fmt="media" title="Gambar/GIF/Video [alt]{url}"><i class="fa-solid fa-image"></i></button>
+                        <button type="button" class="fmt-btn" data-fmt="info" title="Panduan format"><i class="fa-solid fa-circle-info"></i></button>
+                    </div>
+                    <div class="chat-format-help" id="chat-format-help" hidden>
+                        <p><code>*tebal*</code> <code>_garis bawah_</code> <code>~coret~</code></p>
+                        <p><code>"kutipan"</code> jadi kotak kutip ala Telegram; <code>&gt; teks</code> di awal baris jadi kutipan baris.</p>
+                        <p><code>[teks](https://alamat)</code> jadi tautan.</p>
+                        <p><code>[keterangan]{https://alamat}</code> jadi gambar, GIF, video, YouTube, Spotify, atau peta. File Google Drive yang didukung: png, jpg, jpeg, webp, md, mp3, mp4, txt, doc, docx.</p>
+                        <p>Tekan <b>Ctrl+Enter</b> untuk kirim. Pesan milikmu bisa diedit (✏️) atau dihapus (🗑).</p>
+                    </div>
+                    <textarea id="chat-thread-input" rows="1" placeholder="Tulis pesan..." autocomplete="off" maxlength="1000"></textarea>
+                </div>
                 <button type="submit">Kirim</button>
             </form>
         </div>
@@ -282,6 +300,8 @@
                     <p>Hanya admin. Anggota biasa hanya bisa menghapus pesannya sendiri.</p>
                     <h4>Login gagal saat dibuka dari TikTok, Instagram, atau Facebook?</h4>
                     <p>Google tidak mengizinkan login dari browser di dalam aplikasi tersebut. Buka tautan ini lewat Chrome atau Safari.</p>
+                    <h4>Bisakah aku mengedit pesanku?</h4>
+                    <p>Bisa. Tekan ikon ✏️ di pesanmu, ubah teksnya, lalu simpan. Pesan yang sudah diedit diberi tanda &ldquo;diedit&rdquo;. Hanya akun yang menulis pesan itu yang bisa mengeditnya.</p>
                     <h4>Aku salah kirim pesan, bagaimana?</h4>
                     <p>Tekan ikon 🗑 di pesanmu untuk menghapusnya.</p>
                     <h4>Ada masalah atau pertanyaan lain?</h4>
@@ -306,6 +326,7 @@
     <script src="/assets/logic/scramble-engine.js"></script>
     <script src="/assets/logic/chat-beta-scrambler.js"></script>
     <script defer src="/assets/logic/auth-helper.js"></script>
+    <script defer src="/assets/logic/chat-format.js"></script>
     <script defer src="/assets/logic/chat-app.js"></script>
     <script src="/assets/logic/sw-register.js"></script>
 </body>
