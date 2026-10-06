@@ -23,11 +23,11 @@
       "rewrites": [
         {
           "source": "/chat",
-          "destination": "/index.html"
+          "destination": "/chat.html"
         },
         {
           "source": "/chat/**",
-          "destination": "/index.html"
+          "destination": "/chat.html"
         }
       ],
       "headers": [

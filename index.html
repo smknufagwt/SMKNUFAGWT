@@ -53,112 +53,6 @@
     <link rel="stylesheet" href="assets/style/variable.css">
 </head>
 <body>
-    <div id="chat-view" hidden>
-        <nav class="chat-nav">
-            <a class="chat-home-btn" href="/" id="chat-home-btn" aria-label="Kembali ke beranda">←</a>
-            <span class="chat-nav-title">CHAT</span>
-            <span class="chat-beta-badge" id="chat-beta-badge">BETA</span>
-            <div class="chat-account-wrap" id="chat-account-wrap">
-                <span class="chat-account-hint" id="chat-account-hint"></span>
-                <button class="chat-account-btn" id="chat-account-btn" type="button" aria-label="Akun">
-                    <span class="chat-account-icon" id="chat-account-icon">🔒</span>
-                </button>
-            </div>
-        </nav>
-
-        <main class="chat-room-list" id="chat-room-list">
-            <p class="chat-room-greeting" id="chat-room-greeting" hidden></p>
-            <button class="chatapp-online-total" id="chatapp-online-total" type="button" hidden>
-                <span class="chatapp-online-dot"></span>
-                <span class="chatapp-online-count">0</span> orang online
-            </button>
-            <div class="chatapp-online-list" id="chatapp-online-list" hidden></div>
-            <p class="chat-room-hint">Pilih ruang percakapan:</p>
-
-            <a class="chat-room-item" data-room="public" href="/chat/public">
-                <span class="chat-room-icon">💬</span>
-                <span class="chat-room-name">Public</span>
-                <span class="chat-room-sub">Bebas baca &amp; tulis</span>
-                <span class="chat-room-unread" data-unread="public" hidden>0</span>
-            </a>
-
-            <a class="chat-room-item" data-room="announcement" href="/chat/announcement">
-                <span class="chat-room-icon">📢</span>
-                <span class="chat-room-name">Announcement</span>
-                <span class="chat-room-sub">Read-only</span>
-                <span class="chat-room-unread" data-unread="announcement" hidden>0</span>
-            </a>
-
-            <p class="chat-room-hint chat-room-hint-class">Kelas (perlu approval admin):</p>
-
-            <div class="chat-room-group">
-                <span class="chat-room-group-label">🎓 Kelas 1</span>
-                <a class="chat-room-item chat-room-item-class" data-room="pemasaran-1" href="/chat/pemasaran/1">
-                    <span class="chat-room-icon">🛍️</span>
-                    <span class="chat-room-name">Pemasaran 1</span>
-                    <span class="chat-room-status" data-status="pemasaran-1">Belum diminta</span>
-                    <span class="chat-room-unread" data-unread="pemasaran-1" hidden>0</span>
-                </a>
-                <a class="chat-room-item chat-room-item-class" data-room="otomotif-1" href="/chat/otomotif/1">
-                    <span class="chat-room-icon">🔧</span>
-                    <span class="chat-room-name">Otomotif 1</span>
-                    <span class="chat-room-status" data-status="otomotif-1">Belum diminta</span>
-                    <span class="chat-room-unread" data-unread="otomotif-1" hidden>0</span>
-                </a>
-            </div>
-
-            <div class="chat-room-group">
-                <span class="chat-room-group-label">🎓 Kelas 2</span>
-                <a class="chat-room-item chat-room-item-class" data-room="pemasaran-2" href="/chat/pemasaran/2">
-                    <span class="chat-room-icon">🛍️</span>
-                    <span class="chat-room-name">Pemasaran 2</span>
-                    <span class="chat-room-status" data-status="pemasaran-2">Belum diminta</span>
-                    <span class="chat-room-unread" data-unread="pemasaran-2" hidden>0</span>
-                </a>
-                <a class="chat-room-item chat-room-item-class" data-room="otomotif-2" href="/chat/otomotif/2">
-                    <span class="chat-room-icon">🔧</span>
-                    <span class="chat-room-name">Otomotif 2</span>
-                    <span class="chat-room-status" data-status="otomotif-2">Belum diminta</span>
-                    <span class="chat-room-unread" data-unread="otomotif-2" hidden>0</span>
-                </a>
-            </div>
-
-            <div class="chat-room-group">
-                <span class="chat-room-group-label">🎓 Kelas 3</span>
-                <a class="chat-room-item chat-room-item-class" data-room="pemasaran-3" href="/chat/pemasaran/3">
-                    <span class="chat-room-icon">🛍️</span>
-                    <span class="chat-room-name">Pemasaran 3</span>
-                    <span class="chat-room-status" data-status="pemasaran-3">Belum diminta</span>
-                    <span class="chat-room-unread" data-unread="pemasaran-3" hidden>0</span>
-                </a>
-                <a class="chat-room-item chat-room-item-class" data-room="otomotif-3" href="/chat/otomotif/3">
-                    <span class="chat-room-icon">🔧</span>
-                    <span class="chat-room-name">Otomotif 3</span>
-                    <span class="chat-room-status" data-status="otomotif-3">Belum diminta</span>
-                    <span class="chat-room-unread" data-unread="otomotif-3" hidden>0</span>
-                </a>
-            </div>
-        </main>
-
-        <div class="chat-room-placeholder" id="chat-room-placeholder" hidden>
-            <button class="chat-back-btn" id="chat-back-btn" type="button">&larr; Kembali</button>
-            <p id="chat-room-placeholder-text"></p>
-        </div>
-
-        <div class="chat-room-thread" id="chat-room-thread" hidden>
-            <div class="chat-thread-head">
-                <button class="chat-back-btn" id="chat-thread-back-btn" type="button">&larr; Kembali</button>
-                <span class="chat-thread-title" id="chat-thread-title"></span>
-                <span class="chat-thread-online" id="chat-thread-online" hidden>0 online</span>
-            </div>
-            <div class="chat-thread-messages" id="chat-thread-messages"></div>
-            <p class="chat-thread-readonly-note" id="chat-thread-readonly-note" hidden></p>
-            <form class="chat-thread-form" id="chat-thread-form">
-                <input type="text" id="chat-thread-input" placeholder="Tulis pesan..." autocomplete="off" maxlength="1000">
-                <button type="submit">Kirim</button>
-            </form>
-        </div>
-    </div>
 
 
     <audio id="bgm" src="assets/audio/bgm.mp3" preload="none" loop></audio>
@@ -1819,8 +1713,6 @@ listEl.innerHTML = ids.map(key => {
         <script src="assets/logic/headline.js"></script>
         <script src="assets/logic/scramble-engine.js"></script>
         <script src="assets/logic/chat-beta-scrambler.js"></script>
-        <script defer src="assets/logic/auth-helper.js"></script>
-        <script defer src="assets/logic/chat-app.js"></script>
         <script src="assets/logic/sw-register.js"></script>
         <script>
         // Visitor counter fetch logic — inline di sini (bukan file eksternal)

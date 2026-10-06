@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CHAT NUFABASE - SMK NURUL FALAH</title>
+    <meta name="description" content="Chat NUFABASE SMK Nurul Falah: ruang obrolan Public, Announcement, dan kelas. Baca info, aturan, dan kebijakan privasi di sini.">
+    <meta name="author" content="SMK Nurul Falah">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="/chat" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ccircle%20cx='50'%20cy='50'%20r='45'%20fill='black'%20stroke='white'%20stroke-width='4'/%3E%3Cline%20x1='5'%20y1='50'%20x2='95'%20y2='50'%20stroke='white'%20stroke-width='2'/%3E%3Cline%20x1='50'%20y1='5'%20x2='50'%20y2='95'%20stroke='white'%20stroke-width='2'/%3E%3C/svg%3E">
+    <link rel="alternate icon" href="/favicon.ico">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#060502">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    </noscript>
+
+    <script defer src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+
+    <!-- Path absolut: halaman ini juga disajikan di /chat/pemasaran/1 dst (rewrite) -->
+    <link rel="stylesheet" href="/assets/style/main.css">
+    <link rel="stylesheet" href="/assets/style/variable.css">
+</head>
+<body>
+    <div id="chat-view">
+        <nav class="chat-nav">
+            <a class="chat-home-btn" href="/" id="chat-home-btn" aria-label="Kembali ke beranda">←</a>
+            <span class="chat-nav-title">CHAT</span>
+            <span class="chat-beta-badge" id="chat-beta-badge">BETA</span>
+            <div class="chat-account-wrap" id="chat-account-wrap">
+                <span class="chat-account-hint" id="chat-account-hint"></span>
+                <button class="chat-account-btn" id="chat-account-btn" type="button" aria-label="Akun">
+                    <span class="chat-account-icon" id="chat-account-icon">🔒</span>
+                </button>
+            </div>
+        </nav>
+
+        <main class="chat-room-list" id="chat-room-list">
+            <p class="chat-room-greeting" id="chat-room-greeting" hidden></p>
+            <button class="chatapp-online-total" id="chatapp-online-total" type="button" hidden>
+                <span class="chatapp-online-dot"></span>
+                <span class="chatapp-online-count">0</span> orang online
+            </button>
+            <div class="chatapp-online-list" id="chatapp-online-list" hidden></div>
+            <a class="chat-room-item chat-info-link" href="/chat/info">
+                <span class="chat-room-icon">ℹ️</span>
+                <span class="chat-room-name">Info, Aturan &amp; Privasi</span>
+                <span class="chat-room-sub">Baca dulu ya</span>
+            </a>
+
+            <p class="chat-room-hint">Pilih ruang percakapan:</p>
+
+            <a class="chat-room-item" data-room="public" href="/chat/public">
+                <span class="chat-room-icon">💬</span>
+                <span class="chat-room-name">Public</span>
+                <span class="chat-room-sub">Bebas baca &amp; tulis</span>
+                <span class="chat-room-unread" data-unread="public" hidden>0</span>
+            </a>
+
+            <a class="chat-room-item" data-room="announcement" href="/chat/announcement">
+                <span class="chat-room-icon">📢</span>
+                <span class="chat-room-name">Announcement</span>
+                <span class="chat-room-sub">Read-only</span>
+                <span class="chat-room-unread" data-unread="announcement" hidden>0</span>
+            </a>
+
+            <p class="chat-room-hint chat-room-hint-class">Kelas (perlu approval admin):</p>
+
+            <div class="chat-room-group">
+                <span class="chat-room-group-label">🎓 Kelas 1</span>
+                <a class="chat-room-item chat-room-item-class" data-room="pemasaran-1" href="/chat/pemasaran/1">
+                    <span class="chat-room-icon">🛍️</span>
+                    <span class="chat-room-name">Pemasaran 1</span>
+                    <span class="chat-room-status" data-status="pemasaran-1">Belum diminta</span>
+                    <span class="chat-room-unread" data-unread="pemasaran-1" hidden>0</span>
+                </a>
+                <a class="chat-room-item chat-room-item-class" data-room="otomotif-1" href="/chat/otomotif/1">
+                    <span class="chat-room-icon">🔧</span>
+                    <span class="chat-room-name">Otomotif 1</span>
+                    <span class="chat-room-status" data-status="otomotif-1">Belum diminta</span>
+                    <span class="chat-room-unread" data-unread="otomotif-1" hidden>0</span>
+                </a>
+            </div>
+
+            <div class="chat-room-group">
+                <span class="chat-room-group-label">🎓 Kelas 2</span>
+                <a class="chat-room-item chat-room-item-class" data-room="pemasaran-2" href="/chat/pemasaran/2">
+                    <span class="chat-room-icon">🛍️</span>
+                    <span class="chat-room-name">Pemasaran 2</span>
+                    <span class="chat-room-status" data-status="pemasaran-2">Belum diminta</span>
+                    <span class="chat-room-unread" data-unread="pemasaran-2" hidden>0</span>
+                </a>
+                <a class="chat-room-item chat-room-item-class" data-room="otomotif-2" href="/chat/otomotif/2">
+                    <span class="chat-room-icon">🔧</span>
+                    <span class="chat-room-name">Otomotif 2</span>
+                    <span class="chat-room-status" data-status="otomotif-2">Belum diminta</span>
+                    <span class="chat-room-unread" data-unread="otomotif-2" hidden>0</span>
+                </a>
+            </div>
+
+            <div class="chat-room-group">
+                <span class="chat-room-group-label">🎓 Kelas 3</span>
+                <a class="chat-room-item chat-room-item-class" data-room="pemasaran-3" href="/chat/pemasaran/3">
+                    <span class="chat-room-icon">🛍️</span>
+                    <span class="chat-room-name">Pemasaran 3</span>
+                    <span class="chat-room-status" data-status="pemasaran-3">Belum diminta</span>
+                    <span class="chat-room-unread" data-unread="pemasaran-3" hidden>0</span>
+                </a>
+                <a class="chat-room-item chat-room-item-class" data-room="otomotif-3" href="/chat/otomotif/3">
+                    <span class="chat-room-icon">🔧</span>
+                    <span class="chat-room-name">Otomotif 3</span>
+                    <span class="chat-room-status" data-status="otomotif-3">Belum diminta</span>
+                    <span class="chat-room-unread" data-unread="otomotif-3" hidden>0</span>
+                </a>
+            </div>
+        </main>
+
+        <div class="chat-room-placeholder" id="chat-room-placeholder" hidden>
+            <button class="chat-back-btn" id="chat-back-btn" type="button">&larr; Kembali</button>
+            <p id="chat-room-placeholder-text"></p>
+        </div>
+
+        <div class="chat-room-thread" id="chat-room-thread" hidden>
+            <div class="chat-thread-head">
+                <button class="chat-back-btn" id="chat-thread-back-btn" type="button">&larr; Kembali</button>
+                <span class="chat-thread-title" id="chat-thread-title"></span>
+                <span class="chat-thread-online" id="chat-thread-online" hidden>0 online</span>
+            </div>
+            <div class="chat-thread-messages" id="chat-thread-messages"></div>
+            <p class="chat-thread-readonly-note" id="chat-thread-readonly-note" hidden></p>
+            <form class="chat-thread-form" id="chat-thread-form">
+                <input type="text" id="chat-thread-input" placeholder="Tulis pesan..." autocomplete="off" maxlength="1000">
+                <button type="submit">Kirim</button>
+            </form>
+        </div>
+
+        <section class="chat-info" id="chat-info-view" hidden aria-labelledby="chat-info-title">
+            <div class="chat-thread-head">
+                <button class="chat-back-btn" id="chat-info-back-btn" type="button">&larr; Kembali</button>
+                <span class="chat-thread-title" id="chat-info-title">Info, Aturan &amp; Privasi</span>
+            </div>
+
+            <div class="chat-info-lead">
+                <strong>Intinya, dalam 30 detik 👇</strong>
+                <ul>
+                    <li>Chat NUFABASE adalah ruang ngobrol untuk siswa dan warga SMK Nurul Falah.</li>
+                    <li>Masuk pakai akun Google. Nama dan foto Google kamu ikut tampil di chat.</li>
+                    <li>Ruang <b>Public</b> dan <b>Announcement</b> bisa dibuka semua yang sudah login. Ruang <b>kelas</b> hanya untuk anggota yang disetujui admin.</li>
+                    <li>Bicaralah dengan sopan. Pesan kamu bisa kamu hapus sendiri kapan saja.</li>
+                    <li>Datamu tidak dijual dan tidak dipakai untuk iklan. Tapi pesan <b>tidak</b> dikunci end-to-end, jadi jangan kirim password, PIN, atau kode OTP.</li>
+                </ul>
+            </div>
+
+            <details open>
+                <summary>ℹ️ Informasi: apa itu chat ini?</summary>
+                <div class="chat-info-body">
+                    <p>Chat NUFABASE adalah tempat ngobrol online milik sekolah. Fitur ini masih <b>Beta</b> (tahap uji coba), jadi kadang masih ada kekurangan. Kalau menemukan masalah, kabari admin.</p>
+                    <h4>Ada 8 ruang obrolan</h4>
+                    <ul>
+                        <li>💬 <b>Public</b>: semua yang sudah login boleh membaca dan menulis.</li>
+                        <li>📢 <b>Announcement</b>: semua boleh membaca, tetapi hanya admin yang boleh menulis. Dipakai untuk pengumuman.</li>
+                        <li>🎓 <b>Ruang kelas</b> (Pemasaran dan Otomotif, kelas 1 sampai 3): hanya untuk anggota kelas tersebut dan admin. Orang lain tidak bisa membaca maupun menulis.</li>
+                    </ul>
+                    <h4>Cara masuk ke ruang kelas</h4>
+                    <ol>
+                        <li>Tekan ikon 🔒 di pojok kanan atas, lalu login dengan akun Google.</li>
+                        <li>Pilih ruang kelasmu, lalu tekan <b>Minta Akses ke Kelas Ini</b>.</li>
+                        <li>Tunggu admin menyetujui. Statusnya terlihat di daftar ruang: <i>Menunggu persetujuan</i>, <i>Disetujui</i>, atau <i>Ditolak</i>.</li>
+                        <li>Setelah disetujui, kamu bisa langsung membaca dan menulis di ruang kelasmu.</li>
+                    </ol>
+                    <p class="chat-info-note">Satu orang hanya bisa aktif di satu kelas dalam satu waktu. Kalau ditolak, kamu boleh mengajukan lagi.</p>
+                    <p>Fitur lain: lihat siapa yang sedang online, penanda pesan belum dibaca, dan notifikasi pesan baru (boleh kamu tolak, chat tetap bisa dipakai).</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>📜 Aturan bersama</summary>
+                <div class="chat-info-body">
+                    <p>Anggap chat ini seperti ruang kelas: semua orang harus merasa aman dan dihargai.</p>
+                    <h4>✅ Boleh dan dianjurkan</h4>
+                    <ul>
+                        <li>Bertanya, berdiskusi, dan saling membantu soal belajar dan kegiatan sekolah.</li>
+                        <li>Memakai bahasa yang sopan, walaupun sedang bercanda.</li>
+                        <li>Melapor ke admin atau guru kalau melihat hal yang tidak pantas.</li>
+                    </ul>
+                    <h4>❌ Tidak boleh</h4>
+                    <ul>
+                        <li>Menghina, mengejek, mengancam, atau merundung (bullying) orang lain.</li>
+                        <li>Konten SARA (suku, agama, ras, antargolongan), pornografi, kekerasan, atau judi.</li>
+                        <li>Menyebar nomor HP, alamat, foto, atau data pribadi orang lain tanpa izin.</li>
+                        <li>Menyebar berita bohong (hoaks), tautan berbahaya, atau iklan dan spam.</li>
+                        <li>Berpura-pura menjadi orang lain, atau mencoba membobol, merusak, dan mengakali sistem.</li>
+                        <li>Memakai ruang kelas untuk hal yang tidak berhubungan dengan kelas.</li>
+                    </ul>
+                    <h4>Kalau aturan dilanggar</h4>
+                    <ul>
+                        <li>Admin boleh menghapus pesan yang melanggar.</li>
+                        <li>Akses ke ruang kelas bisa dicabut.</li>
+                        <li>Pelanggaran berat bisa diteruskan ke pihak sekolah.</li>
+                    </ul>
+                    <p class="chat-info-note">Setiap orang bertanggung jawab atas pesan yang ia kirim dari akunnya sendiri.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>🔒 Kebijakan Privasi</summary>
+                <div class="chat-info-body">
+                    <h4>1. Data apa yang kami simpan?</h4>
+                    <ul>
+                        <li><b>Dari akun Google kamu:</b> nama, alamat email, foto profil, dan kode akun. Kami tidak pernah melihat atau menyimpan password Google kamu.</li>
+                        <li><b>Pesan:</b> isi pesan, nama yang tampil, ruang tujuan, dan waktu kirim.</li>
+                        <li><b>Permintaan akses kelas:</b> nama, email, kelas yang diminta, status, dan waktunya.</li>
+                        <li><b>Status online:</b> nama kamu, ruang yang sedang dibuka, dan waktu aktif terakhir. Data ini hanya berlaku selama kamu online dan dihapus saat kamu keluar.</li>
+                        <li><b>Waktu login terakhir.</b></li>
+                        <li><b>Di perangkatmu sendiri:</b> penanda pesan terakhir yang dibaca dan sesi login, supaya kamu tidak perlu login terus-menerus.</li>
+                    </ul>
+                    <p>Chat ini <b>tidak</b> menyimpan lokasi, daftar kontak, atau alamat IP kamu di database chat. Layanan Google (Firebase) tempat data disimpan bisa mencatat data teknis standar, termasuk alamat IP, di sistem mereka sendiri.</p>
+
+                    <h4>2. Siapa yang bisa melihat?</h4>
+                    <ul>
+                        <li><b>Nama, foto, dan pesan kamu:</b> terlihat oleh orang yang boleh membaca ruang itu. Di Public, berarti semua yang login.</li>
+                        <li><b>Daftar online:</b> semua yang login bisa melihat nama dan ruang yang sedang dibuka orang lain.</li>
+                        <li><b>Email kamu:</b> hanya kamu dan admin yang bisa melihat.</li>
+                        <li><b>Admin</b> bisa melihat daftar anggota kelas dan permintaan akses, membaca semua ruang (termasuk ruang kelas), dan menghapus pesan.</li>
+                        <li>Pengembang sistem secara teknis memiliki akses ke database, dan hanya memakainya untuk menjalankan serta menjaga chat ini.</li>
+                    </ul>
+
+                    <h4>3. Dipakai untuk apa?</h4>
+                    <p>Hanya untuk menjalankan chat: menampilkan namamu, mengatur siapa boleh masuk ke ruang kelas, mengirim notifikasi, dan menjaga ketertiban. Data tidak dijual, tidak dibagikan untuk iklan, dan tidak diberikan ke pihak ketiga untuk tujuan komersial.</p>
+
+                    <h4>4. Seberapa aman?</h4>
+                    <ul>
+                        <li>Login lewat Google, dan koneksi memakai HTTPS.</li>
+                        <li>Aturan akses dipasang langsung di database, jadi ruang kelas benar-benar terkunci untuk yang belum disetujui, bukan sekadar disembunyikan di tampilan.</li>
+                    </ul>
+                    <p class="chat-info-note">Pesan <b>tidak</b> dienkripsi end-to-end. Jangan pernah mengirim password, PIN, kode OTP, nomor kartu, atau rahasia pribadi di chat ini.</p>
+
+                    <h4>5. Disimpan berapa lama?</h4>
+                    <ul>
+                        <li>Pesan tersimpan sampai dihapus oleh pengirimnya atau admin. Tidak ada penghapusan otomatis.</li>
+                        <li>Profil dan keanggotaan kelas tersimpan sampai admin mencabutnya atau kamu meminta penghapusan.</li>
+                        <li>Status online hilang otomatis saat kamu keluar.</li>
+                    </ul>
+
+                    <h4>6. Hak kamu</h4>
+                    <ul>
+                        <li><b>Hapus pesan sendiri</b> kapan saja lewat ikon 🗑 di pesanmu.</li>
+                        <li><b>Keluar</b> kapan saja: tekan ikon fotomu di pojok kanan atas.</li>
+                        <li><b>Minta penghapusan data atau profil:</b> hubungi admin di <a href="mailto:smknufagwt@gmail.com">smknufagwt@gmail.com</a>. Permintaan diproses manual oleh admin.</li>
+                        <li><b>Cabut izin</b> aplikasi ini kapan saja lewat pengaturan akun Google kamu.</li>
+                    </ul>
+
+                    <h4>7. Untuk pelajar dan orang tua</h4>
+                    <p>Banyak penggunanya masih di bawah 18 tahun. Orang tua, wali, dan guru dianjurkan ikut mendampingi. Jangan membagikan data pribadi (alamat rumah, nomor HP, foto pribadi) di ruang Public.</p>
+
+                    <h4>8. Bedanya dengan Global Live Chat di beranda</h4>
+                    <p>Global Live Chat di halaman beranda adalah chat terpisah: tanpa login, anonim, dan alamat IP hanya tampil sebagian. Kebijakannya ada di tombol <b>Privacy Policy</b> di bagian bawah beranda. Halaman ini hanya berlaku untuk Chat NUFABASE (<code>/chat</code>).</p>
+
+                    <p class="chat-info-note">Dengan login dan memakai chat ini, kamu dianggap sudah membaca dan menyetujui aturan serta kebijakan di atas.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>❓ Tanya jawab singkat</summary>
+                <div class="chat-info-body">
+                    <h4>Siapa itu admin?</h4>
+                    <p>Pengelola chat yang ditunjuk sekolah dan pengembang. Admin menyetujui akses kelas dan menjaga ketertiban.</p>
+                    <h4>Kenapa aku tidak bisa membuka ruang kelas?</h4>
+                    <p>Ruang kelas hanya untuk anggota yang sudah disetujui. Minta akses dulu, lalu tunggu admin.</p>
+                    <h4>Bisakah orang lain menghapus pesanku?</h4>
+                    <p>Hanya admin. Anggota biasa hanya bisa menghapus pesannya sendiri.</p>
+                    <h4>Login gagal saat dibuka dari TikTok, Instagram, atau Facebook?</h4>
+                    <p>Google tidak mengizinkan login dari browser di dalam aplikasi tersebut. Buka tautan ini lewat Chrome atau Safari.</p>
+                    <h4>Aku salah kirim pesan, bagaimana?</h4>
+                    <p>Tekan ikon 🗑 di pesanmu untuk menghapusnya.</p>
+                    <h4>Ada masalah atau pertanyaan lain?</h4>
+                    <p>Hubungi admin di <a href="mailto:smknufagwt@gmail.com">smknufagwt@gmail.com</a>.</p>
+                </div>
+            </details>
+
+            <p class="chat-info-updated">Terakhir diperbarui: 6 Oktober 2026 · Chat NUFABASE (Beta)</p>
+        </section>
+    </div>
+
+    <script>
+        const FIREBASE_CONFIG = {
+            apiKey: "%%FIREBASE_API_KEY%%",
+            authDomain: "server-nufa.firebaseapp.com",
+            projectId: "server-nufa",
+            storageBucket: "server-nufa.firebasestorage.app",
+            messagingSenderId: "168660687360",
+            appId: "1:168660687360:web:bdb56f6ea15e3cd44756e5"
+        };
+    </script>
+    <script src="/assets/logic/scramble-engine.js"></script>
+    <script src="/assets/logic/chat-beta-scrambler.js"></script>
+    <script defer src="/assets/logic/auth-helper.js"></script>
+    <script defer src="/assets/logic/chat-app.js"></script>
+    <script src="/assets/logic/sw-register.js"></script>
+</body>
+</html>

@@ -22,13 +22,6 @@
     };
     const ALL_ROOM_IDS = ['public', 'announcement'].concat(CLASS_ROOM_IDS);
 
-    // Elemen main-site yang perlu disembunyikan selagi di /chat
-    const MAIN_SITE_SELECTORS = [
-        '#overlay', '#main-content', '#gallery-lightbox',
-        '#music-btn', '#color-btn', '#chat-btn',
-        '#chat-marquee-bar', '#chat-toast-stack', '#chat-panel',
-    ];
-
     const ACCOUNT_HINT_MESSAGES = [
         'Login akun google anda',
         'Akses percakapan dengan email anda',
@@ -121,6 +114,7 @@
     function pathToRoomId(pathname) {
         const parts = pathname.replace(/\/+$/, '').split('/').filter(Boolean); // ['chat', 'pemasaran', '1']
         if (parts.length <= 1) return null; // '/chat' saja = landing
+        if (parts[1] === 'info') return 'info';
         if (parts[1] === 'public') return 'public';
         if (parts[1] === 'announcement') return 'announcement';
         if (parts.length === 3) {
@@ -132,14 +126,6 @@
 
     function isChatPath(pathname) {
         return pathname === '/chat' || pathname.startsWith('/chat/');
-    }
-
-    function setMainSiteVisible(visible) {
-        MAIN_SITE_SELECTORS.forEach((sel) => {
-            const el = document.querySelector(sel);
-            if (el) el.style.display = visible ? '' : 'none';
-        });
-        document.body.style.overflow = visible ? '' : 'hidden auto';
     }
 
     function teardownThread() {
@@ -386,27 +372,23 @@
         await renderClassRoomGate(roomId);
     }
 
+    function showInfo() {
+        document.getElementById('chat-room-list').hidden = true;
+        document.getElementById('chat-room-placeholder').hidden = true;
+        document.getElementById('chat-room-thread').hidden = true;
+        teardownThread();
+        window.scrollTo(0, 0);
+    }
+
     function render() {
-        const pathname = window.location.pathname;
         const chatView = document.getElementById('chat-view');
         if (!chatView) return;
-
-        if (!isChatPath(pathname)) {
-            chatView.hidden = true;
-            setMainSiteVisible(true);
-            teardownThread();
-            return;
-        }
-
-        chatView.hidden = false;
-        setMainSiteVisible(false);
-
-        const roomId = pathToRoomId(pathname);
-        if (!roomId) {
-            showRoomList();
-        } else {
-            enterRoom(roomId);
-        }
+        const roomId = pathToRoomId(window.location.pathname);
+        const info = document.getElementById('chat-info-view');
+        if (info) info.hidden = roomId !== 'info';
+        if (roomId === 'info') { showInfo(); return; }
+        if (!roomId) showRoomList();
+        else enterRoom(roomId);
     }
 
     function navigate(path) {
@@ -433,6 +415,8 @@
 
         document.getElementById('chat-back-btn').addEventListener('click', () => navigate('/chat'));
         document.getElementById('chat-thread-back-btn').addEventListener('click', () => navigate('/chat'));
+        const infoBack = document.getElementById('chat-info-back-btn');
+        if (infoBack) infoBack.addEventListener('click', () => navigate('/chat'));
 
         document.getElementById('chat-thread-form').addEventListener('submit', (e) => {
             e.preventDefault();

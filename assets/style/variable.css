@@ -663,3 +663,35 @@
     font-size: 0.62rem;
 }
 
+/* ── halaman Info, Aturan & Privasi (/chat/info) ───────────────── */
+.chat-info { max-width: 640px; margin: 0 auto; padding: 0 14px 40px; }
+.chat-info-link { border-style: dashed; }
+.chat-info-lead {
+    border: 1px solid var(--chat-gold-dim); border-radius: 8px;
+    background: rgba(217, 192, 137, 0.08); padding: 12px 14px; margin: 6px 0 14px;
+    font-size: 0.8rem; line-height: 1.6; color: var(--chat-gold-bright);
+}
+.chat-info-lead ul { margin: 8px 0 0; padding-left: 18px; color: var(--chat-gold); }
+.chat-info details {
+    border: 1px solid var(--chat-nav-border); border-radius: 8px;
+    background: rgba(217, 192, 137, 0.04); margin-bottom: 10px;
+}
+.chat-info summary {
+    cursor: pointer; padding: 11px 14px; list-style: none;
+    font-weight: 700; font-size: 0.82rem; letter-spacing: 0.5px; color: var(--chat-gold-bright);
+}
+.chat-info summary::-webkit-details-marker { display: none; }
+.chat-info summary::after { content: '＋'; float: right; color: var(--chat-gold-dim); }
+.chat-info details[open] > summary { border-bottom: 1px solid var(--chat-nav-border); }
+.chat-info details[open] > summary::after { content: '－'; }
+.chat-info-body { padding: 10px 14px 14px; font-size: 0.78rem; line-height: 1.65; color: var(--chat-gold); }
+.chat-info-body p { margin: 6px 0; }
+.chat-info-body h4 { margin: 14px 0 4px; font-size: 0.78rem; color: var(--chat-gold-bright); }
+.chat-info-body ul, .chat-info-body ol { margin: 4px 0 8px; padding-left: 20px; }
+.chat-info-body li { margin-bottom: 4px; }
+.chat-info-body a { color: var(--chat-gold-bright); }
+.chat-info-note {
+    border-left: 2px solid var(--chat-gold); padding: 4px 10px; margin: 10px 0;
+    background: rgba(217, 192, 137, 0.06);
+}
+.chat-info-updated { text-align: center; font-size: 0.62rem; color: var(--chat-gold-dim); margin-top: 14px; }
