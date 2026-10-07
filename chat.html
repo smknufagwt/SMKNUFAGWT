@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
     <title>CHAT NUFABASE - SMK NURUL FALAH</title>
     <meta name="description" content="Chat NUFABASE SMK Nurul Falah: ruang obrolan Public, Announcement, dan kelas. Baca info, aturan, dan kebijakan privasi di sini.">
     <meta name="author" content="SMK Nurul Falah">
@@ -12,6 +12,7 @@
     <link rel="alternate icon" href="/favicon.ico">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#060502">
+    <script src="/assets/logic/chat-prefs.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -136,6 +137,26 @@
                 <button class="chat-back-btn" id="chat-thread-back-btn" type="button">&larr; Kembali</button>
                 <span class="chat-thread-title" id="chat-thread-title"></span>
                 <span class="chat-thread-online" id="chat-thread-online" hidden>0 online</span>
+                <button class="chat-settings-btn" id="chat-settings-btn" type="button" title="Pengaturan tampilan" aria-label="Pengaturan tampilan" hidden><i class="fa-solid fa-gear"></i></button>
+                <div class="chat-settings-panel" id="chat-settings-panel" hidden>
+                    <div class="chat-settings-row">
+                        <div class="chat-settings-label"><span>Ukuran teks &amp; embed</span><b id="chat-font-val">100%</b></div>
+                        <div class="chat-settings-ctl">
+                            <button type="button" data-font="-" aria-label="Perkecil">A&minus;</button>
+                            <input type="range" id="chat-font-range" min="80" max="150" step="5" value="100" aria-label="Ukuran teks">
+                            <button type="button" data-font="+" aria-label="Perbesar">A+</button>
+                        </div>
+                    </div>
+                    <div class="chat-settings-row">
+                        <div class="chat-settings-label"><span>Tema</span></div>
+                        <div class="chat-seg">
+                            <button type="button" data-theme-opt="auto">Otomatis</button>
+                            <button type="button" data-theme-opt="light">Terang</button>
+                            <button type="button" data-theme-opt="dark">Gelap</button>
+                        </div>
+                    </div>
+                    <button type="button" class="chat-settings-reset" data-prefs-reset>Atur ulang</button>
+                </div>
             </div>
             <div class="chat-thread-messages" id="chat-thread-messages"></div>
             <p class="chat-thread-readonly-note" id="chat-thread-readonly-note" hidden></p>

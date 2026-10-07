@@ -335,6 +335,9 @@
         const writable = writableOverride !== undefined ? writableOverride : canWriteToRoom(roomId);
         form.hidden = !writable;
         note.hidden = writable;
+        const gear = document.getElementById('chat-settings-btn');
+        gear.hidden = !writable;
+        if (!writable) { document.getElementById('chat-settings-panel').hidden = true; gear.classList.remove('on'); }
         if (!writable) {
             note.textContent = roomId === 'announcement'
                 ? 'Hanya admin yang bisa mengirim pesan di Announcement.'
@@ -487,6 +490,7 @@
         const roomId = pathToRoomId(window.location.pathname);
         const info = document.getElementById('chat-info-view');
         if (info) info.hidden = roomId !== 'info';
+        document.documentElement.classList.toggle('chat-lock', !!roomId && roomId !== 'info' && roomId !== 'unknown');
         if (roomId === 'info') { showInfo(); return; }
         if (!roomId) showRoomList();
         else enterRoom(roomId);
@@ -518,6 +522,34 @@
         document.getElementById('chat-thread-back-btn').addEventListener('click', () => navigate('/chat'));
         const infoBack = document.getElementById('chat-info-back-btn');
         if (infoBack) infoBack.addEventListener('click', () => navigate('/chat'));
+
+        // Roda gigi: skala teks+embed & tema (disimpan ChatPrefs di localStorage)
+        const gear = document.getElementById('chat-settings-btn');
+        const panel = document.getElementById('chat-settings-panel');
+        const range = document.getElementById('chat-font-range');
+        const syncSettings = () => {
+            range.value = ChatPrefs.scale;
+            document.getElementById('chat-font-val').textContent = ChatPrefs.scale + '%';
+            panel.querySelectorAll('[data-theme-opt]').forEach((b) => b.classList.toggle('on', b.dataset.themeOpt === ChatPrefs.theme));
+        };
+        const closePanel = () => { panel.hidden = true; gear.classList.remove('on'); };
+        gear.addEventListener('click', (e) => {
+            e.stopPropagation();
+            panel.hidden = !panel.hidden;
+            gear.classList.toggle('on', !panel.hidden);
+            if (!panel.hidden) syncSettings();
+        });
+        document.addEventListener('click', (e) => {
+            if (!panel.hidden && !panel.contains(e.target) && !gear.contains(e.target)) closePanel();
+        });
+        range.addEventListener('input', () => { ChatPrefs.setScale(Number(range.value)); syncSettings(); });
+        panel.addEventListener('click', (e) => {
+            const f = e.target.closest('[data-font]');
+            if (f) { ChatPrefs.setScale(ChatPrefs.scale + (f.dataset.font === '+' ? 5 : -5)); syncSettings(); return; }
+            const t = e.target.closest('[data-theme-opt]');
+            if (t) { ChatPrefs.setTheme(t.dataset.themeOpt); syncSettings(); return; }
+            if (e.target.closest('[data-prefs-reset]')) { ChatPrefs.reset(); syncSettings(); }
+        });
 
         const form = document.getElementById('chat-thread-form');
         const input = document.getElementById('chat-thread-input');
