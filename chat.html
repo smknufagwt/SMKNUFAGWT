@@ -140,11 +140,19 @@
                 <button class="chat-settings-btn" id="chat-settings-btn" type="button" title="Pengaturan tampilan" aria-label="Pengaturan tampilan" hidden><i class="fa-solid fa-gear"></i></button>
                 <div class="chat-settings-panel" id="chat-settings-panel" hidden>
                     <div class="chat-settings-row">
-                        <div class="chat-settings-label"><span>Ukuran teks &amp; embed</span><b id="chat-font-val">100%</b></div>
+                        <div class="chat-settings-label"><span>Ukuran teks</span><b id="chat-font-val">100%</b></div>
                         <div class="chat-settings-ctl">
-                            <button type="button" data-font="-" aria-label="Perkecil">A&minus;</button>
-                            <input type="range" id="chat-font-range" min="80" max="150" step="5" value="100" aria-label="Ukuran teks">
-                            <button type="button" data-font="+" aria-label="Perbesar">A+</button>
+                            <button type="button" data-font="-" aria-label="Perkecil teks">A&minus;</button>
+                            <input type="range" id="chat-font-range" min="80" max="150" step="5" value="100" aria-label="Ukuran teks 80 sampai 150 persen">
+                            <button type="button" data-font="+" aria-label="Perbesar teks">A+</button>
+                        </div>
+                    </div>
+                    <div class="chat-settings-row">
+                        <div class="chat-settings-label"><span>Ukuran facade &amp; embed</span><b id="chat-embed-val">100%</b></div>
+                        <div class="chat-settings-ctl">
+                            <button type="button" data-embed="-" aria-label="Perkecil embed">&minus;</button>
+                            <input type="range" id="chat-embed-range" min="90" max="250" step="10" value="100" aria-label="Ukuran embed 90 sampai 250 persen">
+                            <button type="button" data-embed="+" aria-label="Perbesar embed">+</button>
                         </div>
                     </div>
                     <div class="chat-settings-row">
@@ -332,6 +340,50 @@
 
             <p class="chat-info-updated">Terakhir diperbarui: 6 Oktober 2026 · Chat NUFABASE (Beta)</p>
         </section>
+
+        <div class="chat-footer" role="contentinfo">
+            <button class="chat-footer-link" id="chat-feature-open" type="button">💡 Ajukan fitur baru</button>
+            <a class="chat-footer-link" href="/chat/info">ℹ️ Info, Aturan &amp; Privasi</a>
+            <p class="chat-footer-note">Chat NUFABASE · Beta · SMK Nurul Falah</p>
+        </div>
+
+        <div class="chat-feature-modal" id="chat-feature-modal" hidden role="dialog" aria-modal="true" aria-labelledby="chat-feature-title">
+            <div class="chat-feature-card">
+                <button class="chat-feature-close" id="chat-feature-close" type="button" aria-label="Tutup">&#10005;</button>
+                <h3 id="chat-feature-title">💡 Ajukan fitur baru</h3>
+                <ol class="chat-feature-flow">
+                    <li>Tulis idemu di bawah ini.</li>
+                    <li>Kirim lewat <b>GitHub</b> (publik, bisa dipantau) atau <b>Email</b> (privat).</li>
+                    <li>Admin meninjau dan memberi label.</li>
+                    <li>Kalau disetujui, dikerjakan dan dicatat di Jurnal (<a href="/blog">/blog</a>).</li>
+                </ol>
+                <div class="chat-feature-form">
+                    <label>Jenis
+                        <select id="chat-feature-type">
+                            <option>Fitur baru</option>
+                            <option>Perbaikan bug</option>
+                            <option>Tampilan / desain</option>
+                            <option>Lainnya</option>
+                        </select>
+                    </label>
+                    <label>Judul singkat
+                        <input type="text" id="chat-feature-name" maxlength="80" placeholder="Contoh: Balas pesan dengan kutipan" autocomplete="off">
+                    </label>
+                    <label>Ceritakan idenya
+                        <textarea id="chat-feature-detail" rows="4" maxlength="800" placeholder="Apa yang kamu inginkan, dan kapan dibutuhkan?"></textarea>
+                    </label>
+                    <label>Manfaatnya buat siapa? (opsional)
+                        <textarea id="chat-feature-benefit" rows="2" maxlength="300"></textarea>
+                    </label>
+                    <p class="chat-feature-warn">⚠️ Isi issue GitHub bersifat publik. Jangan menulis data pribadi (nomor HP, alamat, email). Kalau ragu, pakai Email.</p>
+                    <p class="chat-feature-msg" id="chat-feature-msg" hidden></p>
+                    <div class="chat-feature-actions">
+                        <button type="button" id="chat-feature-github"><i class="fa-brands fa-github"></i> Kirim lewat GitHub</button>
+                        <button type="button" id="chat-feature-email"><i class="fa-solid fa-envelope"></i> Kirim lewat Email</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -349,6 +401,7 @@
     <script defer src="/assets/logic/auth-helper.js"></script>
     <script defer src="/assets/logic/chat-format.js"></script>
     <script defer src="/assets/logic/chat-app.js"></script>
+    <script defer src="/assets/logic/chat-feature.js"></script>
     <script src="/assets/logic/sw-register.js"></script>
 </body>
 </html>

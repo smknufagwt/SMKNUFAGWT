@@ -172,12 +172,74 @@
         el.scrollTop = el.scrollHeight;
     }
 
+    const MONTHS_ID = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+    // Waktu kirim (ms) dari created_at; belum ada timestamp server (pesan lokal pending) = paling baru
+    function msgMillis(msg) {
+        const t = msg.created_at;
+        if (t && typeof t.toMillis === 'function') return t.toMillis();
+        if (t && t.seconds) return t.seconds * 1000;
+        return Date.now();
+    }
+
+    function dayLabel(ms) {
+        const d = new Date(ms), now = new Date(), yest = new Date(now);
+        yest.setDate(now.getDate() - 1);
+        const key = (x) => x.getFullYear() * 10000 + x.getMonth() * 100 + x.getDate();
+        if (key(d) === key(now)) return 'Hari ini';
+        if (key(d) === key(yest)) return 'Kemarin';
+        return d.getDate() + ' ' + MONTHS_ID[d.getMonth()] + ' ' + String(d.getFullYear()).slice(-2);
+    }
+
+    // Sisipkan sesuai urutan (waktu kirim, lalu id) — tidak bergantung urutan kedatangan dari Firestore
+    function insertSorted(container, el) {
+        const items = container.querySelectorAll('.chat-thread-msg');
+        let ref = null;
+        for (let i = items.length - 1; i >= 0; i--) {
+            const o = items[i];
+            if (o._ts < el._ts || (o._ts === el._ts && o.dataset.msgId <= el.dataset.msgId)) break;
+            ref = o;
+        }
+        container.insertBefore(el, ref);
+    }
+
+    function inOrder(el) {
+        let p = el.previousElementSibling;
+        while (p && !p.classList.contains('chat-thread-msg')) p = p.previousElementSibling;
+        let n = el.nextElementSibling;
+        while (n && !n.classList.contains('chat-thread-msg')) n = n.nextElementSibling;
+        return (!p || p._ts <= el._ts) && (!n || n._ts >= el._ts);
+    }
+
+    // Bangun ulang pemisah tanggal (Hari ini / Kemarin / 6 Okt 26) di antara pesan
+    function refreshDaySeparators(container) {
+        container.querySelectorAll('.chat-day-sep').forEach((n) => n.remove());
+        let last = '';
+        container.querySelectorAll('.chat-thread-msg').forEach((el) => {
+            const d = new Date(el._ts);
+            const key = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+            if (key === last) return;
+            last = key;
+            const sep = document.createElement('div');
+            sep.className = 'chat-day-sep';
+            sep.textContent = dayLabel(el._ts);
+            container.insertBefore(sep, el);
+        });
+    }
+
+    function setContent(el, raw) {
+        const html = ChatFormat.toHtml(raw);
+        el.querySelector('.chat-thread-msg-content').innerHTML = html;
+        el.classList.toggle('has-embed', /chat-media|chat-yt-facade|drive-facade|maps-facade/.test(html));
+    }
+
     function buildMessageEl(msg) {
         const isOwn = !!(currentUser && msg.user_id === currentUser.uid);
         const el = document.createElement('div');
         el.className = 'chat-thread-msg' + (isOwn ? ' is-own' : '');
         el.dataset.msgId = msg.id;
         el._raw = msg.content;
+        el._ts = msgMillis(msg);
 
         const name = document.createElement('span');
         name.className = 'chat-thread-msg-name';
@@ -185,7 +247,6 @@
 
         const content = document.createElement('span');
         content.className = 'chat-thread-msg-content chat-text';
-        content.innerHTML = ChatFormat.toHtml(msg.content);
 
         const time = document.createElement('span');
         time.className = 'chat-thread-msg-time';
@@ -194,6 +255,7 @@
         el.appendChild(name);
         el.appendChild(content);
         el.appendChild(time);
+        setContent(el, msg.content);
 
         if (isOwn) {
             const edit = document.createElement('button');
@@ -215,19 +277,21 @@
     }
 
     function appendMessageEl(container, msg) {
-        container.appendChild(buildMessageEl(msg));
-        while (container.children.length > 200) container.removeChild(container.firstChild);
+        insertSorted(container, buildMessageEl(msg));
+        const items = container.querySelectorAll('.chat-thread-msg');
+        for (let i = 0; i < items.length - 200; i++) items[i].remove();
     }
 
-    // Dipanggil saat dokumen 'modified': edit (isi + tanda diedit) atau created_at server terisi
+    // Dipanggil saat dokumen 'modified': edit isi/tanda diedit, atau created_at server terisi (posisi dikoreksi)
     function updateMessageEl(container, msg) {
         const el = container.querySelector('[data-msg-id="' + msg.id + '"]');
         if (!el) return;
         el._raw = msg.content;
-        if (!el.classList.contains('is-editing')) {
-            el.querySelector('.chat-thread-msg-content').innerHTML = ChatFormat.toHtml(msg.content);
-        }
+        if (!el.classList.contains('is-editing')) setContent(el, msg.content);
         el.querySelector('.chat-thread-msg-time').textContent = msgTimeLabel(msg);
+        el._ts = msgMillis(msg);
+        if (!inOrder(el)) { el.remove(); insertSorted(container, el); }
+        refreshDaySeparators(container);
         ChatFormat.observe(container);
     }
 
@@ -282,7 +346,7 @@
                     edited_at: firebase.firestore.FieldValue.serverTimestamp(),
                 });
                 el._raw = text;
-                el.querySelector('.chat-thread-msg-content').innerHTML = ChatFormat.toHtml(text);
+                setContent(el, text);
                 endEdit(el);
                 ChatFormat.observe(el.parentElement);
             } catch (e) {
@@ -301,7 +365,8 @@
     function removeMessageEl(container, id) {
         const el = container.querySelector('[data-msg-id="' + id + '"]');
         if (el) el.remove();
-        if (!container.children.length) {
+        refreshDaySeparators(container);
+        if (!container.querySelector('.chat-thread-msg')) {
             container.innerHTML = '<p class="chat-thread-empty">Belum ada pesan.</p>';
         }
     }
@@ -336,8 +401,8 @@
         form.hidden = !writable;
         note.hidden = writable;
         const gear = document.getElementById('chat-settings-btn');
-        gear.hidden = !writable;
-        if (!writable) { document.getElementById('chat-settings-panel').hidden = true; gear.classList.remove('on'); }
+        gear.hidden = !currentUser; // semua room (read/write), wajib login
+        if (!currentUser) { document.getElementById('chat-settings-panel').hidden = true; gear.classList.remove('on'); }
         if (!writable) {
             note.textContent = roomId === 'announcement'
                 ? 'Hanya admin yang bisa mengirim pesan di Announcement.'
@@ -353,7 +418,6 @@
 
         list.innerHTML = '<p class="chat-thread-loading">Memuat pesan...</p>';
 
-        let first = true;
         threadUnsub = roomMsgs(roomId).orderBy('created_at', 'desc').limit(100).onSnapshot((snap) => {
             if (currentRoomId !== roomId || !threadUnsub) return;
             if (list.querySelector('.chat-thread-loading') || list.querySelector('.chat-thread-empty')) list.innerHTML = '';
@@ -363,9 +427,8 @@
             });
             const added = snap.docChanges().filter((c) => c.type === 'added')
                 .map((c) => ({ id: c.doc.id, ...c.doc.data() }));
-            if (first) added.reverse(); // snapshot awal desc -> balik ke urutan lama->baru
-            first = false;
             added.forEach((m) => appendMessageEl(list, m));
+            refreshDaySeparators(list);
             ChatFormat.observe(list);
             if (added.length) { scrollThreadToBottom(list); markRoomRead(roomId); }
             if (!snap.docs.length && !list.children.length) list.innerHTML = '<p class="chat-thread-empty">Belum ada pesan.</p>';
@@ -523,13 +586,16 @@
         const infoBack = document.getElementById('chat-info-back-btn');
         if (infoBack) infoBack.addEventListener('click', () => navigate('/chat'));
 
-        // Roda gigi: skala teks+embed & tema (disimpan ChatPrefs di localStorage)
+        // Roda gigi (semua room, wajib login): teks 80-150%, facade/embed 90-250%, tema
         const gear = document.getElementById('chat-settings-btn');
         const panel = document.getElementById('chat-settings-panel');
-        const range = document.getElementById('chat-font-range');
+        const tRange = document.getElementById('chat-font-range');
+        const eRange = document.getElementById('chat-embed-range');
         const syncSettings = () => {
-            range.value = ChatPrefs.scale;
+            tRange.value = ChatPrefs.scale;
+            eRange.value = ChatPrefs.embedScale;
             document.getElementById('chat-font-val').textContent = ChatPrefs.scale + '%';
+            document.getElementById('chat-embed-val').textContent = ChatPrefs.embedScale + '%';
             panel.querySelectorAll('[data-theme-opt]').forEach((b) => b.classList.toggle('on', b.dataset.themeOpt === ChatPrefs.theme));
         };
         const closePanel = () => { panel.hidden = true; gear.classList.remove('on'); };
@@ -542,10 +608,13 @@
         document.addEventListener('click', (e) => {
             if (!panel.hidden && !panel.contains(e.target) && !gear.contains(e.target)) closePanel();
         });
-        range.addEventListener('input', () => { ChatPrefs.setScale(Number(range.value)); syncSettings(); });
+        tRange.addEventListener('input', () => { ChatPrefs.setScale(Number(tRange.value)); syncSettings(); });
+        eRange.addEventListener('input', () => { ChatPrefs.setEmbedScale(Number(eRange.value)); syncSettings(); });
         panel.addEventListener('click', (e) => {
             const f = e.target.closest('[data-font]');
             if (f) { ChatPrefs.setScale(ChatPrefs.scale + (f.dataset.font === '+' ? 5 : -5)); syncSettings(); return; }
+            const m = e.target.closest('[data-embed]');
+            if (m) { ChatPrefs.setEmbedScale(ChatPrefs.embedScale + (m.dataset.embed === '+' ? 10 : -10)); syncSettings(); return; }
             const t = e.target.closest('[data-theme-opt]');
             if (t) { ChatPrefs.setTheme(t.dataset.themeOpt); syncSettings(); return; }
             if (e.target.closest('[data-prefs-reset]')) { ChatPrefs.reset(); syncSettings(); }
