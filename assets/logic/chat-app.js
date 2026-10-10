@@ -233,6 +233,39 @@
         el.classList.toggle('has-embed', /chat-media|chat-yt-facade|drive-facade|maps-facade/.test(html));
     }
 
+    // Hanya foto profil Google (https://lh*.googleusercontent.com) yang dirender; ukuran dinormalkan
+    // ke satu URL per pengguna (=s64-c) supaya browser meng-cache dan memakainya ulang di semua pesan.
+    function safeAvatar(u, size) {
+        if (typeof u !== 'string' || u.length > 500) return '';
+        if (!/^https:\/\/lh[0-9]\.googleusercontent\.com\//i.test(u)) return '';
+        return u.replace(/=s\d+(-c)?$/i, '') + '=s' + size + '-c';
+    }
+
+    function avatarEl(msg, isOwn) {
+        const label = String(msg.display_name || 'Anonim').trim() || 'Anonim';
+        const wrap = document.createElement('span');
+        wrap.className = 'chat-avatar';
+        wrap.setAttribute('aria-hidden', 'true');
+        let hue = 0;
+        const seed = String(msg.user_id || label);
+        for (let i = 0; i < seed.length; i++) hue = (hue * 31 + seed.charCodeAt(i)) % 360;
+        wrap.style.setProperty('--av-h', String(hue));
+        wrap.textContent = Array.from(label)[0].toUpperCase();
+        // Pesan lama tanpa photo_url: untuk pesan sendiri pakai foto akun yang sedang login
+        const url = safeAvatar(msg.photo_url || (isOwn && currentUser ? currentUser.photoURL : ''), 64);
+        if (url) {
+            const img = document.createElement('img');
+            img.alt = '';
+            img.loading = 'lazy';
+            img.decoding = 'async';
+            img.referrerPolicy = 'no-referrer';
+            img.onerror = () => img.remove(); // gagal muat -> huruf inisial tetap tampil
+            img.src = url;
+            wrap.appendChild(img);
+        }
+        return wrap;
+    }
+
     function buildMessageEl(msg) {
         const isOwn = !!(currentUser && msg.user_id === currentUser.uid);
         const el = document.createElement('div');
@@ -252,7 +285,11 @@
         time.className = 'chat-thread-msg-time';
         time.textContent = msgTimeLabel(msg);
 
-        el.appendChild(name);
+        const head = document.createElement('div');
+        head.className = 'chat-thread-msg-head';
+        head.appendChild(avatarEl(msg, isOwn));
+        head.appendChild(name);
+        el.appendChild(head);
         el.appendChild(content);
         el.appendChild(time);
         setContent(el, msg.content);
@@ -442,13 +479,19 @@
     async function sendMessage(roomId, content) {
         const text = content.trim().slice(0, 1000);
         if (!db || !currentUser || !text) return;
+        const doc = {
+            room_id: roomId, user_id: currentUser.uid,
+            display_name: (currentUser.displayName || 'Anonim').slice(0, 60),
+            content: text, created_at: firebase.firestore.FieldValue.serverTimestamp(),
+        };
+        const photo = safeAvatar(currentUser.photoURL, 64);
         try {
-            await roomMsgs(roomId).add({
-                room_id: roomId, user_id: currentUser.uid,
-                display_name: (currentUser.displayName || 'Anonim').slice(0, 60),
-                content: text, created_at: firebase.firestore.FieldValue.serverTimestamp(),
-            });
+            await roomMsgs(roomId).add(photo ? { ...doc, photo_url: photo } : doc);
         } catch (e) {
+            // Rules lama (belum mengenal photo_url) menolak field tambahan -> kirim ulang tanpa foto
+            if (e.code === 'permission-denied' && photo) {
+                try { await roomMsgs(roomId).add(doc); return; } catch (e2) { e = e2; }
+            }
             showChatToast(e.code === 'permission-denied' ? 'Tidak punya akses tulis di ruang ini.' : 'Gagal kirim pesan.');
         }
     }
