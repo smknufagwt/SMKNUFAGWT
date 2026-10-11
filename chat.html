@@ -354,36 +354,79 @@
         <div class="chat-feature-modal" id="chat-feature-modal" hidden role="dialog" aria-modal="true" aria-labelledby="chat-feature-title">
             <div class="chat-feature-card">
                 <button class="chat-feature-close" id="chat-feature-close" type="button" aria-label="Tutup">&#10005;</button>
-                <h3 id="chat-feature-title">💡 Ajukan fitur baru</h3>
+                <h3 id="chat-feature-title">💡 Usul fitur atau laporkan masalah</h3>
+                <p class="chat-feature-lead">Ceritakan dengan jelas apa yang kamu butuhkan. Makin lengkap ceritanya, makin cepat tim memahami dan mengerjakannya.</p>
                 <ol class="chat-feature-flow">
-                    <li>Tulis idemu di bawah ini.</li>
-                    <li>Kirim lewat <b>GitHub</b> (publik, bisa dipantau) atau <b>Email</b> (privat).</li>
-                    <li>Admin meninjau dan memberi label.</li>
-                    <li>Kalau disetujui, dikerjakan dan dicatat di Jurnal (<a href="/blog">/blog</a>).</li>
+                    <li>Isi formulir di bawah ini.</li>
+                    <li>Pilih cara kirim: <b>GitHub</b> (terlihat publik, bisa kamu pantau perkembangannya) atau <b>Email</b> (pribadi).</li>
+                    <li>Admin membaca, lalu menentukan apakah dan kapan dikerjakan.</li>
+                    <li>Kalau dikerjakan, hasilnya dicatat di Jurnal (<a href="/blog">/blog</a>).</li>
                 </ol>
                 <div class="chat-feature-form">
-                    <label>Jenis
-                        <select id="chat-feature-type">
-                            <option>Fitur baru</option>
-                            <option>Perbaikan bug</option>
-                            <option>Tampilan / desain</option>
-                            <option>Lainnya</option>
-                        </select>
-                    </label>
+                    <div class="chat-feature-row">
+                        <label>Jenis
+                            <select id="chat-feature-type">
+                                <option>Fitur baru</option>
+                                <option>Ada yang rusak / error</option>
+                                <option>Tampilan atau desain</option>
+                                <option>Terasa lambat atau berat</option>
+                                <option>Keamanan dan privasi</option>
+                                <option>Saran atau pertanyaan</option>
+                                <option>Lainnya</option>
+                            </select>
+                        </label>
+                        <label>Bagian yang dimaksud
+                            <select id="chat-feature-area">
+                                <option>Semua bagian</option>
+                                <option>Ruang Public</option>
+                                <option>Ruang Announcement</option>
+                                <option>Ruang kelas</option>
+                                <option>Halaman beranda</option>
+                                <option>Blog / Jurnal</option>
+                                <option>Login akun</option>
+                            </select>
+                        </label>
+                    </div>
                     <label>Judul singkat
-                        <input type="text" id="chat-feature-name" maxlength="80" placeholder="Contoh: Balas pesan dengan kutipan" autocomplete="off">
+                        <input type="text" id="chat-feature-name" maxlength="80" placeholder="Contoh: Balas pesan dengan mengutip" autocomplete="off">
                     </label>
-                    <label>Ceritakan idenya
-                        <textarea id="chat-feature-detail" rows="4" maxlength="800" placeholder="Apa yang kamu inginkan, dan kapan dibutuhkan?"></textarea>
+                    <label>Ceritakan idenya atau masalahnya
+                        <textarea id="chat-feature-detail" rows="5" maxlength="1500" placeholder="Apa yang kamu inginkan? Apa yang sekarang kurang pas? Boleh ditulis panjang."></textarea>
+                        <span class="chat-feature-count" id="chat-feature-count">0 / 1500</span>
+                    </label>
+                    <label>Kalau ini masalah: apa yang kamu lakukan sampai muncul? (opsional)
+                        <textarea id="chat-feature-steps" rows="3" maxlength="600" placeholder="Contoh: 1. Buka ruang Pemasaran 1  2. Kirim foto  3. Foto tidak muncul"></textarea>
                     </label>
                     <label>Manfaatnya buat siapa? (opsional)
-                        <textarea id="chat-feature-benefit" rows="2" maxlength="300"></textarea>
+                        <textarea id="chat-feature-benefit" rows="2" maxlength="300" placeholder="Contoh: Semua siswa kelas 1, supaya tidak salah paham saat membalas"></textarea>
                     </label>
-                    <p class="chat-feature-warn">⚠️ Isi issue GitHub bersifat publik. Jangan menulis data pribadi (nomor HP, alamat, email). Kalau ragu, pakai Email.</p>
+                    <label>Seberapa penting?
+                        <select id="chat-feature-priority">
+                            <option>Biasa saja</option>
+                            <option>Cukup penting</option>
+                            <option>Mendesak, mengganggu pemakaian</option>
+                        </select>
+                    </label>
+                    <details class="chat-feature-tips">
+                        <summary>✍️ Tips menulis: boleh pakai format Markdown (.md)</summary>
+                        <div>
+                            <p>Kalau kamu terbiasa dengan Markdown, kolom cerita dan langkah mendukungnya. Lewat GitHub tulisanmu tampil rapi; lewat Email tampil sebagai teks biasa.</p>
+                            <ul>
+                                <li><code>**tebal**</code> dan <code>*miring*</code></li>
+                                <li><code>- butir</code> untuk daftar, <code>1.</code> untuk urutan langkah</li>
+                                <li><code>- [ ] tugas</code> untuk daftar centang</li>
+                                <li><code>&gt; kutipan</code> dan <code>`kode`</code></li>
+                                <li><code>[teks](https://alamat)</code> untuk tautan</li>
+                            </ul>
+                            <p>Belum paham? Tulis biasa saja, tidak apa-apa.</p>
+                        </div>
+                    </details>
+                    <p class="chat-feature-warn">⚠️ Kiriman lewat GitHub bisa dibaca siapa saja. Jangan menulis data pribadi (nomor HP, alamat, kata sandi). Kalau ragu, pakai Email.</p>
                     <p class="chat-feature-msg" id="chat-feature-msg" hidden></p>
                     <div class="chat-feature-actions">
                         <button type="button" id="chat-feature-github"><i class="fa-brands fa-github"></i> Kirim lewat GitHub</button>
                         <button type="button" id="chat-feature-email"><i class="fa-solid fa-envelope"></i> Kirim lewat Email</button>
+                        <button type="button" id="chat-feature-copy" class="is-secondary"><i class="fa-regular fa-copy"></i> Salin teks (.md)</button>
                     </div>
                 </div>
             </div>

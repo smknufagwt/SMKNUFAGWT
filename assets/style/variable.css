@@ -1110,3 +1110,15 @@ html[data-chat-theme="light"] .chat-nav-title { text-shadow: none; }
     100% { transform: translate3d(100%, 0, 0); opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .chat-text .chat-inline-quote::before { animation: none; opacity: 0; } }
+
+/* ═══ Modal usul fitur — pelengkap tata letak ═══ */
+.chat-feature-card { width: min(520px, 100%); padding-right: 16px; }
+.chat-feature-lead { margin: 0 0 8px; color: var(--chat-text); }
+.chat-feature-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
+@media (max-width: 440px) { .chat-feature-row { grid-template-columns: 1fr; } }
+.chat-feature-count { display: block; margin-top: 2px; text-align: right; font-size: 0.62rem; color: var(--chat-gold-dim); }
+.chat-feature-tips { margin: 4px 0 8px; padding: 6px 10px; border: 1px solid var(--chat-nav-border); border-radius: 8px; color: var(--chat-text); }
+.chat-feature-tips summary { cursor: pointer; color: var(--chat-gold-bright); }
+.chat-feature-tips ul { margin: 6px 0; padding-left: 18px; }
+.chat-feature-tips code { padding: 0 4px; border-radius: 4px; background: rgba(var(--chat-gold-rgb), 0.12); font-size: 0.72rem; }
+.chat-feature-actions button.is-secondary { background: none; }
