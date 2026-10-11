@@ -1123,25 +1123,38 @@ html[data-chat-theme="light"] .chat-nav-title { text-shadow: none; }
 .chat-feature-tips code { padding: 0 4px; border-radius: 4px; background: rgba(var(--chat-gold-rgb), 0.12); font-size: 0.72rem; }
 .chat-feature-actions button.is-secondary { background: none; }
 
-/* ═══ Desktop/PC (≥900px): list room grid, thread & nav melebar ═══ */
+/* ═══ Desktop/PC (≥900px): split view — sidebar room kiri, thread kanan ═══ */
 @media (min-width: 900px) {
-    .chat-nav { padding-inline: max(14px, calc((100% - 1040px) / 2)); }
-    .chat-room-list {
-        max-width: 1040px; padding: 24px 24px 56px;
-        display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px 14px; align-content: start;
+    :root { --chat-side: 340px; }
+    html:not(.chat-info-open) #chat-view #chat-room-list[hidden] { display: block !important; }
+    html:not(.chat-info-open) #chat-view .chat-room-list {
+        position: fixed; top: var(--chat-nav-height); bottom: 0; left: 0; z-index: 35;
+        width: var(--chat-side); max-width: none; margin: 0; padding: 16px; overflow-y: auto;
+        background: var(--chat-bg); border-right: 1px solid var(--chat-nav-border); box-sizing: border-box;
     }
-    .chat-room-list > * { grid-column: 1 / -1; margin-top: 0; margin-bottom: 0; }
-    .chat-room-list > .chat-room-item[data-room] { grid-column: span 3; }
-    .chat-room-list > .chat-room-group { grid-column: span 2; }
-    .chat-room-list > .chatapp-online-total { justify-self: start; }
-    .chat-room-placeholder { max-width: 720px; padding-top: 32px; }
-    .chat-room-thread { max-width: 960px; padding-inline: 24px; }
+    .chat-room-item.is-active { border-color: var(--chat-gold); background: rgba(var(--chat-gold-rgb), 0.16); }
+    html:not(.chat-info-open) #chat-view .chat-room-thread {
+        left: var(--chat-side); right: 0; width: auto; max-width: none; margin: 0; padding-inline: 0;
+    }
+    html:not(.chat-info-open) #chat-view .chat-room-placeholder { max-width: none; margin: 0 0 0 var(--chat-side); padding: 32px; }
+    .chat-thread-head, .chat-thread-messages, .chat-thread-readonly-note, .chat-thread-form {
+        padding-inline: max(24px, calc((100% - 900px) / 2));
+    }
+    .chat-thread-back-btn, #chat-thread-back-btn, #chat-back-btn { display: none; }
     .chat-thread-msg { max-width: 70%; }
     .chat-settings-panel { width: 340px; }
+    html:not(.chat-info-open) #chat-view::after {
+        content: 'Pilih ruang percakapan di sebelah kiri'; position: fixed; top: var(--chat-nav-height); bottom: 0;
+        left: var(--chat-side); right: 0; display: flex; align-items: center; justify-content: center;
+        color: var(--chat-gold-dim); font-size: 0.85rem; letter-spacing: 1px; pointer-events: none;
+    }
+    #chat-view:has(#chat-room-thread:not([hidden]))::after,
+    #chat-view:has(#chat-room-placeholder:not([hidden]))::after { display: none !important; }
 }
 @media (min-width: 1400px) {
-    .chat-nav { padding-inline: max(14px, calc((100% - 1200px) / 2)); }
-    .chat-room-list { max-width: 1200px; }
-    .chat-room-thread { max-width: 1080px; }
+    :root { --chat-side: 380px; }
+    .chat-thread-head, .chat-thread-messages, .chat-thread-readonly-note, .chat-thread-form {
+        padding-inline: max(32px, calc((100% - 1000px) / 2));
+    }
     .chat-thread-msg { max-width: 62%; }
 }

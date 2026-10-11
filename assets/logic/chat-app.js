@@ -597,6 +597,8 @@
         const info = document.getElementById('chat-info-view');
         if (info) info.hidden = roomId !== 'info';
         document.documentElement.classList.toggle('chat-lock', !!roomId && roomId !== 'info' && roomId !== 'unknown');
+        document.documentElement.classList.toggle('chat-info-open', roomId === 'info');
+        document.querySelectorAll('.chat-room-item[data-room]').forEach((a) => a.classList.toggle('is-active', a.dataset.room === roomId));
         if (roomId === 'info') { showInfo(); return; }
         if (!roomId) showRoomList();
         else enterRoom(roomId);
