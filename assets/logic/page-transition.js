@@ -1,4 +1,4 @@
-// Transisi mulus main site <-> /blog: skip boot overlay & tombol "kembali" tanpa reload berat.
+// Transisi mulus main site <-> /blog & /chat: skip boot overlay & tombol "kembali" tanpa reload berat.
 document.addEventListener("DOMContentLoaded", function () {
     // Sisi main site: kalau baru balik dari blog, langsung masuk (skip overlay) —
     // TAPI cuma kalau autoResumeAccess (site-fx.js) belum lebih dulu masukin (cek opacity,
@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Sisi blog: tandai akses terbuka sebelum balik ke beranda
-    const btnKembali = document.getElementById('btn-kembali');
+    const btnKembali = document.getElementById('btn-kembali') || document.getElementById('chat-home-btn');
     if (btnKembali) {
         btnKembali.addEventListener('click', function (e) {
             e.preventDefault();

@@ -1097,3 +1097,16 @@ html[data-chat-theme="light"] .chat-nav-title { text-shadow: none; }
 @media (prefers-reduced-motion: reduce) {
     #chat-view *, #chat-view *::before, #chat-view *::after { animation: none !important; transition: none !important; }
 }
+
+/* Kutip: sapuan cahaya mulus — digerakkan transform (GPU), memudar di tepi sehingga tak ada lompatan saat loop */
+.chat-text .chat-inline-quote::before {
+    background-size: 100% 100%; transform: translate3d(-100%, 0, 0); will-change: transform, opacity;
+    animation: quote-sweep 5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@keyframes quote-sweep {
+    0%   { transform: translate3d(-100%, 0, 0); opacity: 0; }
+    20%  { opacity: 1; }
+    80%  { opacity: 1; }
+    100% { transform: translate3d(100%, 0, 0); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .chat-text .chat-inline-quote::before { animation: none; opacity: 0; } }
