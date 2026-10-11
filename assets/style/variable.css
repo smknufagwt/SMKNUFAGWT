@@ -1122,3 +1122,26 @@ html[data-chat-theme="light"] .chat-nav-title { text-shadow: none; }
 .chat-feature-tips ul { margin: 6px 0; padding-left: 18px; }
 .chat-feature-tips code { padding: 0 4px; border-radius: 4px; background: rgba(var(--chat-gold-rgb), 0.12); font-size: 0.72rem; }
 .chat-feature-actions button.is-secondary { background: none; }
+
+/* ═══ Desktop/PC (≥900px): list room grid, thread & nav melebar ═══ */
+@media (min-width: 900px) {
+    .chat-nav { padding-inline: max(14px, calc((100% - 1040px) / 2)); }
+    .chat-room-list {
+        max-width: 1040px; padding: 24px 24px 56px;
+        display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px 14px; align-content: start;
+    }
+    .chat-room-list > * { grid-column: 1 / -1; margin-top: 0; margin-bottom: 0; }
+    .chat-room-list > .chat-room-item[data-room] { grid-column: span 3; }
+    .chat-room-list > .chat-room-group { grid-column: span 2; }
+    .chat-room-list > .chatapp-online-total { justify-self: start; }
+    .chat-room-placeholder { max-width: 720px; padding-top: 32px; }
+    .chat-room-thread { max-width: 960px; padding-inline: 24px; }
+    .chat-thread-msg { max-width: 70%; }
+    .chat-settings-panel { width: 340px; }
+}
+@media (min-width: 1400px) {
+    .chat-nav { padding-inline: max(14px, calc((100% - 1200px) / 2)); }
+    .chat-room-list { max-width: 1200px; }
+    .chat-room-thread { max-width: 1080px; }
+    .chat-thread-msg { max-width: 62%; }
+}
