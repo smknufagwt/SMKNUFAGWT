@@ -894,7 +894,9 @@ html.chat-lock, html.chat-lock body { overflow: hidden; overscroll-behavior: non
     transition: border-color 0.15s ease, background 0.15s ease;
 }
 .chat-footer-link:hover { border-color: var(--chat-gold); background: rgba(var(--chat-gold-rgb), 0.08); }
-.chat-footer-note { width: 100%; margin: 4px 0 0; text-align: center; font-size: 0.62rem; color: var(--chat-gold-dim); }
+.chat-footer-about { width: 100%; margin: 0 0 4px; text-align: center; font-size: 0.7rem; line-height: 1.5; color: var(--chat-text); }
+.chat-footer-note a { color: var(--chat-gold-bright); }
+.chat-footer-note { width: 100%; line-height: 1.5; margin: 4px 0 0; text-align: center; font-size: 0.62rem; color: var(--chat-gold-dim); }
 
 .chat-feature-modal {
     position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center;

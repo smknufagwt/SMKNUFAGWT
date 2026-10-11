@@ -4,6 +4,13 @@
    ========================================================================== */
 const POSTS = [
     {
+        date: "2026-10-11",
+        tag: "UPDATE",
+        title: "Chat NUFABASE makin rapi: tema, pengaturan, avatar, dan Ajukan Fitur",
+        banner: { src: "/appcover.jpg", alt: "Screenshot tampilan halaman /chat NUFABASE: daftar ruang obrolan, footer, dan tema emas" },
+        body: "Beberapa commit terakhir fokus merapikan halaman <b>/chat</b> supaya lebih nyaman dipakai sehari-hari.\n\n<b>Yang baru:</b>\n<ul>\n<li>Tema terang/gelap dan roda gigi pengaturan: ukuran teks (80–150%) dan ukuran embed (90–250%) bisa diatur terpisah.</li>\n<li>Format pesan disamakan dengan Global Live Chat: tebal, coret, kutipan, tautan, dan embed media. Pesan milik sendiri bisa diedit dan dihapus.</li>\n<li>Pesan diurutkan menurut waktu kirim, lengkap dengan pemisah tanggal.</li>\n<li>Avatar kecil di tiap pesan, tanpa tambahan pembacaan database.</li>\n<li>Footer /chat kini berisi info singkat dan tombol <b>Ajukan fitur baru</b> (lewat GitHub Issue atau Email).</li>\n<li>Halaman <a href=\"/chat/info\">Info, Aturan &amp; Privasi</a> dan tampilan dengan kontras yang lebih jelas.</li>\n</ul>\n\nPunya ide fitur? Tekan <b>Ajukan fitur baru</b> di footer /chat."
+    },
+    {
         date: "2026-08-14",
         tag: "UPDATE",
         title: "Backsound dinamis, domain baru, dan Beta Chat per Kelas",
