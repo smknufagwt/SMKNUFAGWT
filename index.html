@@ -395,6 +395,13 @@
             }
         };
         window.MediaPrefs = MediaPrefs;
+        // Sinkron dgn /chat: perubahan di tab lain langsung terbaca
+        window.addEventListener('storage', (e) => {
+            if (!e.key || e.key.indexOf('nufa_media_') !== 0) return;
+            MediaPrefs.autoplay = localStorage.getItem('nufa_media_autoplay') !== 'off';
+            MediaPrefs.loop = localStorage.getItem('nufa_media_loop') !== 'off';
+            MediaPrefs.soundDefault = localStorage.getItem('nufa_media_sound') === 'on';
+        });
 
         // YouTube IFrame: autoplay=1 digabung loop=1+playlist=selfId di URL src memicu race condition
         // bawaan YouTube (player belum selesai init loop-nya pas autoplay nembak) → keliatan sebagai

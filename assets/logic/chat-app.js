@@ -14,8 +14,8 @@
         'pemasaran-3', 'otomotif-3',
     ];
     const ROOM_LABELS = {
-        'public': 'Public',
-        'announcement': 'Announcement',
+        'public': 'Umum',
+        'announcement': 'Pengumuman',
         'pemasaran-1': 'Pemasaran 1', 'otomotif-1': 'Otomotif 1',
         'pemasaran-2': 'Pemasaran 2', 'otomotif-2': 'Otomotif 2',
         'pemasaran-3': 'Pemasaran 3', 'otomotif-3': 'Otomotif 3',
@@ -23,7 +23,7 @@
     const ALL_ROOM_IDS = ['public', 'announcement'].concat(CLASS_ROOM_IDS);
 
     const ACCOUNT_HINT_MESSAGES = [
-        'Login akun google anda',
+        'Masuk dengan akun Google',
         'Akses percakapan dengan email anda',
         'Kelas kamu, obrolan kamu 🎓',
         'Aman & privat, cukup 1x klik',
@@ -148,6 +148,7 @@
         document.getElementById('chat-room-thread').hidden = true;
         teardownThread();
         if (currentUser) computeUnreadCounts();
+        updateMyRooms();
     }
 
     function showPlaceholderText(msg) {
@@ -442,7 +443,7 @@
         if (!currentUser) { document.getElementById('chat-settings-panel').hidden = true; gear.classList.remove('on'); }
         if (!writable) {
             note.textContent = roomId === 'announcement'
-                ? 'Hanya admin yang bisa mengirim pesan di Announcement.'
+                ? 'Hanya admin yang bisa mengirim pesan di Pengumuman.'
                 : 'Kamu tidak punya akses tulis di ruang ini — cuma bisa baca.';
         }
 
@@ -567,7 +568,7 @@
             return;
         }
         if (!currentUser) {
-            showPlaceholderText('Login dengan Google dulu buat mengakses "' + (ROOM_LABELS[roomId] || roomId) + '".');
+            showPlaceholderText('Masuk dengan Google dulu untuk mengakses "' + (ROOM_LABELS[roomId] || roomId) + '".');
             return;
         }
         if (!db) {
@@ -626,6 +627,18 @@
             });
         }
 
+        const notifBtn = document.getElementById('chat-notif-btn');
+        if (notifBtn) notifBtn.addEventListener('click', toggleNotif);
+
+        // Link footer ke Info: kalau sudah di halaman Info, blok dan beri pesan sistem
+        document.addEventListener('click', (e) => {
+            const a = e.target.closest('.chat-footer-link[href="/chat/info"]');
+            if (!a) return;
+            e.preventDefault();
+            if (pathToRoomId(window.location.pathname) === 'info') showChatToast('Sistem: Anda sudah berada di sini (Info, Aturan & Privasi).');
+            else navigate('/chat/info');
+        });
+
         document.getElementById('chat-back-btn').addEventListener('click', () => navigate('/chat'));
         document.getElementById('chat-thread-back-btn').addEventListener('click', () => navigate('/chat'));
         const infoBack = document.getElementById('chat-info-back-btn');
@@ -641,6 +654,7 @@
             eRange.value = ChatPrefs.embedScale;
             document.getElementById('chat-font-val').textContent = ChatPrefs.scale + '%';
             document.getElementById('chat-embed-val').textContent = ChatPrefs.embedScale + '%';
+            panel.querySelectorAll('[data-media-pref]').forEach((c) => { c.checked = !!window.MediaPrefs[c.dataset.mediaPref]; });
             panel.querySelectorAll('[data-theme-opt]').forEach((b) => b.classList.toggle('on', b.dataset.themeOpt === ChatPrefs.theme));
         };
         const closePanel = () => { panel.hidden = true; gear.classList.remove('on'); };
@@ -655,6 +669,14 @@
         });
         tRange.addEventListener('input', () => { ChatPrefs.setScale(Number(tRange.value)); syncSettings(); });
         eRange.addEventListener('input', () => { ChatPrefs.setEmbedScale(Number(eRange.value)); syncSettings(); });
+        // Pengaturan media memakai key localStorage yang sama dengan beranda (sinkron otomatis)
+        panel.addEventListener('change', (e) => {
+            const c = e.target.closest('[data-media-pref]');
+            if (!c) return;
+            window.MediaPrefs.set(c.dataset.mediaPref, c.checked);
+            showChatToast('Pengaturan media disimpan. Berlaku untuk media yang tampil berikutnya.');
+        });
+        window.addEventListener('mediaprefs', () => { if (!panel.hidden) syncSettings(); });
         panel.addEventListener('click', (e) => {
             const f = e.target.closest('[data-font]');
             if (f) { ChatPrefs.setScale(ChatPrefs.scale + (f.dataset.font === '+' ? 5 : -5)); syncSettings(); return; }
@@ -757,15 +779,20 @@
                 greetEl.hidden = true;
             }
         }
+        renderNotifBtn();
         updateAccountHint();
     }
 
     function refreshRoomStatuses() {
         if (!db || !currentUser) {
             document.querySelectorAll('.chat-room-status').forEach((el) => {
-                el.textContent = 'Login untuk minta akses';
+                el.textContent = 'Masuk untuk minta akses';
                 el.removeAttribute('data-state');
             });
+            return;
+        }
+        if (isAdmin) { // admin sudah punya akses baca & tulis ke semua ruang
+            document.querySelectorAll('.chat-room-status').forEach((el) => { el.textContent = 'Akses penuh'; el.setAttribute('data-state', 'approved'); });
             return;
         }
         db.collection('room_access_requests')
@@ -872,13 +899,51 @@
         renderUnreadBadges();
     }
 
+    // Satu tombol bel untuk semua ruang; notifikasi di-collapse jadi satu (tag sama)
+    const K_NOTIF = 'nufa_chat_notif_all';
+    function notifOn() {
+        if (!('Notification' in window) || Notification.permission !== 'granted') return false;
+        let v = null;
+        try { v = localStorage.getItem(K_NOTIF); } catch (e) { /* storage diblok */ }
+        return v !== 'off';
+    }
+
+    function renderNotifBtn() {
+        const b = document.getElementById('chat-notif-btn');
+        if (!b) return;
+        const on = notifOn();
+        b.hidden = !currentUser || !('Notification' in window);
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-pressed', String(on));
+        b.title = on ? 'Notifikasi menyala untuk semua ruang' : 'Notifikasi mati';
+        b.innerHTML = '<i class="fa-solid fa-bell' + (on ? '' : '-slash') + '"></i>';
+    }
+
+    async function toggleNotif() {
+        if (notifOn()) {
+            try { localStorage.setItem(K_NOTIF, 'off'); } catch (e) { /* abaikan */ }
+            showChatToast('Notifikasi chat dimatikan.');
+        } else {
+            if (Notification.permission === 'default') await Notification.requestPermission().catch(() => {});
+            if (Notification.permission === 'granted') {
+                try { localStorage.setItem(K_NOTIF, 'on'); } catch (e) { /* abaikan */ }
+                showChatToast('Notifikasi menyala untuk semua ruang chat.');
+            } else {
+                showChatToast('Izin notifikasi ditolak. Aktifkan lewat pengaturan browser.');
+            }
+        }
+        renderNotifBtn();
+    }
+
     function maybeNotify(msg) {
-        if (!('Notification' in window) || Notification.permission !== 'granted') return;
+        if (!notifOn()) return;
         try {
-            const n = new Notification((ROOM_LABELS[msg.room_id] || msg.room_id) + ' • ' + (msg.display_name || 'Pesan baru'), {
-                body: window.ChatFormat ? ChatFormat.toPlainText(msg.content) : msg.content,
+            const body = window.ChatFormat ? ChatFormat.toPlainText(msg.content) : msg.content;
+            const n = new Notification('Chat NUFABASE', {
+                body: (ROOM_LABELS[msg.room_id] || msg.room_id) + ' • ' + (msg.display_name || 'Pesan baru') + ': ' + body,
                 icon: '/appcover.jpg',
-                tag: 'chat-' + msg.room_id,
+                tag: 'nufa-chat-all',
+                renotify: true,
             });
             n.onclick = () => {
                 window.focus();
@@ -886,6 +951,49 @@
                 n.close();
             };
         } catch (e) { /* browser nolak/gak dukung, abaikan */ }
+    }
+
+    // Kelas yang sudah disetujui naik ke kotak "Kelasmu" dengan animasi FLIP (tiap masuk/akses chat)
+    function placeHome(el) {
+        const idx = CLASS_ROOM_IDS.indexOf(el.dataset.room);
+        const next = Array.from(el._home.querySelectorAll('.chat-room-item'))
+            .find((x) => CLASS_ROOM_IDS.indexOf(x.dataset.room) > idx);
+        el._home.insertBefore(el, next || null);
+    }
+
+    function updateMyRooms() {
+        const box = document.getElementById('chat-room-mine'), list = document.getElementById('chat-room-list');
+        if (!box || !list || !list.getClientRects().length) return; // daftar belum terlihat: ditunda sampai showRoomList
+        const want = currentUser && !isAdmin ? CLASS_ROOM_IDS.filter((id) => accessibleRooms.includes(id)) : [];
+        const moves = Array.from(document.querySelectorAll('.chat-room-item-class'))
+            .filter((el) => (el.parentElement === box) !== want.includes(el.dataset.room));
+        if (!moves.length) return;
+        const all = Array.from(document.querySelectorAll('.chat-room-item'));
+        const first = new Map(all.map((el) => [el, el.getBoundingClientRect().top]));
+        moves.forEach((el) => {
+            if (!el._home) el._home = el.parentElement;
+            if (want.includes(el.dataset.room)) box.appendChild(el); else placeHome(el);
+        });
+        box.hidden = !box.querySelector('.chat-room-item');
+        document.querySelectorAll('.chat-room-group:not(.chat-room-mine)').forEach((g) => { g.hidden = !g.querySelector('.chat-room-item'); });
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        all.forEach((el) => {
+            const dy = first.get(el) - el.getBoundingClientRect().top;
+            if (!dy) return;
+            el.style.transition = 'none';
+            el.style.transform = 'translateY(' + dy + 'px)';
+        });
+        void list.offsetWidth; // paksa reflow supaya transisi jalan
+        all.forEach((el) => {
+            if (!el.style.transform) return;
+            el.style.transition = 'transform 0.75s cubic-bezier(0.22, 1, 0.36, 1)';
+            el.style.transform = '';
+            setTimeout(() => { el.style.transition = ''; }, 800);
+        });
+        moves.filter((el) => want.includes(el.dataset.room)).forEach((el) => {
+            el.classList.add('is-promoted');
+            setTimeout(() => el.classList.remove('is-promoted'), 2400);
+        });
     }
 
     function teardownUnreadChannel() {
@@ -910,13 +1018,6 @@
                 });
             }, () => {})
         );
-    }
-
-    function maybeRequestNotificationPermission() {
-        if (!('Notification' in window)) return;
-        if (Notification.permission === 'default') {
-            Notification.requestPermission().catch(() => {});
-        }
     }
 
     // ── presence: 1 channel global (bukan 8 channel per-room — lebih hemat
@@ -1061,7 +1162,6 @@
                 await window.AuthHelper.ensureProfile(user);
                 isAdmin = (await window.AuthHelper.resolveRole(user)).isAdmin;
                 await loadAccess();
-                maybeRequestNotificationPermission();
                 computeUnreadCounts();
                 setupUnreadChannel();
                 setupPresenceChannel();
@@ -1073,6 +1173,7 @@
                 renderUnreadBadges();
             }
             refreshRoomStatuses();
+            updateMyRooms();
             if (isChatPath(window.location.pathname)) render();
         });
     }

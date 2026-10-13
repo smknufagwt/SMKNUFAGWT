@@ -5,7 +5,7 @@
     const REPO = 'smknufagwt/SMKNUFAGWT';
     const MAIL = 'smknufagwt@gmail.com';
     const MAX_URL = 7000; // batas aman panjang URL GitHub
-    const MAX_FILES = 5, MAX_TOTAL = 100 * 1024 * 1024; // lampiran: maks 100 MB total
+    const MAX_FILES = 5, MAX_TOTAL = 25 * 1024 * 1024; // lampiran: maks 25 MB total (lebih besar: tautan Drive)
     const $ = (id) => document.getElementById(id);
     let files = [];
 
@@ -75,14 +75,14 @@
                 x.addEventListener('click', () => { files.splice(i, 1); renderFiles(); });
                 li.append(n, s, x); list.appendChild(li);
             });
-            totalEl.textContent = mb(total()) + ' / 100 MB';
+            totalEl.textContent = mb(total()) + ' / 25 MB';
         }
 
         picker.addEventListener('change', () => {
             let skipped = '';
             Array.from(picker.files).forEach((f) => {
                 if (files.length >= MAX_FILES) skipped = 'Maksimal ' + MAX_FILES + ' file.';
-                else if (total() + f.size > MAX_TOTAL) skipped = '"' + f.name + '" tidak ditambahkan: total lampiran melebihi 100 MB.';
+                else if (total() + f.size > MAX_TOTAL) skipped = '"' + f.name + '" tidak ditambahkan: total lampiran melebihi 25 MB. Untuk file besar, pakai tautan Google Drive.';
                 else files.push(f);
             });
             picker.value = '';

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
     <title>CHAT NUFABASE - SMK NURUL FALAH</title>
-    <meta name="description" content="Chat NUFABASE SMK Nurul Falah: ruang obrolan Public, Announcement, dan kelas. Baca info, aturan, dan kebijakan privasi di sini.">
+    <meta name="description" content="Chat NUFABASE SMK Nurul Falah: ruang obrolan Umum, Pengumuman, dan kelas. Baca info, aturan, dan kebijakan privasi di sini.">
     <meta name="author" content="SMK Nurul Falah">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="/chat" />
@@ -43,6 +43,7 @@
             <span class="chat-beta-badge" id="chat-beta-badge">BETA</span>
             <div class="chat-account-wrap" id="chat-account-wrap">
                 <span class="chat-account-hint" id="chat-account-hint"></span>
+                <button class="chat-account-btn chat-notif-btn" id="chat-notif-btn" type="button" aria-label="Notifikasi chat" aria-pressed="false" hidden><i class="fa-solid fa-bell-slash"></i></button>
                 <button class="chat-account-btn" id="chat-account-btn" type="button" aria-label="Akun">
                     <span class="chat-account-icon" id="chat-account-icon">🔒</span>
                 </button>
@@ -53,7 +54,7 @@
             <p class="chat-room-greeting" id="chat-room-greeting" hidden></p>
             <button class="chatapp-online-total" id="chatapp-online-total" type="button" hidden>
                 <span class="chatapp-online-dot"></span>
-                <span class="chatapp-online-count">0</span> orang online
+                <span class="chatapp-online-count">0</span> online
             </button>
             <div class="chatapp-online-list" id="chatapp-online-list" hidden></div>
             <a class="chat-room-item chat-info-link" href="/chat/info">
@@ -66,17 +67,21 @@
 
             <a class="chat-room-item" data-room="public" href="/chat/public">
                 <span class="chat-room-icon">💬</span>
-                <span class="chat-room-name">Public</span>
+                <span class="chat-room-name">Umum</span>
                 <span class="chat-room-sub">Bebas baca &amp; tulis</span>
                 <span class="chat-room-unread" data-unread="public" hidden>0</span>
             </a>
 
             <a class="chat-room-item" data-room="announcement" href="/chat/announcement">
                 <span class="chat-room-icon">📢</span>
-                <span class="chat-room-name">Announcement</span>
-                <span class="chat-room-sub">Read-only</span>
+                <span class="chat-room-name">Pengumuman</span>
+                <span class="chat-room-sub">Hanya baca</span>
                 <span class="chat-room-unread" data-unread="announcement" hidden>0</span>
             </a>
+
+            <div class="chat-room-group chat-room-mine" id="chat-room-mine" hidden>
+                <span class="chat-room-group-label">⭐ Kelasmu (sudah disetujui)</span>
+            </div>
 
             <p class="chat-room-hint chat-room-hint-class">Kelas (perlu approval admin):</p>
 
@@ -165,6 +170,12 @@
                             <button type="button" data-theme-opt="dark">Gelap</button>
                         </div>
                     </div>
+                    <div class="chat-settings-row">
+                        <div class="chat-settings-label"><span>Video &amp; media</span></div>
+                        <label class="chat-settings-check"><input type="checkbox" data-media-pref="autoplay"> Putar otomatis video</label>
+                        <label class="chat-settings-check"><input type="checkbox" data-media-pref="loop"> Ulangi video (loop)</label>
+                        <label class="chat-settings-check"><input type="checkbox" data-media-pref="soundDefault"> Suara default menyala</label>
+                    </div>
                     <button type="button" class="chat-settings-reset" data-prefs-reset>Atur ulang</button>
                 </div>
             </div>
@@ -205,7 +216,7 @@
                 <ul>
                     <li>Chat NUFABASE adalah ruang ngobrol untuk siswa dan warga SMK Nurul Falah.</li>
                     <li>Masuk pakai akun Google. Nama dan foto Google kamu ikut tampil di chat.</li>
-                    <li>Ruang <b>Public</b> dan <b>Announcement</b> bisa dibuka semua yang sudah login. Ruang <b>kelas</b> hanya untuk anggota yang disetujui admin.</li>
+                    <li>Ruang <b>Umum</b> dan <b>Pengumuman</b> bisa dibuka semua yang sudah masuk. Ruang <b>kelas</b> hanya untuk anggota yang disetujui admin.</li>
                     <li>Bicaralah dengan sopan. Pesan kamu bisa kamu hapus sendiri kapan saja.</li>
                     <li>Datamu tidak dijual dan tidak dipakai untuk iklan. Tapi pesan <b>tidak</b> dikunci end-to-end, jadi jangan kirim password, PIN, atau kode OTP.</li>
                 </ul>
@@ -217,13 +228,13 @@
                     <p>Chat NUFABASE adalah tempat ngobrol online milik sekolah. Fitur ini masih <b>Beta</b> (tahap uji coba), jadi kadang masih ada kekurangan. Kalau menemukan masalah, kabari admin.</p>
                     <h4>Ada 8 ruang obrolan</h4>
                     <ul>
-                        <li>💬 <b>Public</b>: semua yang sudah login boleh membaca dan menulis.</li>
-                        <li>📢 <b>Announcement</b>: semua boleh membaca, tetapi hanya admin yang boleh menulis. Dipakai untuk pengumuman.</li>
+                        <li>💬 <b>Umum</b>: semua yang sudah masuk boleh membaca dan menulis.</li>
+                        <li>📢 <b>Pengumuman</b>: semua boleh membaca, tetapi hanya admin yang boleh menulis. Dipakai untuk pengumuman.</li>
                         <li>🎓 <b>Ruang kelas</b> (Pemasaran dan Otomotif, kelas 1 sampai 3): hanya untuk anggota kelas tersebut dan admin. Orang lain tidak bisa membaca maupun menulis.</li>
                     </ul>
                     <h4>Cara masuk ke ruang kelas</h4>
                     <ol>
-                        <li>Tekan ikon 🔒 di pojok kanan atas, lalu login dengan akun Google.</li>
+                        <li>Tekan ikon 🔒 di pojok kanan atas, lalu masuk dengan akun Google.</li>
                         <li>Pilih ruang kelasmu, lalu tekan <b>Minta Akses ke Kelas Ini</b>.</li>
                         <li>Tunggu admin menyetujui. Statusnya terlihat di daftar ruang: <i>Menunggu persetujuan</i>, <i>Disetujui</i>, atau <i>Ditolak</i>.</li>
                         <li>Setelah disetujui, kamu bisa langsung membaca dan menulis di ruang kelasmu.</li>
@@ -271,15 +282,15 @@
                         <li><b>Pesan:</b> isi pesan, nama yang tampil, foto profil Google (tautan fotonya ikut tersimpan di tiap pesan, jadi pesan lama tidak berubah kalau kamu mengganti foto), ruang tujuan, dan waktu kirim.</li>
                         <li><b>Permintaan akses kelas:</b> nama, email, kelas yang diminta, status, dan waktunya.</li>
                         <li><b>Status online:</b> nama kamu, ruang yang sedang dibuka, dan waktu aktif terakhir. Data ini hanya berlaku selama kamu online dan dihapus saat kamu keluar.</li>
-                        <li><b>Waktu login terakhir.</b></li>
-                        <li><b>Di perangkatmu sendiri:</b> penanda pesan terakhir yang dibaca dan sesi login, supaya kamu tidak perlu login terus-menerus.</li>
+                        <li><b>Waktu masuk terakhir.</b></li>
+                        <li><b>Di perangkatmu sendiri:</b> penanda pesan terakhir yang dibaca dan sesi masuk, supaya kamu tidak perlu masuk terus-menerus.</li>
                     </ul>
                     <p>Chat ini <b>tidak</b> menyimpan lokasi, daftar kontak, atau alamat IP kamu di database chat. Layanan Google (Firebase) tempat data disimpan bisa mencatat data teknis standar, termasuk alamat IP, di sistem mereka sendiri.</p>
 
                     <h4>2. Siapa yang bisa melihat?</h4>
                     <ul>
-                        <li><b>Nama, foto, dan pesan kamu:</b> terlihat oleh orang yang boleh membaca ruang itu. Di Public, berarti semua yang login.</li>
-                        <li><b>Daftar online:</b> semua yang login bisa melihat nama dan ruang yang sedang dibuka orang lain.</li>
+                        <li><b>Nama, foto, dan pesan kamu:</b> terlihat oleh orang yang boleh membaca ruang itu. Di Umum, berarti semua yang masuk.</li>
+                        <li><b>Daftar online:</b> semua yang masuk bisa melihat nama dan ruang yang sedang dibuka orang lain.</li>
                         <li><b>Email kamu:</b> hanya kamu dan admin yang bisa melihat.</li>
                         <li><b>Admin</b> bisa melihat daftar anggota kelas dan permintaan akses, membaca semua ruang (termasuk ruang kelas), dan menghapus pesan.</li>
                         <li>Pengembang sistem secara teknis memiliki akses ke database, dan hanya memakainya untuk menjalankan serta menjaga chat ini.</li>
@@ -290,7 +301,7 @@
 
                     <h4>4. Seberapa aman?</h4>
                     <ul>
-                        <li>Login lewat Google, dan koneksi memakai HTTPS.</li>
+                        <li>Masuk lewat Google, dan koneksi memakai HTTPS.</li>
                         <li>Aturan akses dipasang langsung di database, jadi ruang kelas benar-benar terkunci untuk yang belum disetujui, bukan sekadar disembunyikan di tampilan.</li>
                     </ul>
                     <p class="chat-info-note">Pesan <b>tidak</b> dienkripsi end-to-end. Jangan pernah mengirim password, PIN, kode OTP, nomor kartu, atau rahasia pribadi di chat ini.</p>
@@ -311,12 +322,12 @@
                     </ul>
 
                     <h4>7. Untuk pelajar dan orang tua</h4>
-                    <p>Banyak penggunanya masih di bawah 18 tahun. Orang tua, wali, dan guru dianjurkan ikut mendampingi. Jangan membagikan data pribadi (alamat rumah, nomor HP, foto pribadi) di ruang Public.</p>
+                    <p>Banyak penggunanya masih di bawah 18 tahun. Orang tua, wali, dan guru dianjurkan ikut mendampingi. Jangan membagikan data pribadi (alamat rumah, nomor HP, foto pribadi) di ruang Umum.</p>
 
                     <h4>8. Bedanya dengan Global Live Chat di beranda</h4>
-                    <p>Global Live Chat di halaman beranda adalah chat terpisah: tanpa login, anonim, dan alamat IP hanya tampil sebagian. Kebijakannya ada di tombol <b>Privacy Policy</b> di bagian bawah beranda. Halaman ini hanya berlaku untuk Chat NUFABASE (<code>/chat</code>).</p>
+                    <p>Global Live Chat di halaman beranda adalah chat terpisah: tanpa masuk akun, anonim, dan alamat IP hanya tampil sebagian. Kebijakannya ada di tombol <b>Privacy Policy</b> di bagian bawah beranda. Halaman ini hanya berlaku untuk Chat NUFABASE (<code>/chat</code>).</p>
 
-                    <p class="chat-info-note">Dengan login dan memakai chat ini, kamu dianggap sudah membaca dan menyetujui aturan serta kebijakan di atas.</p>
+                    <p class="chat-info-note">Dengan masuk dan memakai chat ini, kamu dianggap sudah membaca dan menyetujui aturan serta kebijakan di atas.</p>
                 </div>
             </details>
 
@@ -329,8 +340,8 @@
                     <p>Ruang kelas hanya untuk anggota yang sudah disetujui. Minta akses dulu, lalu tunggu admin.</p>
                     <h4>Bisakah orang lain menghapus pesanku?</h4>
                     <p>Hanya admin. Anggota biasa hanya bisa menghapus pesannya sendiri.</p>
-                    <h4>Login gagal saat dibuka dari TikTok, Instagram, atau Facebook?</h4>
-                    <p>Google tidak mengizinkan login dari browser di dalam aplikasi tersebut. Buka tautan ini lewat Chrome atau Safari.</p>
+                    <h4>Gagal masuk saat dibuka dari TikTok, Instagram, atau Facebook?</h4>
+                    <p>Google tidak mengizinkan masuk akun dari browser di dalam aplikasi tersebut. Buka tautan ini lewat Chrome atau Safari.</p>
                     <h4>Bisakah aku mengedit pesanku?</h4>
                     <p>Bisa. Tekan ikon ✏️ di pesanmu, ubah teksnya, lalu simpan. Pesan yang sudah diedit diberi tanda &ldquo;diedit&rdquo;. Hanya akun yang menulis pesan itu yang bisa mengeditnya.</p>
                     <h4>Aku salah kirim pesan, bagaimana?</h4>
@@ -347,7 +358,7 @@
             <p class="chat-footer-about"><b>Chat NUFABASE</b> adalah ruang obrolan milik warga SMK Nurul Falah. Masuk dengan akun Google, pilih ruang, lalu ngobrol. Ruang kelas butuh persetujuan admin.</p>
             <button class="chat-footer-link" id="chat-feature-open" type="button">💡 Ajukan fitur baru</button>
             <a class="chat-footer-link" href="/chat/info">ℹ️ Info, Aturan &amp; Privasi</a>
-            <a class="chat-footer-link" href="/blog">📖 Jurnal &amp; Update</a>
+            <a class="chat-footer-link" href="/blog">📖 Jurnal &amp; Pembaruan</a>
             <p class="chat-footer-note">Punya ide atau menemukan bug? Ajukan lewat tombol di atas, atau email <a href="mailto:smknufagwt@gmail.com">smknufagwt@gmail.com</a>.<br>Chat NUFABASE · Beta · SMK Nurul Falah</p>
         </div>
 
@@ -383,12 +394,12 @@
                             <label>Di bagian mana?
                                 <select id="chat-feature-area">
                                     <option>Semua bagian</option>
-                                    <option>Ruang Public</option>
-                                    <option>Ruang Announcement</option>
+                                    <option>Ruang Umum</option>
+                                    <option>Ruang Pengumuman</option>
                                     <option>Ruang kelas</option>
                                     <option>Halaman beranda</option>
                                     <option>Blog / Jurnal</option>
-                                    <option>Login akun</option>
+                                    <option>Masuk akun</option>
                                 </select>
                             </label>
                         </div>
@@ -440,11 +451,11 @@
                             </label>
                             <div class="chat-feature-files">
                                 <span class="chat-feature-files-title">📎 Lampiran <small>(foto, video, dokumen, dll.)</small></span>
-                                <span class="chat-feature-hint">Maksimal <b>100 MB</b> total, sampai 5 file. Gmail menerima lampiran sampai 25 MB (lebih besar otomatis jadi tautan Google Drive), GitHub sekitar 25 MB per file (video sampai 100 MB).</span>
+                                <span class="chat-feature-hint">Maksimal <b>25 MB</b> total, sampai 5 file. Video atau file lebih besar? Unggah ke Google Drive, bagikan tautannya, lalu tulis di ceritamu dengan format Markdown: <code>[nama file](https://drive.google.com/...)</code></span>
                                 <label class="chat-feature-filebtn" for="chat-feature-files"><i class="fa-solid fa-paperclip"></i> Pilih file</label>
                                 <input type="file" id="chat-feature-files" multiple hidden>
                                 <ul class="chat-feature-filelist" id="chat-feature-filelist" hidden></ul>
-                                <span class="chat-feature-count" id="chat-feature-files-total">0 MB / 100 MB</span>
+                                <span class="chat-feature-count" id="chat-feature-files-total">0 MB / 25 MB</span>
                             </div>
                         </div>
                     </details>

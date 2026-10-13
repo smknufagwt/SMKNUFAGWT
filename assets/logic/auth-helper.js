@@ -20,19 +20,19 @@
     function authErrorMessage(err) {
         const code = err && err.code;
         const map = {
-            'app/in-app-browser': 'Login Google tidak jalan di browser dalam aplikasi (TikTok/Instagram/dll). Buka lewat Chrome/Safari.',
+            'app/in-app-browser': 'Masuk dengan Google tidak jalan di browser dalam aplikasi (TikTok/Instagram/dll). Buka lewat Chrome/Safari.',
             'auth/unauthorized-domain': 'Domain ini belum diizinkan di Firebase — tambahkan di Authentication › Settings › Authorized domains.',
-            'auth/popup-blocked': 'Popup login diblokir browser. Klik login lagi — akan dialihkan lewat redirect.',
-            'auth/operation-not-supported-in-this-environment': 'Login popup tidak didukung di browser ini.',
-            'auth/web-storage-unsupported': 'Browser menonaktifkan storage — aktifkan dulu untuk bisa login.',
+            'auth/popup-blocked': 'Popup masuk diblokir browser. Klik masuk lagi — akan dialihkan lewat redirect.',
+            'auth/operation-not-supported-in-this-environment': 'Masuk lewat popup tidak didukung di browser ini.',
+            'auth/web-storage-unsupported': 'Browser menonaktifkan penyimpanan — aktifkan dulu untuk bisa masuk.',
             'auth/network-request-failed': 'Koneksi bermasalah, coba lagi.',
             'auth/too-many-requests': 'Terlalu banyak percobaan, tunggu sebentar.',
             'auth/user-disabled': 'Akun ini dinonaktifkan.',
-            'auth/account-exists-with-different-credential': 'Email ini sudah terdaftar dengan metode login lain.',
+            'auth/account-exists-with-different-credential': 'Email ini sudah terdaftar dengan metode masuk lain.',
         };
         if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return null;
         if (map[code]) return map[code];
-        return 'Login Google gagal: ' + (err && err.message ? err.message : 'error tidak diketahui');
+        return 'Masuk dengan Google gagal: ' + (err && err.message ? err.message : 'kesalahan tidak diketahui');
     }
 
     function googleProvider() {

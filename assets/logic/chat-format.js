@@ -10,6 +10,20 @@
         loop: localStorage.getItem('nufa_media_loop') !== 'off',
         soundDefault: localStorage.getItem('nufa_media_sound') === 'on',
     };
+    const MEDIA_KEYS = { autoplay: 'nufa_media_autoplay', loop: 'nufa_media_loop', soundDefault: 'nufa_media_sound' };
+    // set() menulis key yang sama dgn beranda; event 'storage' menyinkronkan tab lain secara langsung
+    MediaPrefs.set = function (key, on) {
+        if (!MEDIA_KEYS[key]) return;
+        this[key] = !!on;
+        try { localStorage.setItem(MEDIA_KEYS[key], on ? 'on' : 'off'); } catch (e) { /* storage diblok */ }
+    };
+    window.addEventListener('storage', (e) => {
+        if (Object.keys(MEDIA_KEYS).every((k) => MEDIA_KEYS[k] !== e.key)) return;
+        MediaPrefs.autoplay = localStorage.getItem(MEDIA_KEYS.autoplay) !== 'off';
+        MediaPrefs.loop = localStorage.getItem(MEDIA_KEYS.loop) !== 'off';
+        MediaPrefs.soundDefault = localStorage.getItem(MEDIA_KEYS.soundDefault) === 'on';
+        window.dispatchEvent(new Event('mediaprefs'));
+    });
     window.MediaPrefs = MediaPrefs;
 
     // iframe YouTube selalu autoplay=0 di URL; playVideo ditembak via postMessage setelah onReady
