@@ -968,13 +968,15 @@
         const moves = Array.from(document.querySelectorAll('.chat-room-item-class'))
             .filter((el) => (el.parentElement === box) !== want.includes(el.dataset.room));
         if (!moves.length) return;
-        const all = Array.from(document.querySelectorAll('.chat-room-item'));
+        const info = document.querySelector('.chat-info-link'); // link Info sudah ada di footer: slotnya diganti kotak Kelasmu
+        const all = Array.from(document.querySelectorAll('.chat-room-item')).filter((el) => el !== info);
         const first = new Map(all.map((el) => [el, el.getBoundingClientRect().top]));
         moves.forEach((el) => {
             if (!el._home) el._home = el.parentElement;
             if (want.includes(el.dataset.room)) box.appendChild(el); else placeHome(el);
         });
         box.hidden = !box.querySelector('.chat-room-item');
+        if (info) info.hidden = !box.hidden;
         document.querySelectorAll('.chat-room-group:not(.chat-room-mine)').forEach((g) => { g.hidden = !g.querySelector('.chat-room-item'); });
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
         all.forEach((el) => {
