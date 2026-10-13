@@ -983,17 +983,20 @@
             el.style.transition = 'none';
             el.style.transform = 'translateY(' + dy + 'px)';
         });
+        const rising = moves.filter((el) => want.includes(el.dataset.room));
+        rising.forEach((el) => el.classList.add('is-rising')); // naik di atas item lain (menimpa Info)
         void list.offsetWidth; // paksa reflow supaya transisi jalan
         all.forEach((el) => {
             if (!el.style.transform) return;
-            el.style.transition = 'transform 0.75s cubic-bezier(0.22, 1, 0.36, 1)';
+            el.style.transition = 'transform 1.2s cubic-bezier(0.22, 1, 0.36, 1)';
             el.style.transform = '';
-            setTimeout(() => { el.style.transition = ''; }, 800);
+            setTimeout(() => { el.style.transition = ''; }, 1300);
         });
-        moves.filter((el) => want.includes(el.dataset.room)).forEach((el) => {
+        setTimeout(() => rising.forEach((el) => {
+            el.classList.remove('is-rising');
             el.classList.add('is-promoted');
             setTimeout(() => el.classList.remove('is-promoted'), 2400);
-        });
+        }), 1200);
     }
 
     function teardownUnreadChannel() {

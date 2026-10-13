@@ -1217,3 +1217,10 @@ html[data-chat-theme="light"] .chat-nav-title { text-shadow: none; }
 .chat-settings-check { display: flex; align-items: center; gap: 8px; padding: 5px 0; cursor: pointer; }
 .chat-settings-check input { width: 16px; height: 16px; accent-color: var(--chat-gold); }
 @media (prefers-reduced-motion: reduce) { .chat-room-item.is-promoted { animation: none; } }
+
+/* Kelas disetujui naik menimpa item Info: z-index tinggi + latar solid supaya menutupi teks di bawahnya */
+.chat-room-item.is-rising {
+    position: relative; z-index: 30; transform-origin: center;
+    background: linear-gradient(rgba(var(--chat-gold-rgb), 0.2), rgba(var(--chat-gold-rgb), 0.2)), var(--chat-bg);
+    border-color: var(--chat-gold); box-shadow: 0 8px 22px rgba(0, 0, 0, 0.55), 0 0 14px rgba(var(--chat-gold-rgb), 0.5);
+}
