@@ -1224,3 +1224,43 @@ html[data-chat-theme="light"] .chat-nav-title { text-shadow: none; }
     background: linear-gradient(rgba(var(--chat-gold-rgb), 0.2), rgba(var(--chat-gold-rgb), 0.2)), var(--chat-bg);
     border-color: var(--chat-gold); box-shadow: 0 8px 22px rgba(0, 0, 0, 0.55), 0 0 14px rgba(var(--chat-gold-rgb), 0.5);
 }
+
+/* ── polling akses baca kelas + modal logout ───────────────────── */
+.chat-poll {
+    position: relative; margin: 14px 0 6px; padding: 14px 14px 12px; border-radius: 12px; overflow: hidden;
+    background: var(--chat-bg); border: 1px solid var(--chat-gold-dim);
+    background-image: linear-gradient(135deg, rgba(var(--chat-gold-rgb), 0.12), rgba(var(--chat-gold-rgb), 0.02));
+    animation: chat-fade-up 0.35s ease backwards;
+}
+.chat-poll-tag { display: inline-block; font-size: 0.58rem; font-weight: 700; letter-spacing: 2px; padding: 2px 8px; border: 1px solid var(--chat-gold-dim); border-radius: 999px; color: var(--chat-gold-dim); }
+.chat-poll-x { position: absolute; top: 8px; right: 10px; width: 24px; height: 24px; background: none; border: none; color: var(--chat-gold-dim); cursor: pointer; font-size: 0.8rem; border-radius: 50%; }
+.chat-poll-x:hover { color: var(--chat-gold-bright); background: rgba(var(--chat-gold-rgb), 0.12); }
+.chat-poll-q { margin: 8px 0 2px; font-size: 0.88rem; color: var(--chat-gold-bright); }
+.chat-poll-sub { margin: 0 0 10px; font-size: 0.66rem; line-height: 1.5; color: var(--chat-gold-dim); }
+.chat-poll-opt {
+    position: relative; display: block; width: 100%; margin-bottom: 8px; padding: 10px 12px 12px; text-align: left; overflow: hidden;
+    font-family: inherit; font-size: 0.74rem; color: var(--chat-gold); cursor: pointer;
+    background: rgba(var(--chat-gold-rgb), 0.05); border: 1px solid var(--chat-nav-border); border-radius: 8px;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.chat-poll-opt:hover { border-color: var(--chat-gold); transform: translateX(2px); }
+.chat-poll-opt.is-picked { border-color: var(--chat-gold-bright); background: rgba(var(--chat-gold-rgb), 0.14); }
+.chat-poll-opt.is-picked .chat-poll-lbl::before { content: '✓ '; color: var(--chat-ok); }
+.chat-poll-opt:disabled { opacity: 0.6; pointer-events: none; }
+.chat-poll-pct { position: absolute; top: 10px; right: 12px; font-weight: 700; color: var(--chat-gold-bright); }
+.chat-poll-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(var(--chat-gold-rgb), 0.1); }
+.chat-poll-bar i { display: block; height: 100%; width: 0; background: var(--chat-gold); transition: width 0.5s ease; }
+.chat-poll-lbl { display: block; padding-right: 38px; line-height: 1.4; }
+.chat-poll-foot { margin: 2px 0 0; font-size: 0.6rem; color: var(--chat-gold-dim); }
+.chat-logout-modal { z-index: 120; }
+.chat-logout-card { width: min(320px, 100%); text-align: center; }
+.chat-logout-ico { font-size: 1.8rem; margin-bottom: 4px; }
+.chat-logout-actions { display: flex; gap: 8px; margin-top: 14px; }
+.chat-logout-btn {
+    flex: 1; padding: 9px 0; font-family: inherit; font-weight: 700; font-size: 0.76rem; cursor: pointer;
+    color: var(--chat-gold); background: rgba(var(--chat-gold-rgb), 0.08); border: 1px solid var(--chat-gold-dim); border-radius: 8px;
+}
+.chat-logout-btn:hover { border-color: var(--chat-gold); }
+.chat-logout-btn.is-danger { color: var(--chat-danger); border-color: var(--chat-danger); }
+/* background Info/Privasi solid mengikuti tema, bukan transparan */
+.chat-info details { background-color: var(--chat-bg); background-image: linear-gradient(rgba(var(--chat-gold-rgb), 0.05), rgba(var(--chat-gold-rgb), 0.05)); }

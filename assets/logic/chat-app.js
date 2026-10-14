@@ -149,6 +149,7 @@
         teardownThread();
         if (currentUser) computeUnreadCounts();
         updateMyRooms();
+        renderPoll();
     }
 
     function showPlaceholderText(msg) {
@@ -522,6 +523,11 @@
             await openThread(roomId, true);
             return;
         }
+        if (readPolicy === 'open') {
+            await openThread(roomId, false);
+            document.getElementById('chat-thread-readonly-note').textContent = 'Mode baca terbuka (hasil voting): kamu bisa membaca, tapi hanya anggota kelas yang bisa menulis.';
+            return;
+        }
         const status = reqSnap && reqSnap.exists ? reqSnap.data().status : null;
         const elsewhere = others.docs.some((d) => d.data().room_id !== roomId);
         showAccessGate(roomId, status, elsewhere);
@@ -744,7 +750,7 @@
         document.getElementById('chat-account-btn').addEventListener('click', async () => {
             if (!db || !window.AuthHelper) return;
             if (currentUser) {
-                await window.AuthHelper.signOut();
+                openLogoutModal();
             } else {
                 try {
                     await window.AuthHelper.signIn();
@@ -1162,11 +1168,13 @@
             currentUser = user;
             isAdmin = false;
             accessibleRooms = [];
+            if (!user) { readPolicy = 'closed'; myVote = null; }
             updateAccountIcon();
             if (user) {
                 await window.AuthHelper.ensureProfile(user);
                 isAdmin = (await window.AuthHelper.resolveRole(user)).isAdmin;
                 await loadAccess();
+                await loadPoll();
                 computeUnreadCounts();
                 setupUnreadChannel();
                 setupPresenceChannel();
@@ -1179,13 +1187,115 @@
             }
             refreshRoomStatuses();
             updateMyRooms();
+            renderPoll();
             if (isChatPath(window.location.pathname)) render();
+        });
+    }
+
+
+    // ── logout confirm ──────────────────────────────────────────
+    function openLogoutModal() {
+        const m = document.getElementById('chat-logout-modal');
+        if (!m) { window.AuthHelper.signOut(); return; }
+        m.hidden = false;
+        document.getElementById('chat-logout-cancel').focus();
+    }
+
+    function bindLogoutModal() {
+        const m = document.getElementById('chat-logout-modal');
+        if (!m) return;
+        const close = () => { m.hidden = true; };
+        document.getElementById('chat-logout-cancel').addEventListener('click', close);
+        m.addEventListener('click', (e) => { if (e.target === m) close(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !m.hidden) close(); });
+        document.getElementById('chat-logout-ok').addEventListener('click', async () => {
+            close();
+            await window.AuthHelper.signOut();
+        });
+    }
+
+    // ── polling akses baca kelas (terbanyak menang; seri/kosong = tertutup) ──
+    const POLL_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+    let readPolicy = 'closed';
+    let pollTally = { open: 0, closed: 0 };
+    let myVote = null;
+
+    async function loadPoll() {
+        if (!db || !currentUser) return;
+        const [t, v] = await Promise.all([
+            db.collection('polls').doc('read_access').get().catch(() => null),
+            db.collection('poll_votes').doc(currentUser.uid + '_read_access').get().catch(() => null),
+        ]);
+        const d = t && t.exists ? t.data() : {};
+        pollTally = { open: d.open || 0, closed: d.closed || 0 };
+        myVote = v && v.exists ? v.data().choice : null;
+        readPolicy = pollTally.open > pollTally.closed ? 'open' : 'closed';
+    }
+
+    function pollDismissKey() { return currentUser ? 'chatPollDismissed:' + currentUser.uid : null; }
+
+    function renderPoll() {
+        const box = document.getElementById('chat-poll');
+        if (!box) return;
+        const key = pollDismissKey();
+        let dismissed = 0;
+        try { dismissed = key ? Number(localStorage.getItem(key)) || 0 : 0; } catch (e) { /* abaikan */ }
+        const show = !!(currentUser && db && (Date.now() - dismissed) >= POLL_COOLDOWN_MS);
+        box.hidden = !show;
+        if (!show) return;
+        const total = pollTally.open + pollTally.closed;
+        ['open', 'closed'].forEach((c) => {
+            const pct = total ? Math.round(pollTally[c] / total * 100) : 0;
+            box.querySelector('[data-pct="' + c + '"]').textContent = myVote ? pct + '%' : '';
+            box.querySelector('[data-bar="' + c + '"]').style.width = myVote ? pct + '%' : '0';
+            box.querySelector('.chat-poll-opt[data-choice="' + c + '"]').classList.toggle('is-picked', myVote === c);
+        });
+        document.getElementById('chat-poll-foot').textContent = (myVote ? 'Terima kasih! Kamu bisa ganti pilihan kapan saja. ' : '') +
+            total + ' suara · Aturan saat ini: ' + (readPolicy === 'open' ? 'semua bisa membaca' : 'khusus anggota kelas');
+    }
+
+    async function castVote(choice) {
+        if (!db || !currentUser || choice === myVote) return;
+        const btns = document.querySelectorAll('#chat-poll .chat-poll-opt');
+        btns.forEach((b) => { b.disabled = true; });
+        const batch = db.batch();
+        const tallyRef = db.collection('polls').doc('read_access');
+        const next = { open: pollTally.open, closed: pollTally.closed };
+        if (myVote) next[myVote] = Math.max(0, next[myVote] - 1);
+        next[choice] += 1;
+        batch.set(db.collection('poll_votes').doc(currentUser.uid + '_read_access'), {
+            user_id: currentUser.uid, poll_id: 'read_access', choice: choice,
+            voted_at: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+        batch.set(tallyRef, next);
+        try {
+            await batch.commit();
+            pollTally = next; myVote = choice;
+            readPolicy = pollTally.open > pollTally.closed ? 'open' : 'closed';
+        } catch (e) {
+            await loadPoll(); // counter basi / ditolak rules: sinkron ulang
+            showChatToast('Gagal mengirim suara, coba lagi.');
+        }
+        btns.forEach((b) => { b.disabled = false; });
+        renderPoll();
+    }
+
+    function bindPoll() {
+        const box = document.getElementById('chat-poll');
+        if (!box) return;
+        box.querySelectorAll('.chat-poll-opt').forEach((b) => b.addEventListener('click', () => castVote(b.dataset.choice)));
+        document.getElementById('chat-poll-x').addEventListener('click', () => {
+            const key = pollDismissKey();
+            if (key) { try { localStorage.setItem(key, String(Date.now())); } catch (e) { /* abaikan */ } }
+            box.hidden = true;
         });
     }
 
     function init() {
         if (!document.getElementById('chat-view')) return;
         bindNav();
+        bindLogoutModal();
+        bindPoll();
         render();
         initServices();
     }

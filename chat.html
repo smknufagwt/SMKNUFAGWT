@@ -132,6 +132,15 @@
                     <span class="chat-room-unread" data-unread="otomotif-3" hidden>0</span>
                 </a>
             </div>
+            <section class="chat-poll" id="chat-poll" hidden aria-label="Polling akses baca kelas">
+                <button class="chat-poll-x" id="chat-poll-x" type="button" aria-label="Abaikan polling">&#10005;</button>
+                <span class="chat-poll-tag">📊 POLLING</span>
+                <h4 class="chat-poll-q">Bolehkah chat kelas dibaca siapa saja?</h4>
+                <p class="chat-poll-sub">Menulis tetap khusus anggota kelas. Suara terbanyak menentukan aturan baca semua ruang kelas.</p>
+                <button class="chat-poll-opt" type="button" data-choice="open"><span class="chat-poll-lbl">Setiap orang berhak melihat chat kelas lain</span><span class="chat-poll-pct" data-pct="open"></span><span class="chat-poll-bar"><i data-bar="open"></i></span></button>
+                <button class="chat-poll-opt" type="button" data-choice="closed"><span class="chat-poll-lbl">Chat kelas hanya untuk anggota kelasnya</span><span class="chat-poll-pct" data-pct="closed"></span><span class="chat-poll-bar"><i data-bar="closed"></i></span></button>
+                <p class="chat-poll-foot" id="chat-poll-foot"></p>
+            </section>
         </main>
 
         <div class="chat-room-placeholder" id="chat-room-placeholder" hidden>
@@ -280,6 +289,7 @@
                     <ul>
                         <li><b>Dari akun Google kamu:</b> nama, alamat email, foto profil, dan kode akun. Kami tidak pernah melihat atau menyimpan password Google kamu.</li>
                         <li><b>Pesan:</b> isi pesan, nama yang tampil, foto profil Google (tautan fotonya ikut tersimpan di tiap pesan, jadi pesan lama tidak berubah kalau kamu mengganti foto), ruang tujuan, dan waktu kirim.</li>
+                        <li><b>Suara polling:</b> pilihan suaramu (satu per akun) dan hasil totalnya. Pilihan tiap akun hanya terlihat oleh akun itu sendiri.</li>
                         <li><b>Permintaan akses kelas:</b> nama, email, kelas yang diminta, status, dan waktunya.</li>
                         <li><b>Status online:</b> nama kamu, ruang yang sedang dibuka, dan waktu aktif terakhir. Data ini hanya berlaku selama kamu online dan dihapus saat kamu keluar.</li>
                         <li><b>Waktu masuk terakhir.</b></li>
@@ -360,6 +370,18 @@
             <a class="chat-footer-link" href="/chat/info">ℹ️ Info, Aturan &amp; Privasi</a>
             <a class="chat-footer-link" href="/blog">📖 Jurnal &amp; Pembaruan</a>
             <p class="chat-footer-note">Punya ide atau menemukan bug? Ajukan lewat tombol di atas, atau email <a href="mailto:smknufagwt@gmail.com">smknufagwt@gmail.com</a>.<br>Chat NUFABASE · Beta · SMK Nurul Falah</p>
+        </div>
+
+        <div class="chat-feature-modal chat-logout-modal" id="chat-logout-modal" hidden role="dialog" aria-modal="true" aria-labelledby="chat-logout-title">
+            <div class="chat-feature-card chat-logout-card">
+                <div class="chat-logout-ico">🔒</div>
+                <h3 id="chat-logout-title">Anda akan logout?</h3>
+                <p class="chat-feature-lead">Kamu perlu masuk lagi dengan Google untuk membuka chat.</p>
+                <div class="chat-logout-actions">
+                    <button type="button" class="chat-logout-btn" id="chat-logout-cancel">Batal</button>
+                    <button type="button" class="chat-logout-btn is-danger" id="chat-logout-ok">Ya, logout</button>
+                </div>
+            </div>
         </div>
 
         <div class="chat-feature-modal" id="chat-feature-modal" hidden role="dialog" aria-modal="true" aria-labelledby="chat-feature-title">
