@@ -85,9 +85,12 @@
             const label = currentUser.email || currentUser.displayName || 'Akun tersambung';
             el.classList.remove('is-scrambling');
             el.classList.add('is-visible');
-            hintHandle = window.ScrambleFX.run(el, label, { perCharMs: 100, tickMs: 45, holdMs: 0, loop: false });
-            // rainbow nyala setelah teks penuh ter-lock (delay ≈ durasi scramble)
-            setTimeout(() => el.classList.add('is-identity'), label.length * 100 + 150);
+            el.classList.remove('is-identity');
+            // rainbow nyala tepat saat huruf terakhir ter-lock (onDone), bukan timer tebakan
+            hintHandle = window.ScrambleFX.run(el, label, {
+                perCharMs: 60, tickMs: 35, holdMs: 0, loop: false,
+                onDone: () => el.classList.add('is-identity'),
+            });
         } else {
             el.classList.remove('is-identity');
             el.classList.add('is-visible');
