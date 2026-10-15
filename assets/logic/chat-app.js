@@ -999,15 +999,15 @@
         void list.offsetWidth; // paksa reflow supaya transisi jalan
         all.forEach((el) => {
             if (!el.style.transform) return;
-            el.style.transition = 'transform 1.2s cubic-bezier(0.22, 1, 0.36, 1)';
+            el.style.transition = 'transform 0.55s cubic-bezier(0.22, 1, 0.36, 1)';
             el.style.transform = '';
-            setTimeout(() => { el.style.transition = ''; }, 1300);
+            setTimeout(() => { el.style.transition = ''; }, 650);
         });
         setTimeout(() => rising.forEach((el) => {
             el.classList.remove('is-rising');
             el.classList.add('is-promoted');
-            setTimeout(() => el.classList.remove('is-promoted'), 2400);
-        }), 1200);
+            setTimeout(() => el.classList.remove('is-promoted'), 1300);
+        }), 560);
     }
 
     function teardownUnreadChannel() {
@@ -1174,10 +1174,19 @@
             if (!user) { readPolicy = 'closed'; myVote = null; }
             updateAccountIcon();
             if (user) {
-                await window.AuthHelper.ensureProfile(user);
-                isAdmin = (await window.AuthHelper.resolveRole(user)).isAdmin;
-                await loadAccess();
-                await loadPoll();
+                // Cache akses terakhir → kelas disetujui langsung dikenali, koreksi menyusul dari server
+                try {
+                    const c = JSON.parse(localStorage.getItem('chatAccess:' + user.uid) || '[]');
+                    accessibleRooms = ['public', 'announcement'].concat(c.filter((r) => CLASS_ROOM_IDS.includes(r)));
+                    updateMyRooms();
+                } catch (e) { /* cache rusak, abaikan */ }
+                window.AuthHelper.ensureProfile(user); // tidak perlu ditunggu
+                // 3 query independen jalan paralel (sebelumnya berurutan = 4x round-trip)
+                const roleP = window.AuthHelper.resolveRole(user), accessP = loadAccess(), pollP = loadPoll();
+                isAdmin = (await roleP).isAdmin;
+                await Promise.all([accessP, pollP]);
+                if (isAdmin) accessibleRooms = ALL_ROOM_IDS.slice();
+                else try { localStorage.setItem('chatAccess:' + user.uid, JSON.stringify(accessibleRooms.filter((r) => CLASS_ROOM_IDS.includes(r)))); } catch (e) { /* storage penuh */ }
                 computeUnreadCounts();
                 setupUnreadChannel();
                 setupPresenceChannel();

@@ -1209,7 +1209,7 @@ html[data-chat-theme="light"] .chat-nav-title { text-shadow: none; }
 .chat-notif-btn.on { background: var(--chat-gold); border-color: var(--chat-gold); color: var(--chat-bg); }
 .chat-room-mine { border-color: var(--chat-gold-dim); background: rgba(var(--chat-gold-rgb), 0.07); }
 .chat-room-item { will-change: auto; }
-.chat-room-item.is-promoted { animation: chat-promoted 2.2s ease; }
+.chat-room-item.is-promoted { animation: chat-promoted 1.2s ease; }
 @keyframes chat-promoted {
     0%, 100% { box-shadow: 0 0 0 0 rgba(var(--chat-gold-rgb), 0); }
     25% { box-shadow: 0 0 0 4px rgba(var(--chat-gold-rgb), 0.45); border-color: var(--chat-gold); }
