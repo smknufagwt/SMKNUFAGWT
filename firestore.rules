@@ -30,10 +30,16 @@ service cloud.firestore {
         exists(/databases/$(database)/documents/room_members/$(request.auth.uid + '_' + room));
     }
 
+    // Hasil polling akses baca: terbuka kalau suara 'open' > 'closed' (default tertutup)
+    function readOpen() {
+      let p = /databases/$(database)/documents/polls/read_access;
+      return exists(p) && get(p).data.open > get(p).data.closed;
+    }
+
     function canReadRoom(room) {
       return signedIn() && (
         room in ['public', 'announcement'] ||
-        (isClassRoom(room) && (isAdmin() || isMember(room)))
+        (isClassRoom(room) && (isAdmin() || isMember(room) || readOpen()))
       );
     }
 
@@ -47,7 +53,9 @@ service cloud.firestore {
 
     function validMsg(room) {
       let d = request.resource.data;
-      return d.keys().hasOnly(['room_id','user_id','display_name','content','created_at']) &&
+      return d.keys().hasOnly(['room_id','user_id','display_name','content','created_at','photo_url']) &&
+        (!('photo_url' in d) || (d.photo_url is string && d.photo_url.size() <= 300 &&
+          d.photo_url.matches('https://lh[0-9]\\.googleusercontent\\.com/.*'))) &&
         d.room_id == room &&
         d.user_id == request.auth.uid &&
         d.content is string && d.content.size() > 0 && d.content.size() <= 1000 &&
@@ -75,7 +83,13 @@ service cloud.firestore {
     match /rooms/{roomId}/messages/{msg} {
       allow read: if canReadRoom(roomId);
       allow create: if canWriteRoom(roomId) && validMsg(roomId);
-      allow update: if false;
+      // Edit: hanya pemilik pesan, hanya isi (+ penanda edited_at), tetap harus punya akses tulis
+      allow update: if canWriteRoom(roomId) &&
+        resource.data.user_id == request.auth.uid &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['content','edited_at']) &&
+        request.resource.data.content is string &&
+        request.resource.data.content.size() > 0 && request.resource.data.content.size() <= 1000 &&
+        request.resource.data.edited_at == request.time;
       allow delete: if signedIn() && canReadRoom(roomId) &&
         (resource.data.user_id == request.auth.uid || isAdmin());
     }
@@ -129,6 +143,35 @@ service cloud.firestore {
 
     match /_notify_state/{doc} {
       allow read, write: if true;
+    }
+
+    // ── polling akses baca kelas ────────────────────────────
+    // Suara 1 per akun (doc {uid}_read_access). Counter hanya boleh berubah selaras dengan suara yang ditulis di batch yang sama.
+    match /poll_votes/{id} {
+      allow read: if ownerOf(resource.data.user_id);
+      allow create, update: if signedIn() &&
+        id == request.auth.uid + '_read_access' &&
+        request.resource.data.keys().hasOnly(['user_id','poll_id','choice','voted_at']) &&
+        request.resource.data.user_id == request.auth.uid &&
+        request.resource.data.poll_id == 'read_access' &&
+        request.resource.data.choice in ['open','closed'];
+      allow delete: if false;
+    }
+
+    match /polls/read_access {
+      allow read: if signedIn();
+      allow create: if signedIn() && pollCounterOk(0, 0);
+      allow update: if signedIn() && pollCounterOk(resource.data.open, resource.data.closed);
+    }
+
+    function pollCounterOk(o, c) {
+      let vp = /databases/$(database)/documents/poll_votes/$(request.auth.uid + '_read_access');
+      let old = exists(vp) ? get(vp).data.choice : '';
+      let nw = getAfter(vp).data.choice;
+      let r = request.resource.data;
+      return r.keys().hasOnly(['open','closed']) &&
+        r.open == o + (nw == 'open' ? 1 : 0) - (old == 'open' ? 1 : 0) &&
+        r.closed == c + (nw == 'closed' ? 1 : 0) - (old == 'closed' ? 1 : 0);
     }
   }
 }

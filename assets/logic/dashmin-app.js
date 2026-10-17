@@ -92,7 +92,7 @@
                 const when = req.requested_at && typeof req.requested_at.toDate === 'function'
                     ? req.requested_at.toDate()
                     : (req.requested_at ? new Date(req.requested_at) : new Date());
-                sub.textContent = (ROOM_LABELS[req.room_id] || req.room_id) + ' — ' + when.toLocaleString('id-ID');
+                sub.textContent = (req.user_email || '-') + ' • ' + (ROOM_LABELS[req.room_id] || req.room_id) + ' — ' + when.toLocaleString('id-ID');
                 info.appendChild(name);
                 info.appendChild(sub);
 
@@ -216,7 +216,7 @@
             const since = m.approved_at && typeof m.approved_at.toDate === 'function'
                 ? m.approved_at.toDate()
                 : (m.approved_at ? new Date(m.approved_at) : new Date());
-            sub.textContent = 'Sejak ' + since.toLocaleDateString('id-ID');
+            sub.textContent = (m.user_email || '-') + ' • Sejak ' + since.toLocaleDateString('id-ID');
             info.appendChild(name);
             info.appendChild(sub);
 
@@ -236,6 +236,20 @@
                 } catch (e) { revokeBtn.disabled = false; return; }
                 loadMembers();
             });
+            const promoteBtn = document.createElement('button');
+            promoteBtn.className = 'dashmin-action-btn is-approve';
+            promoteBtn.type = 'button';
+            promoteBtn.textContent = 'Jadikan Admin';
+            promoteBtn.addEventListener('click', async () => {
+                if (!window.confirm('Angkat ' + (m.user_email || personName) + ' jadi admin?')) return;
+                promoteBtn.disabled = true;
+                try {
+                    await db.collection('profiles').doc(m.user_id).update({ is_admin: true });
+                    showToast((m.user_email || personName) + ' kini admin.');
+                    loadAdmins();
+                } catch (e) { showToast('Gagal: ' + (e.message || e.code)); promoteBtn.disabled = false; }
+            });
+            actions.appendChild(promoteBtn);
             actions.appendChild(revokeBtn);
 
             row.appendChild(info);

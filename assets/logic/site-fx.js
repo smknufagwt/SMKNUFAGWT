@@ -311,15 +311,15 @@
             colorBtn: document.getElementById('color-btn'),
             colorIndex: 0,
             colors: [
-           { neon: '#ffffff', dim: '#8ce6ef', hex: '#ffffff' },
-                { neon: '#0f0', dim: '#008F11', hex: '#0f0' },       
-                { neon: '#00f0ff', dim: '#008F8F', hex: '#00f0ff' }, 
-                { neon: '#FF3333', dim: '#CC1F1F', hex: '#FF3333' }, 
-                { neon: '#FFFF66', dim: '#999900', hex: '#FFFF66' },
-                { neon: '#D966FF', dim: '#8000B3', hex: '#D966FF' }, 
-                { neon: '#FF8040', dim: '#B34700', hex: '#FF8040' },
-                { neon: '#FF10F0', dim: '#B0008C', hex: '#FF10F0' }
-                 
+                    
+                { neon: '#ffffff', dim: '#a8f0f7', hex: '#ffffff' },
+                { neon: '#0f0', dim: '#1fb835', hex: '#0f0' },       
+                { neon: '#00f0ff', dim: '#14b3b3', hex: '#00f0ff' }, 
+                { neon: '#FF3333', dim: '#e03a3a', hex: '#FF3333' }, 
+                { neon: '#FFFF66', dim: '#c2c200', hex: '#FFFF66' },
+                { neon: '#D966FF', dim: '#a64dd1', hex: '#D966FF' }, 
+                { neon: '#FF8040', dim: '#d9640f', hex: '#FF8040' },
+                { neon: '#FF10F0', dim: '#d11fb0', hex: '#FF10F0' }  
 
             ],
             baseOffset: 6340,

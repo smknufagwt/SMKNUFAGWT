@@ -6,6 +6,10 @@
 
     const MASTER_EMAILS = ['smknufagwt@gmail.com'];
     let signingIn = false;
+    let appRef = null;
+    const getAuth = () => (appRef || firebase.app()).auth();
+    const getDb = () => (appRef || firebase.app()).firestore();
+    function use(app) { appRef = app; }
 
     // WebView TikTok/IG/FB/Android wv memblokir OAuth Google (disallowed_useragent)
     function isInAppBrowser() {
@@ -16,19 +20,19 @@
     function authErrorMessage(err) {
         const code = err && err.code;
         const map = {
-            'app/in-app-browser': 'Login Google tidak jalan di browser dalam aplikasi (TikTok/Instagram/dll). Buka lewat Chrome/Safari.',
+            'app/in-app-browser': 'Masuk dengan Google tidak jalan di browser dalam aplikasi (TikTok/Instagram/dll). Buka lewat Chrome/Safari.',
             'auth/unauthorized-domain': 'Domain ini belum diizinkan di Firebase — tambahkan di Authentication › Settings › Authorized domains.',
-            'auth/popup-blocked': 'Popup login diblokir browser. Klik login lagi — akan dialihkan lewat redirect.',
-            'auth/operation-not-supported-in-this-environment': 'Login popup tidak didukung di browser ini.',
-            'auth/web-storage-unsupported': 'Browser menonaktifkan storage — aktifkan dulu untuk bisa login.',
+            'auth/popup-blocked': 'Popup masuk diblokir browser. Klik masuk lagi — akan dialihkan lewat redirect.',
+            'auth/operation-not-supported-in-this-environment': 'Masuk lewat popup tidak didukung di browser ini.',
+            'auth/web-storage-unsupported': 'Browser menonaktifkan penyimpanan — aktifkan dulu untuk bisa masuk.',
             'auth/network-request-failed': 'Koneksi bermasalah, coba lagi.',
             'auth/too-many-requests': 'Terlalu banyak percobaan, tunggu sebentar.',
             'auth/user-disabled': 'Akun ini dinonaktifkan.',
-            'auth/account-exists-with-different-credential': 'Email ini sudah terdaftar dengan metode login lain.',
+            'auth/account-exists-with-different-credential': 'Email ini sudah terdaftar dengan metode masuk lain.',
         };
         if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return null;
         if (map[code]) return map[code];
-        return 'Login Google gagal: ' + (err && err.message ? err.message : 'error tidak diketahui');
+        return 'Masuk dengan Google gagal: ' + (err && err.message ? err.message : 'kesalahan tidak diketahui');
     }
 
     function googleProvider() {
@@ -48,7 +52,7 @@
         }
         signingIn = true;
         try {
-            const auth = firebase.auth();
+            const auth = getAuth();
             if (auth.useDeviceLanguage) auth.useDeviceLanguage();
             await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(() => {});
             try {
@@ -74,7 +78,7 @@
     }
 
     function signOut() {
-        return firebase.auth().signOut();
+        return getAuth().signOut();
     }
 
     // Selesaikan login redirect yang tertunda setelah page load.
@@ -94,7 +98,7 @@
         let isAdmin = isMaster;
         if (!isAdmin) {
             try {
-                const snap = await firebase.firestore().collection('profiles').doc(user.uid).get();
+                const snap = await getDb().collection('profiles').doc(user.uid).get();
                 isAdmin = !!(snap.exists && snap.data().is_admin === true);
             } catch (e) { /* rules menolak/offline → anggap non-admin */ }
         }
@@ -104,7 +108,7 @@
     // Upsert profil tanpa menyentuh is_admin (hanya admin yang boleh ubah, lewat dashmin).
     async function ensureProfile(user) {
         if (!user) return;
-        await firebase.firestore().collection('profiles').doc(user.uid).set({
+        await getDb().collection('profiles').doc(user.uid).set({
             email: user.email || null,
             full_name: user.displayName || null,
             avatar_url: user.photoURL || null,
@@ -113,7 +117,7 @@
     }
 
     window.AuthHelper = {
-        MASTER_EMAILS, signIn, signOut, authErrorMessage,
+        MASTER_EMAILS, use, signIn, signOut, authErrorMessage,
         settleRedirectResult, resolveRole, ensureProfile, isInAppBrowser,
     };
 })();

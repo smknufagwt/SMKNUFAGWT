@@ -30,9 +30,10 @@ jobs:
           sed -i "s|%%ACCESS_CODE_B64%%|${{ secrets.ACCESS_CODE_B64 }}|g"             index.html
           sed -i "s|%%NOTIFY_SECRET%%|${{ secrets.NOTIFY_SECRET }}|g"                 index.html
 
-      - name: Inject secrets ke dashmin.html
+      - name: Inject secrets ke dashmin.html & chat.html
         run: |
           sed -i "s|%%FIREBASE_API_KEY%%|${{ secrets.FIREBASE_API_KEY }}|g" dashmin.html
+          sed -i "s|%%FIREBASE_API_KEY%%|${{ secrets.FIREBASE_API_KEY }}|g" chat.html
 
       - name: Inject secrets ke assets/logic (gallery.js & notify-throttle.js)
         run: |

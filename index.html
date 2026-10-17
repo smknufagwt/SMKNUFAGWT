@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- ARLINGGA creator -->
     <title>SMK NURUL FALAH - THE GLIMPSE OF FUTURE</title>
-    <meta name="theme-color" content="#0f0">
 <meta name="google-site-verification" content="bcu4uRS7dTLeJExZS1IX56ZkOeI4F5Wu1O48GXmes8Y" />
-<meta name="description" content="Portal Kreatif Informasi Digital dan Galeri Highlight kegiatan SMK Nurul Falah.
+    <meta name="description" content="Portal Kreatif Informasi Digital dan Galeri Highlight kegiatan SMK Nurul Falah.
 NOMOR NPSN	:	10814959
 TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
     <meta name="keywords" content="SMK Nurul Falah, SMK Nufa, smks, Gedung wani timur, kauman, SMK Lampung Timur, GWT, DESA, HACKER, gedung wani, biner, code matrix, matrix, NUFA BASE, Margatiga, website cyberpunk, masa depan, sekilas pandang,">
@@ -31,8 +30,10 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
         NOMOR NPSN	:	10814959
         TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022" />
     <meta name="twitter:image" content="https://raw.githubusercontent.com/smknufagwt/SMKNUFAGWT/main/appcover.jpg" />    
-    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="45" fill="black" stroke="white" stroke-width="4"/%3E%3Cline x1="5" y1="50" x2="95" y2="50" stroke="white" stroke-width="2"/%3E%3Cline x1="50" y1="5" x2="50" y2="95" stroke="white" stroke-width="2"/%3E%3Cellipse cx="50" cy="50" rx="10" ry="45" fill="none" stroke="white" stroke-width="3"%3E%3Canimate attributeName="rx" values="0;44;0" dur="2s" repeatCount="indefinite"/%3E%3C/ellipse%3E%3C/svg%3E'>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ccircle%20cx='50'%20cy='50'%20r='45'%20fill='black'%20stroke='white'%20stroke-width='4'/%3E%3Cline%20x1='5'%20y1='50'%20x2='95'%20y2='50'%20stroke='white'%20stroke-width='2'/%3E%3Cline%20x1='50'%20y1='5'%20x2='50'%20y2='95'%20stroke='white'%20stroke-width='2'/%3E%3Cellipse%20cx='50'%20cy='50'%20rx='10'%20ry='45'%20fill='none'%20stroke='white'%20stroke-width='3'%3E%3Canimate%20attributeName='rx'%20values='0;44;0'%20dur='2s'%20repeatCount='indefinite'/%3E%3C/ellipse%3E%3C/svg%3E">
     <link rel="alternate icon" href="/favicon.ico">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0f0">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,113 +56,6 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
     <link rel="stylesheet" href="assets/style/variable.css">
 </head>
 <body>
-    <!-- /chat landing — di-toggle oleh assets/logic/chat-app.js berdasarkan pathname -->
-    <div id="chat-view" hidden>
-        <nav class="chat-nav">
-            <a class="chat-home-btn" href="/" id="chat-home-btn" aria-label="Kembali ke beranda">←</a>
-            <span class="chat-nav-title">CHAT</span>
-            <span class="chat-beta-badge" id="chat-beta-badge">BETA</span>
-            <div class="chat-account-wrap" id="chat-account-wrap">
-                <span class="chat-account-hint" id="chat-account-hint"></span>
-                <button class="chat-account-btn" id="chat-account-btn" type="button" aria-label="Akun">
-                    <span class="chat-account-icon" id="chat-account-icon">🔒</span>
-                </button>
-            </div>
-        </nav>
-
-        <main class="chat-room-list" id="chat-room-list">
-            <p class="chat-room-greeting" id="chat-room-greeting" hidden></p>
-            <button class="chatapp-online-total" id="chatapp-online-total" type="button" hidden>
-                <span class="chatapp-online-dot"></span>
-                <span class="chatapp-online-count">0</span> orang online
-            </button>
-            <div class="chatapp-online-list" id="chatapp-online-list" hidden></div>
-            <p class="chat-room-hint">Pilih ruang percakapan:</p>
-
-            <a class="chat-room-item" data-room="public" href="/chat/public">
-                <span class="chat-room-icon">💬</span>
-                <span class="chat-room-name">Public</span>
-                <span class="chat-room-sub">Bebas baca &amp; tulis</span>
-                <span class="chat-room-unread" data-unread="public" hidden>0</span>
-            </a>
-
-            <a class="chat-room-item" data-room="announcement" href="/chat/announcement">
-                <span class="chat-room-icon">📢</span>
-                <span class="chat-room-name">Announcement</span>
-                <span class="chat-room-sub">Read-only</span>
-                <span class="chat-room-unread" data-unread="announcement" hidden>0</span>
-            </a>
-
-            <p class="chat-room-hint chat-room-hint-class">Kelas (perlu approval admin):</p>
-
-            <div class="chat-room-group">
-                <span class="chat-room-group-label">🎓 Kelas 1</span>
-                <a class="chat-room-item chat-room-item-class" data-room="pemasaran-1" href="/chat/pemasaran/1">
-                    <span class="chat-room-icon">🛍️</span>
-                    <span class="chat-room-name">Pemasaran 1</span>
-                    <span class="chat-room-status" data-status="pemasaran-1">Belum diminta</span>
-                    <span class="chat-room-unread" data-unread="pemasaran-1" hidden>0</span>
-                </a>
-                <a class="chat-room-item chat-room-item-class" data-room="otomotif-1" href="/chat/otomotif/1">
-                    <span class="chat-room-icon">🔧</span>
-                    <span class="chat-room-name">Otomotif 1</span>
-                    <span class="chat-room-status" data-status="otomotif-1">Belum diminta</span>
-                    <span class="chat-room-unread" data-unread="otomotif-1" hidden>0</span>
-                </a>
-            </div>
-
-            <div class="chat-room-group">
-                <span class="chat-room-group-label">🎓 Kelas 2</span>
-                <a class="chat-room-item chat-room-item-class" data-room="pemasaran-2" href="/chat/pemasaran/2">
-                    <span class="chat-room-icon">🛍️</span>
-                    <span class="chat-room-name">Pemasaran 2</span>
-                    <span class="chat-room-status" data-status="pemasaran-2">Belum diminta</span>
-                    <span class="chat-room-unread" data-unread="pemasaran-2" hidden>0</span>
-                </a>
-                <a class="chat-room-item chat-room-item-class" data-room="otomotif-2" href="/chat/otomotif/2">
-                    <span class="chat-room-icon">🔧</span>
-                    <span class="chat-room-name">Otomotif 2</span>
-                    <span class="chat-room-status" data-status="otomotif-2">Belum diminta</span>
-                    <span class="chat-room-unread" data-unread="otomotif-2" hidden>0</span>
-                </a>
-            </div>
-
-            <div class="chat-room-group">
-                <span class="chat-room-group-label">🎓 Kelas 3</span>
-                <a class="chat-room-item chat-room-item-class" data-room="pemasaran-3" href="/chat/pemasaran/3">
-                    <span class="chat-room-icon">🛍️</span>
-                    <span class="chat-room-name">Pemasaran 3</span>
-                    <span class="chat-room-status" data-status="pemasaran-3">Belum diminta</span>
-                    <span class="chat-room-unread" data-unread="pemasaran-3" hidden>0</span>
-                </a>
-                <a class="chat-room-item chat-room-item-class" data-room="otomotif-3" href="/chat/otomotif/3">
-                    <span class="chat-room-icon">🔧</span>
-                    <span class="chat-room-name">Otomotif 3</span>
-                    <span class="chat-room-status" data-status="otomotif-3">Belum diminta</span>
-                    <span class="chat-room-unread" data-unread="otomotif-3" hidden>0</span>
-                </a>
-            </div>
-        </main>
-
-        <div class="chat-room-placeholder" id="chat-room-placeholder" hidden>
-            <button class="chat-back-btn" id="chat-back-btn" type="button">&larr; Kembali</button>
-            <p id="chat-room-placeholder-text"></p>
-        </div>
-
-        <div class="chat-room-thread" id="chat-room-thread" hidden>
-            <div class="chat-thread-head">
-                <button class="chat-back-btn" id="chat-thread-back-btn" type="button">&larr; Kembali</button>
-                <span class="chat-thread-title" id="chat-thread-title"></span>
-                <span class="chat-thread-online" id="chat-thread-online" hidden>0 online</span>
-            </div>
-            <div class="chat-thread-messages" id="chat-thread-messages"></div>
-            <p class="chat-thread-readonly-note" id="chat-thread-readonly-note" hidden></p>
-            <form class="chat-thread-form" id="chat-thread-form">
-                <input type="text" id="chat-thread-input" placeholder="Tulis pesan..." autocomplete="off" maxlength="1000">
-                <button type="submit">Kirim</button>
-            </form>
-        </div>
-    </div>
 
 
     <audio id="bgm" src="assets/audio/bgm.mp3" preload="none" loop></audio>
@@ -356,10 +250,11 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
         <i class="fa-solid fa-gamepad"></i> GAME WEB
     </a>
 
-    <a id="btn-pembuat" href="https://wa.me/6283199753711?text=halo%2c%20Arlingga" target="_blank" class="author-link" onclick="AudioFX.click()"
-       style="border-color: #25D366 !important; color: #25D366 !important; box-shadow: 0 0 10px rgba(37, 211, 102, 0.3);">
-        <i class="fa-brands fa-whatsapp"></i> PEMBUAT
-    </a>
+<a id="btn-pembuat" href="https://arlingkin.vercel.app/" target="_blank" rel="noopener noreferrer" class="author-link" onclick="AudioFX.click()"
+   style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border: 2px solid #071a3b !important; color: #ffffff !important; background-color: #000000 !important; border-radius: 4px; text-decoration: none; box-shadow: 0 0 10px #071a3b, 0 0 20px rgba(7, 26, 59, 0.6); font-weight: bold;">
+    <img src="https://raw.githubusercontent.com/arlingkin/about/refs/heads/main/favicon.ico" alt="Icon" width="16" height="16" style="width: 16px; height: 16px; object-fit: contain; display: block;">
+    <span>PEMBUAT</span>
+</a>
 
     <a href="https://www.instagram.com/smknurulfalahmargatiga?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" class="author-link" onclick="AudioFX.click()"
        style="border-color: #E1306C !important; color: #E1306C !important; box-shadow: 0 0 10px rgba(225, 48, 108, 0.3);">
@@ -399,21 +294,20 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
     &copy; 2026 SMK NURUL FALAH. All Rights Reserved.
 </div>
 <div class="property-credit">
-        Developed By <a href="https://arlingkin.vercel.app" target="_blank" rel="noopener noreferrer">arlingkin</a>
+        Developed by <a href="https://arlingkin.vercel.app/" target="_blank" rel="noopener noreferrer">arlingkin</a>
     </div>
     </footer>
+    </div>
 
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
         <script src="assets/logic/notify-throttle.js"></script>
         <script src="assets/logic/site-fx.js"></script>
+        <script src="assets/logic/page-transition.js" defer></script>
         <script src="assets/logic/gallery.js"></script>
    <script>/* chat.js — Firebase config, IpMask, WordFilter, PrivacyBoard, MediaPrefs, ChatFormat, GlobalChat */
-      /* chat.js — Firebase config, IpMask, WordFilter, PrivacyBoard, MediaPrefs, ChatFormat, GlobalChat */
         const FIREBASE_CONFIG = {
             apiKey: "%%FIREBASE_API_KEY%%",
-            // Tetap ke domain proyek Firebase (server-nufa.firebaseapp.com) biar popup OAuth
-            // gak kena auth/unauthorized-domain pas di-deploy ke domain kustom (Vercel/web.app).
-            authDomain: "server-nufa.firebaseapp.com",
+            authDomain: "nufabase.web.app",
             projectId: "server-nufa",
             storageBucket: "server-nufa.firebasestorage.app",
             messagingSenderId: "168660687360",
@@ -494,12 +388,6 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
         };
         document.addEventListener('DOMContentLoaded', () => PrivacyBoard.init());
 
-        // Parser format teks chat ala WhatsApp/Telegram: *bold* _underline_ ~coret~ "kutip"
-        // > kutipan-baris, [label](url), dan [alt]{url-gambar/gif/video}.
-        // PENTING: escape HTML dilakukan LEBIH DULU, baru token diubah jadi tag —
-        // jadi user tidak bisa menyuntik HTML/JS lewat pesan (aman untuk global chat).
-        // Preferensi tampilan media per-viewer (autoplay/loop/suara default) — persist localStorage,
-        // mekanisme on/off sama seperti toggle bell notifikasi.
         const MediaPrefs = {
             autoplay: localStorage.getItem('nufa_media_autoplay') !== 'off',
             loop: localStorage.getItem('nufa_media_loop') !== 'off',
@@ -511,6 +399,13 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
             }
         };
         window.MediaPrefs = MediaPrefs;
+        // Sinkron dgn /chat: perubahan di tab lain langsung terbaca
+        window.addEventListener('storage', (e) => {
+            if (!e.key || e.key.indexOf('nufa_media_') !== 0) return;
+            MediaPrefs.autoplay = localStorage.getItem('nufa_media_autoplay') !== 'off';
+            MediaPrefs.loop = localStorage.getItem('nufa_media_loop') !== 'off';
+            MediaPrefs.soundDefault = localStorage.getItem('nufa_media_sound') === 'on';
+        });
 
         // YouTube IFrame: autoplay=1 digabung loop=1+playlist=selfId di URL src memicu race condition
         // bawaan YouTube (player belum selesai init loop-nya pas autoplay nembak) → keliatan sebagai
@@ -862,30 +757,14 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
                 this.presenceId = sessionStorage.getItem('nufa_presence_id') || ('U-' + Math.random().toString(36).slice(2, 9));
                 sessionStorage.setItem('nufa_presence_id', this.presenceId);
 
-                const devIconEl = document.getElementById('chat-device-icon');
-                const devLabelEl = document.getElementById('chat-device-label');
-                if (devIconEl) { devIconEl.className = 'fa-brands ' + this.myDevice.icon + (
-                    // fa-android, fa-apple, fa-windows, fa-linux semuanya brands
-                    // fa-question-circle adalah solid
-                    this.myDevice.icon === 'fa-question-circle' ? ' fa-solid' : ' fa-brands'
-                ).replace('fa-brands fa-brands', 'fa-brands'); }
-                if (devLabelEl) devLabelEl.textContent = this.myDevice.label;
-
-                // Ambil IP publik pengirim (dipakai untuk ditampilkan ke semua orang, tanpa login)
-                const ipDisplayEl = document.getElementById('chat-myip-display');
-                if (ipDisplayEl) ipDisplayEl.textContent = 'Mengambil...';
+                // Ambil IP publik pengirim (dipakai di payload pesan, bukan ditampilkan lokal)
                 this.myIp = await this._resolveMyIp();
-                if (ipDisplayEl) ipDisplayEl.textContent = this.myIp;
-                // Perbaiki ikon device setelah kita punya semua info
-                if (devIconEl) {
-                    const isBrand = ['fa-android','fa-apple','fa-windows','fa-linux'].includes(this.myDevice.icon);
-                    devIconEl.className = (isBrand ? 'fa-brands ' : 'fa-solid ') + this.myDevice.icon;
-                }
 
                 const configured = FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith('GANTI') && !FIREBASE_CONFIG.apiKey.startsWith('%%');
                 if (configured && typeof firebase !== 'undefined') {
                     try {
-                        if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+                        // cek app [DEFAULT] (bukan apps.length): app 'chat' milik /chat bisa terbentuk lebih dulu
+                        if (!firebase.apps.some(a => a.name === '[DEFAULT]')) firebase.initializeApp(FIREBASE_CONFIG);
                         this.db = firebase.firestore();
                         try {
                             await this.db.enablePersistence({ synchronizeTabs: true });
@@ -1846,8 +1725,6 @@ listEl.innerHTML = ids.map(key => {
         <script src="assets/logic/headline.js"></script>
         <script src="assets/logic/scramble-engine.js"></script>
         <script src="assets/logic/chat-beta-scrambler.js"></script>
-        <script defer src="assets/logic/auth-helper.js"></script>
-        <script defer src="assets/logic/chat-app.js"></script>
         <script src="assets/logic/sw-register.js"></script>
         <script>
         // Visitor counter fetch logic — inline di sini (bukan file eksternal)

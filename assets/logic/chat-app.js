@@ -1,14 +1,12 @@
-/* chat-app.js — router SPA untuk /chat (landing page + navigasi room + thread realtime).
-   Auth: Firebase Google Sign-In (reuse FIREBASE_CONFIG dari index.html).
-   Data: semua collection di Cloud Firestore project server-nufa:
-     - profiles/{uid}                → profil user (termasuk is_admin)
-     - messages/{autoId}             → pesan per room
-     - room_access_requests/{uid}_{room} → permintaan akses room kelas
-     - room_members/{uid}_{room}     → member kelas (di-set admin)
-     - chat_presence/{uid}           → heartbeat online
-   Firestore rules & composite index ada di firestore.rules / firestore.indexes.json. */
+/* chat-app.js — router SPA untuk /chat (landing + navigasi room + thread realtime).
+   Auth: Firebase Google Sign-In (AuthHelper) pada Firebase app bernama 'chat' — terpisah dari
+   app default yg dipakai GlobalChat halaman utama. Data: Cloud Firestore project server-nufa
+   (profiles, rooms/{id}/messages, room_access_requests, room_members, chat_presence). */
 (function () {
     'use strict';
+
+    // Handler OAuth Google hanya terdaftar di domain bawaan proyek (bukan nufabase.web.app)
+    const AUTH_DOMAIN = 'server-nufa.firebaseapp.com';
 
     const CLASS_ROOM_IDS = [
         'pemasaran-1', 'otomotif-1',
@@ -16,23 +14,16 @@
         'pemasaran-3', 'otomotif-3',
     ];
     const ROOM_LABELS = {
-        'public': 'Public',
-        'announcement': 'Announcement',
+        'public': 'Umum',
+        'announcement': 'Pengumuman',
         'pemasaran-1': 'Pemasaran 1', 'otomotif-1': 'Otomotif 1',
         'pemasaran-2': 'Pemasaran 2', 'otomotif-2': 'Otomotif 2',
         'pemasaran-3': 'Pemasaran 3', 'otomotif-3': 'Otomotif 3',
     };
     const ALL_ROOM_IDS = ['public', 'announcement'].concat(CLASS_ROOM_IDS);
 
-    // Elemen main-site yang perlu disembunyikan selagi di /chat
-    const MAIN_SITE_SELECTORS = [
-        '#overlay', '#main-content', '#gallery-lightbox',
-        '#music-btn', '#color-btn', '#chat-btn',
-        '#chat-marquee-bar', '#chat-toast-stack', '#chat-panel',
-    ];
-
     const ACCOUNT_HINT_MESSAGES = [
-        'Login akun google anda',
+        'Masuk dengan akun Google',
         'Akses percakapan dengan email anda',
         'Kelas kamu, obrolan kamu 🎓',
         'Aman & privat, cukup 1x klik',
@@ -47,13 +38,30 @@
     let hintIndex = 0;
     let unreadUnsubs = [];
     let accessibleRooms = [];
-    function roomMsgs(roomId) { return db.collection('rooms').doc(roomId).collection('messages'); }
     let unreadMap = {}; // { roomId: count }
     let presenceUnsub = null;
     let presenceInterval = null;
     let presenceBeat = null;
     let currentPresenceUid = null;
     let presenceState = {}; // { uid: { name, room, ts } }
+
+    function roomMsgs(roomId) { return db.collection('rooms').doc(roomId).collection('messages'); }
+
+    // Format: 14.35 · 6 Okt 26 (jam.menit · tanggal bulan tahun-2-digit)
+    function msgTime(ts) {
+        let d = new Date(Date.now());
+        if (ts && typeof ts.toDate === 'function') d = ts.toDate();
+        else if (ts instanceof Date) d = ts;
+        else if (ts && ts.seconds) d = new Date(ts.seconds * 1000);
+        else if (ts) d = new Date(ts);
+        const p = (n) => String(n).padStart(2, '0');
+        const mon = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        return p(d.getHours()) + '.' + p(d.getMinutes()) + ' · ' + d.getDate() + ' ' + mon[d.getMonth()] + ' ' + String(d.getFullYear()).slice(-2);
+    }
+
+    function msgTimeLabel(msg) {
+        return msgTime(msg.created_at) + (msg.edited_at !== undefined ? ' · diedit' : '');
+    }
 
     function cycleAccountHint(el) {
         if (!window.ScrambleFX) return;
@@ -77,9 +85,12 @@
             const label = currentUser.email || currentUser.displayName || 'Akun tersambung';
             el.classList.remove('is-scrambling');
             el.classList.add('is-visible');
-            hintHandle = window.ScrambleFX.run(el, label, { perCharMs: 100, tickMs: 45, holdMs: 0, loop: false });
-            // rainbow nyala setelah teks penuh ter-lock (delay ≈ durasi scramble)
-            setTimeout(() => el.classList.add('is-identity'), label.length * 100 + 150);
+            el.classList.remove('is-identity');
+            // rainbow nyala tepat saat huruf terakhir ter-lock (onDone), bukan timer tebakan
+            hintHandle = window.ScrambleFX.run(el, label, {
+                perCharMs: 60, tickMs: 35, holdMs: 0, loop: false,
+                onDone: () => el.classList.add('is-identity'),
+            });
         } else {
             el.classList.remove('is-identity');
             el.classList.add('is-visible');
@@ -113,6 +124,7 @@
     function pathToRoomId(pathname) {
         const parts = pathname.replace(/\/+$/, '').split('/').filter(Boolean); // ['chat', 'pemasaran', '1']
         if (parts.length <= 1) return null; // '/chat' saja = landing
+        if (parts[1] === 'info') return 'info';
         if (parts[1] === 'public') return 'public';
         if (parts[1] === 'announcement') return 'announcement';
         if (parts.length === 3) {
@@ -124,14 +136,6 @@
 
     function isChatPath(pathname) {
         return pathname === '/chat' || pathname.startsWith('/chat/');
-    }
-
-    function setMainSiteVisible(visible) {
-        MAIN_SITE_SELECTORS.forEach((sel) => {
-            const el = document.querySelector(sel);
-            if (el) el.style.display = visible ? '' : 'none';
-        });
-        document.body.style.overflow = visible ? '' : 'hidden auto';
     }
 
     function teardownThread() {
@@ -147,9 +151,11 @@
         document.getElementById('chat-room-thread').hidden = true;
         teardownThread();
         if (currentUser) computeUnreadCounts();
+        updateMyRooms();
+        renderPoll();
     }
 
-    function showPlaceholderText(msg, showLoginBtn) {
+    function showPlaceholderText(msg) {
         document.getElementById('chat-room-list').hidden = true;
         document.getElementById('chat-room-thread').hidden = true;
         teardownThread();
@@ -159,33 +165,6 @@
         text.textContent = msg;
         const existingBtn = box.querySelector('.chat-request-btn');
         if (existingBtn) existingBtn.remove();
-        const existingLoginBtn = box.querySelector('.chat-placeholder-login-btn');
-        if (existingLoginBtn) existingLoginBtn.remove();
-
-        if (showLoginBtn) {
-            const loginBtn = document.createElement('button');
-            loginBtn.type = 'button';
-            loginBtn.className = 'chat-back-btn chat-placeholder-login-btn';
-            loginBtn.style.marginTop = '12px';
-            loginBtn.textContent = '🔑 Login dengan Google';
-            loginBtn.onclick = async () => {
-                if (window.AuthHelper) {
-                    try {
-                        loginBtn.disabled = true;
-                        loginBtn.textContent = 'Menghubungkan...';
-                        const out = await window.AuthHelper.signIn();
-                        if (out && out.ok) return;
-                    } catch (err) {
-                        const m = window.AuthHelper.authErrorMessage(err);
-                        if (m) showChatToast(m);
-                    } finally {
-                        loginBtn.disabled = false;
-                        loginBtn.textContent = '🔑 Login dengan Google';
-                    }
-                }
-            };
-            box.appendChild(loginBtn);
-        }
     }
 
     function canWriteToRoom(roomId) {
@@ -198,55 +177,238 @@
         el.scrollTop = el.scrollHeight;
     }
 
-    function msgTime(ts) {
-        let d = new Date(Date.now());
-        if (ts && typeof ts.toDate === 'function') d = ts.toDate();
-        else if (ts instanceof Date) d = ts;
-        else if (ts && ts.seconds) d = new Date(ts.seconds * 1000);
-        else if (ts) d = new Date(ts);
-        return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    const MONTHS_ID = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+    // Waktu kirim (ms) dari created_at; belum ada timestamp server (pesan lokal pending) = paling baru
+    function msgMillis(msg) {
+        const t = msg.created_at;
+        if (t && typeof t.toMillis === 'function') return t.toMillis();
+        if (t && t.seconds) return t.seconds * 1000;
+        return Date.now();
     }
 
-    function appendMessageEl(container, msg) {
+    function dayLabel(ms) {
+        const d = new Date(ms), now = new Date(), yest = new Date(now);
+        yest.setDate(now.getDate() - 1);
+        const key = (x) => x.getFullYear() * 10000 + x.getMonth() * 100 + x.getDate();
+        if (key(d) === key(now)) return 'Hari ini';
+        if (key(d) === key(yest)) return 'Kemarin';
+        return d.getDate() + ' ' + MONTHS_ID[d.getMonth()] + ' ' + String(d.getFullYear()).slice(-2);
+    }
+
+    // Sisipkan sesuai urutan (waktu kirim, lalu id) — tidak bergantung urutan kedatangan dari Firestore
+    function insertSorted(container, el) {
+        const items = container.querySelectorAll('.chat-thread-msg');
+        let ref = null;
+        for (let i = items.length - 1; i >= 0; i--) {
+            const o = items[i];
+            if (o._ts < el._ts || (o._ts === el._ts && o.dataset.msgId <= el.dataset.msgId)) break;
+            ref = o;
+        }
+        container.insertBefore(el, ref);
+    }
+
+    function inOrder(el) {
+        let p = el.previousElementSibling;
+        while (p && !p.classList.contains('chat-thread-msg')) p = p.previousElementSibling;
+        let n = el.nextElementSibling;
+        while (n && !n.classList.contains('chat-thread-msg')) n = n.nextElementSibling;
+        return (!p || p._ts <= el._ts) && (!n || n._ts >= el._ts);
+    }
+
+    // Bangun ulang pemisah tanggal (Hari ini / Kemarin / 6 Okt 26) di antara pesan
+    function refreshDaySeparators(container) {
+        container.querySelectorAll('.chat-day-sep').forEach((n) => n.remove());
+        let last = '';
+        container.querySelectorAll('.chat-thread-msg').forEach((el) => {
+            const d = new Date(el._ts);
+            const key = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+            if (key === last) return;
+            last = key;
+            const sep = document.createElement('div');
+            sep.className = 'chat-day-sep';
+            sep.textContent = dayLabel(el._ts);
+            container.insertBefore(sep, el);
+        });
+    }
+
+    function setContent(el, raw) {
+        const html = ChatFormat.toHtml(raw);
+        el.querySelector('.chat-thread-msg-content').innerHTML = html;
+        el.classList.toggle('has-embed', /chat-media|chat-yt-facade|drive-facade|maps-facade/.test(html));
+    }
+
+    // Hanya foto profil Google (https://lh*.googleusercontent.com) yang dirender; ukuran dinormalkan
+    // ke satu URL per pengguna (=s64-c) supaya browser meng-cache dan memakainya ulang di semua pesan.
+    function safeAvatar(u, size) {
+        if (typeof u !== 'string' || u.length > 500) return '';
+        if (!/^https:\/\/lh[0-9]\.googleusercontent\.com\//i.test(u)) return '';
+        return u.replace(/=s\d+(-c)?$/i, '') + '=s' + size + '-c';
+    }
+
+    function avatarEl(msg, isOwn) {
+        const label = String(msg.display_name || 'Anonim').trim() || 'Anonim';
+        const wrap = document.createElement('span');
+        wrap.className = 'chat-avatar';
+        wrap.setAttribute('aria-hidden', 'true');
+        let hue = 0;
+        const seed = String(msg.user_id || label);
+        for (let i = 0; i < seed.length; i++) hue = (hue * 31 + seed.charCodeAt(i)) % 360;
+        wrap.style.setProperty('--av-h', String(hue));
+        wrap.textContent = Array.from(label)[0].toUpperCase();
+        // Pesan lama tanpa photo_url: untuk pesan sendiri pakai foto akun yang sedang login
+        const url = safeAvatar(msg.photo_url || (isOwn && currentUser ? currentUser.photoURL : ''), 64);
+        if (url) {
+            const img = document.createElement('img');
+            img.alt = '';
+            img.loading = 'lazy';
+            img.decoding = 'async';
+            img.referrerPolicy = 'no-referrer';
+            img.onerror = () => img.remove(); // gagal muat -> huruf inisial tetap tampil
+            img.src = url;
+            wrap.appendChild(img);
+        }
+        return wrap;
+    }
+
+    function buildMessageEl(msg) {
         const isOwn = !!(currentUser && msg.user_id === currentUser.uid);
         const el = document.createElement('div');
         el.className = 'chat-thread-msg' + (isOwn ? ' is-own' : '');
         el.dataset.msgId = msg.id;
+        el._raw = msg.content;
+        el._ts = msgMillis(msg);
 
         const name = document.createElement('span');
         name.className = 'chat-thread-msg-name';
         name.textContent = msg.display_name || 'Anonim';
 
         const content = document.createElement('span');
-        content.className = 'chat-thread-msg-content';
-        content.textContent = msg.content;
+        content.className = 'chat-thread-msg-content chat-text';
 
         const time = document.createElement('span');
         time.className = 'chat-thread-msg-time';
-        time.textContent = msgTime(msg.created_at);
+        time.textContent = msgTimeLabel(msg);
 
-        el.appendChild(name);
+        const head = document.createElement('div');
+        head.className = 'chat-thread-msg-head';
+        head.appendChild(avatarEl(msg, isOwn));
+        head.appendChild(name);
+        el.appendChild(head);
         el.appendChild(content);
         el.appendChild(time);
+        setContent(el, msg.content);
 
         if (isOwn) {
+            const edit = document.createElement('button');
+            edit.type = 'button';
+            edit.className = 'chat-thread-msg-edit';
+            edit.title = 'Edit pesan';
+            edit.innerHTML = '<i class="fa-solid fa-pen"></i>';
+            edit.onclick = () => startEdit(el);
             const del = document.createElement('button');
             del.type = 'button';
             del.className = 'chat-thread-msg-del';
             del.title = 'Hapus pesan';
             del.innerHTML = '<i class="fa-solid fa-trash"></i>';
             del.onclick = () => deleteMessage(msg.id, el);
+            el.appendChild(edit);
             el.appendChild(del);
         }
+        return el;
+    }
 
-        container.appendChild(el);
-        while (container.children.length > 200) container.removeChild(container.firstChild);
+    function appendMessageEl(container, msg) {
+        insertSorted(container, buildMessageEl(msg));
+        const items = container.querySelectorAll('.chat-thread-msg');
+        for (let i = 0; i < items.length - 200; i++) items[i].remove();
+    }
+
+    // Dipanggil saat dokumen 'modified': edit isi/tanda diedit, atau created_at server terisi (posisi dikoreksi)
+    function updateMessageEl(container, msg) {
+        const el = container.querySelector('[data-msg-id="' + msg.id + '"]');
+        if (!el) return;
+        el._raw = msg.content;
+        if (!el.classList.contains('is-editing')) setContent(el, msg.content);
+        el.querySelector('.chat-thread-msg-time').textContent = msgTimeLabel(msg);
+        el._ts = msgMillis(msg);
+        if (!inOrder(el)) { el.remove(); insertSorted(container, el); }
+        refreshDaySeparators(container);
+        ChatFormat.observe(container);
+    }
+
+    function endEdit(el) {
+        const box = el.querySelector('.chat-edit-box');
+        if (box) box.remove();
+        el.querySelector('.chat-thread-msg-content').hidden = false;
+        el.classList.remove('is-editing');
+    }
+
+    // Edit inline: hanya pemilik pesan (rules Firestore juga memaksa user_id == auth.uid)
+    function startEdit(el) {
+        if (el.classList.contains('is-editing')) return;
+        const id = el.dataset.msgId, roomId = currentRoomId;
+        el.classList.add('is-editing');
+        el.querySelector('.chat-thread-msg-content').hidden = true;
+
+        const box = document.createElement('div');
+        box.className = 'chat-edit-box';
+        const ta = document.createElement('textarea');
+        ta.className = 'chat-edit-input';
+        ta.maxLength = 1000;
+        ta.rows = 3;
+        ta.value = el._raw || '';
+        const row = document.createElement('div');
+        row.className = 'chat-edit-actions';
+        const save = document.createElement('button');
+        save.type = 'button';
+        save.className = 'chat-edit-save';
+        save.textContent = 'Simpan';
+        const cancel = document.createElement('button');
+        cancel.type = 'button';
+        cancel.className = 'chat-edit-cancel';
+        cancel.textContent = 'Batal';
+        row.appendChild(save);
+        row.appendChild(cancel);
+        box.appendChild(ta);
+        box.appendChild(row);
+        el.insertBefore(box, el.querySelector('.chat-thread-msg-time'));
+        ta.focus();
+
+        const doSave = async () => {
+            const text = ta.value.trim().slice(0, 1000);
+            if (!text) { showChatToast('Pesan tidak boleh kosong.'); return; }
+            if (text === el._raw) { endEdit(el); return; }
+            const bad = ChatFormat.validateEmbeds(text);
+            if (bad) { showChatToast('Format .' + bad + ' tak didukung — edit tidak disimpan.'); return; }
+            save.disabled = true;
+            try {
+                await roomMsgs(roomId).doc(id).update({
+                    content: text,
+                    edited_at: firebase.firestore.FieldValue.serverTimestamp(),
+                });
+                el._raw = text;
+                setContent(el, text);
+                endEdit(el);
+                ChatFormat.observe(el.parentElement);
+            } catch (e) {
+                save.disabled = false;
+                showChatToast(e.code === 'permission-denied' ? 'Tidak bisa mengedit pesan ini.' : 'Gagal menyimpan edit.');
+            }
+        };
+        save.onclick = doSave;
+        cancel.onclick = () => endEdit(el);
+        ta.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); doSave(); }
+            else if (e.key === 'Escape') endEdit(el);
+        });
     }
 
     function removeMessageEl(container, id) {
         const el = container.querySelector('[data-msg-id="' + id + '"]');
         if (el) el.remove();
-        if (!container.children.length) {
+        refreshDaySeparators(container);
+        if (!container.querySelector('.chat-thread-msg')) {
             container.innerHTML = '<p class="chat-thread-empty">Belum ada pesan.</p>';
         }
     }
@@ -280,9 +442,12 @@
         const writable = writableOverride !== undefined ? writableOverride : canWriteToRoom(roomId);
         form.hidden = !writable;
         note.hidden = writable;
+        const gear = document.getElementById('chat-settings-btn');
+        gear.hidden = !currentUser; // semua room (read/write), wajib login
+        if (!currentUser) { document.getElementById('chat-settings-panel').hidden = true; gear.classList.remove('on'); }
         if (!writable) {
             note.textContent = roomId === 'announcement'
-                ? 'Hanya admin yang bisa mengirim pesan di Announcement.'
+                ? 'Hanya admin yang bisa mengirim pesan di Pengumuman.'
                 : 'Kamu tidak punya akses tulis di ruang ini — cuma bisa baca.';
         }
 
@@ -295,17 +460,19 @@
 
         list.innerHTML = '<p class="chat-thread-loading">Memuat pesan...</p>';
 
-        let first = true;
         threadUnsub = roomMsgs(roomId).orderBy('created_at', 'desc').limit(100).onSnapshot((snap) => {
             if (currentRoomId !== roomId || !threadUnsub) return;
             if (list.querySelector('.chat-thread-loading') || list.querySelector('.chat-thread-empty')) list.innerHTML = '';
-            snap.docChanges().forEach((c) => { if (c.type === 'removed') removeMessageEl(list, c.doc.id); });
+            snap.docChanges().forEach((c) => {
+                if (c.type === 'removed') removeMessageEl(list, c.doc.id);
+                else if (c.type === 'modified') updateMessageEl(list, { id: c.doc.id, ...c.doc.data() });
+            });
             const added = snap.docChanges().filter((c) => c.type === 'added')
                 .map((c) => ({ id: c.doc.id, ...c.doc.data() }));
-            if (first) added.reverse(); // snapshot awal desc -> balik ke urutan lama->baru
-            first = false;
             added.forEach((m) => appendMessageEl(list, m));
-            if (added.length) scrollThreadToBottom(list);
+            refreshDaySeparators(list);
+            ChatFormat.observe(list);
+            if (added.length) { scrollThreadToBottom(list); markRoomRead(roomId); }
             if (!snap.docs.length && !list.children.length) list.innerHTML = '<p class="chat-thread-empty">Belum ada pesan.</p>';
         }, (err) => {
             if (currentRoomId !== roomId) return;
@@ -317,20 +484,24 @@
     async function sendMessage(roomId, content) {
         const text = content.trim().slice(0, 1000);
         if (!db || !currentUser || !text) return;
+        const doc = {
+            room_id: roomId, user_id: currentUser.uid,
+            display_name: (currentUser.displayName || 'Anonim').slice(0, 60),
+            content: text, created_at: firebase.firestore.FieldValue.serverTimestamp(),
+        };
+        const photo = safeAvatar(currentUser.photoURL, 64);
         try {
-            await roomMsgs(roomId).add({
-                room_id: roomId, user_id: currentUser.uid,
-                display_name: (currentUser.displayName || 'Anonim').slice(0, 60),
-                content: text, created_at: firebase.firestore.FieldValue.serverTimestamp(),
-            });
+            await roomMsgs(roomId).add(photo ? { ...doc, photo_url: photo } : doc);
         } catch (e) {
+            // Rules lama (belum mengenal photo_url) menolak field tambahan -> kirim ulang tanpa foto
+            if (e.code === 'permission-denied' && photo) {
+                try { await roomMsgs(roomId).add(doc); return; } catch (e2) { e = e2; }
+            }
             showChatToast(e.code === 'permission-denied' ? 'Tidak punya akses tulis di ruang ini.' : 'Gagal kirim pesan.');
         }
     }
 
-    function accessRequestDocId(uid, roomId) {
-        return uid + '_' + roomId;
-    }
+    function accessRequestDocId(uid, roomId) { return uid + '_' + roomId; }
 
     async function loadAccess() {
         accessibleRooms = ['public', 'announcement'];
@@ -355,6 +526,11 @@
             await openThread(roomId, true);
             return;
         }
+        if (readPolicy === 'open') {
+            await openThread(roomId, false);
+            document.getElementById('chat-thread-readonly-note').textContent = 'Mode baca terbuka (hasil voting): kamu bisa membaca, tapi hanya anggota kelas yang bisa menulis.';
+            return;
+        }
         const status = reqSnap && reqSnap.exists ? reqSnap.data().status : null;
         const elsewhere = others.docs.some((d) => d.data().room_id !== roomId);
         showAccessGate(roomId, status, elsewhere);
@@ -362,7 +538,7 @@
 
     function showAccessGate(roomId, status, elsewhere) {
         const label = ROOM_LABELS[roomId];
-        const text = status === 'pending' ? 'Permintaan akses ke "' + label + '" menunggu approval admin.'
+        const text = status === 'pending' ? 'Permintaan akses ke "' + label + '" menunggu persetujuan admin.'
             : elsewhere ? 'Kamu sudah aktif/mengajukan di kelas lain, jadi room ini terkunci.'
             : status === 'rejected' ? 'Permintaan akses ke "' + label + '" ditolak admin. Kamu bisa minta ulang.'
             : 'Ruang ini khusus anggota kelas. Ajukan akses ke admin.';
@@ -383,7 +559,7 @@
                     user_name: currentUser.displayName || '', user_email: currentUser.email || '',
                     requested_at: firebase.firestore.FieldValue.serverTimestamp(),
                 });
-                showChatToast('Permintaan terkirim, tunggu approval admin.');
+                showChatToast('Permintaan terkirim, tunggu persetujuan admin.');
                 refreshRoomStatuses();
                 showAccessGate(roomId, 'pending', false);
             } catch (e) {
@@ -401,7 +577,7 @@
             return;
         }
         if (!currentUser) {
-            showPlaceholderText('Login dengan Google dulu buat mengakses "' + (ROOM_LABELS[roomId] || roomId) + '".', true);
+            showPlaceholderText('Masuk dengan Google dulu untuk mengakses "' + (ROOM_LABELS[roomId] || roomId) + '".');
             return;
         }
         if (!db) {
@@ -416,27 +592,26 @@
         await renderClassRoomGate(roomId);
     }
 
+    function showInfo() {
+        document.getElementById('chat-room-list').hidden = true;
+        document.getElementById('chat-room-placeholder').hidden = true;
+        document.getElementById('chat-room-thread').hidden = true;
+        teardownThread();
+        window.scrollTo(0, 0);
+    }
+
     function render() {
-        const pathname = window.location.pathname;
         const chatView = document.getElementById('chat-view');
         if (!chatView) return;
-
-        if (!isChatPath(pathname)) {
-            chatView.hidden = true;
-            setMainSiteVisible(true);
-            teardownThread();
-            return;
-        }
-
-        chatView.hidden = false;
-        setMainSiteVisible(false);
-
-        const roomId = pathToRoomId(pathname);
-        if (!roomId) {
-            showRoomList();
-        } else {
-            enterRoom(roomId);
-        }
+        const roomId = pathToRoomId(window.location.pathname);
+        const info = document.getElementById('chat-info-view');
+        if (info) info.hidden = roomId !== 'info';
+        document.documentElement.classList.toggle('chat-lock', !!roomId && roomId !== 'info' && roomId !== 'unknown');
+        document.documentElement.classList.toggle('chat-info-open', roomId === 'info');
+        document.querySelectorAll('.chat-room-item[data-room]').forEach((a) => a.classList.toggle('is-active', a.dataset.room === roomId));
+        if (roomId === 'info') { showInfo(); return; }
+        if (!roomId) showRoomList();
+        else enterRoom(roomId);
     }
 
     function navigate(path) {
@@ -461,30 +636,127 @@
             });
         }
 
+        const notifBtn = document.getElementById('chat-notif-btn');
+        if (notifBtn) notifBtn.addEventListener('click', toggleNotif);
+
+        // Link footer ke Info: kalau sudah di halaman Info, blok dan beri pesan sistem
+        document.addEventListener('click', (e) => {
+            const a = e.target.closest('.chat-footer-link[href="/chat/info"]');
+            if (!a) return;
+            e.preventDefault();
+            if (pathToRoomId(window.location.pathname) === 'info') showChatToast('Sistem: Anda sudah berada di sini (Info, Aturan & Privasi).');
+            else navigate('/chat/info');
+        });
+
         document.getElementById('chat-back-btn').addEventListener('click', () => navigate('/chat'));
         document.getElementById('chat-thread-back-btn').addEventListener('click', () => navigate('/chat'));
+        const infoBack = document.getElementById('chat-info-back-btn');
+        if (infoBack) infoBack.addEventListener('click', () => navigate('/chat'));
 
-        document.getElementById('chat-thread-form').addEventListener('submit', (e) => {
+        // Roda gigi (semua room, wajib login): teks 80-150%, facade/embed 90-250%, tema
+        const gear = document.getElementById('chat-settings-btn');
+        const panel = document.getElementById('chat-settings-panel');
+        const tRange = document.getElementById('chat-font-range');
+        const eRange = document.getElementById('chat-embed-range');
+        const syncSettings = () => {
+            tRange.value = ChatPrefs.scale;
+            eRange.value = ChatPrefs.embedScale;
+            document.getElementById('chat-font-val').textContent = ChatPrefs.scale + '%';
+            document.getElementById('chat-embed-val').textContent = ChatPrefs.embedScale + '%';
+            panel.querySelectorAll('[data-media-pref]').forEach((c) => { c.checked = !!window.MediaPrefs[c.dataset.mediaPref]; });
+            panel.querySelectorAll('[data-theme-opt]').forEach((b) => b.classList.toggle('on', b.dataset.themeOpt === ChatPrefs.theme));
+        };
+        const closePanel = () => { panel.hidden = true; gear.classList.remove('on'); };
+        gear.addEventListener('click', (e) => {
+            e.stopPropagation();
+            panel.hidden = !panel.hidden;
+            gear.classList.toggle('on', !panel.hidden);
+            if (!panel.hidden) syncSettings();
+        });
+        document.addEventListener('click', (e) => {
+            if (!panel.hidden && !panel.contains(e.target) && !gear.contains(e.target)) closePanel();
+        });
+        tRange.addEventListener('input', () => { ChatPrefs.setScale(Number(tRange.value)); syncSettings(); });
+        eRange.addEventListener('input', () => { ChatPrefs.setEmbedScale(Number(eRange.value)); syncSettings(); });
+        // Pengaturan media memakai key localStorage yang sama dengan beranda (sinkron otomatis)
+        panel.addEventListener('change', (e) => {
+            const c = e.target.closest('[data-media-pref]');
+            if (!c) return;
+            window.MediaPrefs.set(c.dataset.mediaPref, c.checked);
+            showChatToast('Pengaturan media disimpan. Berlaku untuk media yang tampil berikutnya.');
+        });
+        window.addEventListener('mediaprefs', () => { if (!panel.hidden) syncSettings(); });
+        panel.addEventListener('click', (e) => {
+            const f = e.target.closest('[data-font]');
+            if (f) { ChatPrefs.setScale(ChatPrefs.scale + (f.dataset.font === '+' ? 5 : -5)); syncSettings(); return; }
+            const m = e.target.closest('[data-embed]');
+            if (m) { ChatPrefs.setEmbedScale(ChatPrefs.embedScale + (m.dataset.embed === '+' ? 10 : -10)); syncSettings(); return; }
+            const t = e.target.closest('[data-theme-opt]');
+            if (t) { ChatPrefs.setTheme(t.dataset.themeOpt); syncSettings(); return; }
+            if (e.target.closest('[data-prefs-reset]')) { ChatPrefs.reset(); syncSettings(); }
+        });
+
+        const form = document.getElementById('chat-thread-form');
+        const input = document.getElementById('chat-thread-input');
+        const grow = () => { input.style.height = 'auto'; input.style.height = input.scrollHeight + 'px'; };
+        input.addEventListener('input', grow);
+        input.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                if (form.requestSubmit) form.requestSubmit();
+                else form.dispatchEvent(new Event('submit', { cancelable: true }));
+            }
+        });
+
+        // Sisip pasangan simbol di sekitar teks terpilih (atau placeholder kalau belum memilih)
+        const wrap = (before, after, placeholder) => {
+            input.focus();
+            const start = input.selectionStart, end = input.selectionEnd, val = input.value;
+            const sel = val.slice(start, end) || placeholder;
+            input.value = val.slice(0, start) + before + sel + after + val.slice(end);
+            input.setSelectionRange(start + before.length, start + before.length + sel.length);
+            grow();
+        };
+        document.getElementById('chat-format-bar').addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-fmt]');
+            if (!btn) return;
+            switch (btn.dataset.fmt) {
+                case 'bold': wrap('*', '*', 'tebal'); break;
+                case 'underline': wrap('_', '_', 'garis bawah'); break;
+                case 'strike': wrap('~', '~', 'coret'); break;
+                case 'quote-inline': wrap('"', '"', 'kutip'); break;
+                case 'link': wrap('[', '](https://)', 'teks link'); break;
+                case 'media': wrap('[', ']{https://}', 'alt gambar-video-Display'); break;
+                case 'info': {
+                    const help = document.getElementById('chat-format-help');
+                    help.hidden = !help.hidden;
+                    btn.classList.toggle('on', !help.hidden);
+                    break;
+                }
+            }
+        });
+
+        form.addEventListener('submit', (e) => {
             e.preventDefault();
             if (!currentRoomId) return;
-            const input = document.getElementById('chat-thread-input');
             const value = input.value;
             if (!value.trim()) return;
+            const bad = ChatFormat.validateEmbeds(value);
+            if (bad) { showChatToast('Format .' + bad + ' tak didukung — pesan tidak dikirim.'); return; }
             input.value = '';
+            input.style.height = '';
             sendMessage(currentRoomId, value);
         });
 
         window.addEventListener('popstate', render);
 
         document.getElementById('chat-account-btn').addEventListener('click', async () => {
-            if (typeof firebase === 'undefined' || !firebase.apps || !firebase.apps.length) return;
+            if (!db || !window.AuthHelper) return;
             if (currentUser) {
-                await firebase.auth().signOut();
+                openLogoutModal();
             } else {
                 try {
-                    const out = await window.AuthHelper.signIn();
-                    if (!out) return;
-                    if (out.ok) return; // onAuthStateChanged yang lanjutin
+                    await window.AuthHelper.signIn();
                 } catch (err) {
                     const msg = window.AuthHelper.authErrorMessage(err);
                     if (msg) showChatToast(msg);
@@ -510,21 +782,26 @@
         if (greetEl) {
             if (currentUser) {
                 const firstName = (currentUser.displayName || '').split(' ')[0] || 'Sobat NUFA';
-                greetEl.textContent = 'Halo, ' + firstName + ' 👋';
+                greetEl.textContent = 'Selamat datang di obrolan NufaBase, ' + firstName + ' 🖐️\nMasih dalam tahap pengembangan (Beta).\nTips: ganti nama di akun Google kamu, nama di sini otomatis ikut berubah.';
                 greetEl.hidden = false;
             } else {
                 greetEl.hidden = true;
             }
         }
+        renderNotifBtn();
         updateAccountHint();
     }
 
     function refreshRoomStatuses() {
         if (!db || !currentUser) {
             document.querySelectorAll('.chat-room-status').forEach((el) => {
-                el.textContent = 'Login untuk minta akses';
+                el.textContent = 'Masuk untuk minta akses';
                 el.removeAttribute('data-state');
             });
+            return;
+        }
+        if (isAdmin) { // admin sudah punya akses baca & tulis ke semua ruang
+            document.querySelectorAll('.chat-room-status').forEach((el) => { el.textContent = 'Akses penuh'; el.setAttribute('data-state', 'approved'); });
             return;
         }
         db.collection('room_access_requests')
@@ -532,18 +809,14 @@
             .get()
             .then((snap) => {
                 const byRoom = {};
-                snap.docs.forEach((doc) => {
-                    const r = doc.data();
-                    byRoom[r.room_id] = r.status;
-                });
+                snap.docs.forEach((doc) => { const r = doc.data(); byRoom[r.room_id] = r.status; });
                 document.querySelectorAll('.chat-room-status').forEach((el) => {
-                    const roomId = el.getAttribute('data-status');
-                    const status = byRoom[roomId];
+                    const status = byRoom[el.getAttribute('data-status')];
                     if (!status) {
                         el.textContent = 'Belum diminta';
                         el.removeAttribute('data-state');
                     } else if (status === 'pending') {
-                        el.textContent = 'Menunggu approval';
+                        el.textContent = 'Menunggu persetujuan';
                         el.setAttribute('data-state', 'pending');
                     } else if (status === 'approved') {
                         el.textContent = 'Disetujui';
@@ -623,6 +896,7 @@
         const rooms = accessibleRooms.slice();
         const map = getLastReadMap();
         if (!Object.keys(map).length) {
+            // baru pertama kali: jangan hitung histori lama sebagai unread
             const now = new Date().toISOString();
             rooms.forEach((id) => { map[id] = now; });
             setLastReadMap(map);
@@ -634,13 +908,51 @@
         renderUnreadBadges();
     }
 
+    // Satu tombol bel untuk semua ruang; notifikasi di-collapse jadi satu (tag sama)
+    const K_NOTIF = 'nufa_chat_notif_all';
+    function notifOn() {
+        if (!('Notification' in window) || Notification.permission !== 'granted') return false;
+        let v = null;
+        try { v = localStorage.getItem(K_NOTIF); } catch (e) { /* storage diblok */ }
+        return v !== 'off';
+    }
+
+    function renderNotifBtn() {
+        const b = document.getElementById('chat-notif-btn');
+        if (!b) return;
+        const on = notifOn();
+        b.hidden = !currentUser || !('Notification' in window);
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-pressed', String(on));
+        b.title = on ? 'Notifikasi menyala untuk semua ruang' : 'Notifikasi mati';
+        b.innerHTML = '<i class="fa-solid fa-bell' + (on ? '' : '-slash') + '"></i>';
+    }
+
+    async function toggleNotif() {
+        if (notifOn()) {
+            try { localStorage.setItem(K_NOTIF, 'off'); } catch (e) { /* abaikan */ }
+            showChatToast('Notifikasi chat dimatikan.');
+        } else {
+            if (Notification.permission === 'default') await Notification.requestPermission().catch(() => {});
+            if (Notification.permission === 'granted') {
+                try { localStorage.setItem(K_NOTIF, 'on'); } catch (e) { /* abaikan */ }
+                showChatToast('Notifikasi menyala untuk semua ruang chat.');
+            } else {
+                showChatToast('Izin notifikasi ditolak. Aktifkan lewat pengaturan browser.');
+            }
+        }
+        renderNotifBtn();
+    }
+
     function maybeNotify(msg) {
-        if (!('Notification' in window) || Notification.permission !== 'granted') return;
+        if (!notifOn()) return;
         try {
-            const n = new Notification((ROOM_LABELS[msg.room_id] || msg.room_id) + ' • ' + (msg.display_name || 'Pesan baru'), {
-                body: msg.content,
+            const body = window.ChatFormat ? ChatFormat.toPlainText(msg.content) : msg.content;
+            const n = new Notification('Chat NUFABASE', {
+                body: (ROOM_LABELS[msg.room_id] || msg.room_id) + ' • ' + (msg.display_name || 'Pesan baru') + ': ' + body,
                 icon: '/appcover.jpg',
-                tag: 'chat-' + msg.room_id,
+                tag: 'nufa-chat-all',
+                renotify: true,
             });
             n.onclick = () => {
                 window.focus();
@@ -648,6 +960,54 @@
                 n.close();
             };
         } catch (e) { /* browser nolak/gak dukung, abaikan */ }
+    }
+
+    // Kelas yang sudah disetujui naik ke kotak "Kelasmu" dengan animasi FLIP (tiap masuk/akses chat)
+    function placeHome(el) {
+        const idx = CLASS_ROOM_IDS.indexOf(el.dataset.room);
+        const next = Array.from(el._home.querySelectorAll('.chat-room-item'))
+            .find((x) => CLASS_ROOM_IDS.indexOf(x.dataset.room) > idx);
+        el._home.insertBefore(el, next || null);
+    }
+
+    function updateMyRooms() {
+        const box = document.getElementById('chat-room-mine'), list = document.getElementById('chat-room-list');
+        if (!box || !list || !list.getClientRects().length) return; // daftar belum terlihat: ditunda sampai showRoomList
+        const want = currentUser && !isAdmin ? CLASS_ROOM_IDS.filter((id) => accessibleRooms.includes(id)) : [];
+        const moves = Array.from(document.querySelectorAll('.chat-room-item-class'))
+            .filter((el) => (el.parentElement === box) !== want.includes(el.dataset.room));
+        if (!moves.length) return;
+        const info = document.querySelector('.chat-info-link'); // link Info sudah ada di footer: slotnya diganti kotak Kelasmu
+        const all = Array.from(document.querySelectorAll('.chat-room-item')).filter((el) => el !== info);
+        const first = new Map(all.map((el) => [el, el.getBoundingClientRect().top]));
+        moves.forEach((el) => {
+            if (!el._home) el._home = el.parentElement;
+            if (want.includes(el.dataset.room)) box.appendChild(el); else placeHome(el);
+        });
+        box.hidden = !box.querySelector('.chat-room-item');
+        if (info) info.hidden = !box.hidden;
+        document.querySelectorAll('.chat-room-group:not(.chat-room-mine)').forEach((g) => { g.hidden = !g.querySelector('.chat-room-item'); });
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        all.forEach((el) => {
+            const dy = first.get(el) - el.getBoundingClientRect().top;
+            if (!dy) return;
+            el.style.transition = 'none';
+            el.style.transform = 'translateY(' + dy + 'px)';
+        });
+        const rising = moves.filter((el) => want.includes(el.dataset.room));
+        rising.forEach((el) => el.classList.add('is-rising')); // naik di atas item lain (menimpa Info)
+        void list.offsetWidth; // paksa reflow supaya transisi jalan
+        all.forEach((el) => {
+            if (!el.style.transform) return;
+            el.style.transition = 'transform 0.55s cubic-bezier(0.22, 1, 0.36, 1)';
+            el.style.transform = '';
+            setTimeout(() => { el.style.transition = ''; }, 650);
+        });
+        setTimeout(() => rising.forEach((el) => {
+            el.classList.remove('is-rising');
+            el.classList.add('is-promoted');
+            setTimeout(() => el.classList.remove('is-promoted'), 1300);
+        }), 560);
     }
 
     function teardownUnreadChannel() {
@@ -674,14 +1034,7 @@
         );
     }
 
-    function maybeRequestNotificationPermission() {
-        if (!('Notification' in window)) return;
-        if (Notification.permission === 'default') {
-            Notification.requestPermission().catch(() => {});
-        }
-    }
-
-    // ── presence: 1 koleksi global (bukan 8 koleksi per-room — lebih hemat
+    // ── presence: 1 channel global (bukan 8 channel per-room — lebih hemat
     //    koneksi, penting buat device/koneksi low-end). Tiap user nge-track
     //    { name, room }; room null = lagi di hub /chat, bukan di room manapun.
     function computeOnlineCounts() {
@@ -758,9 +1111,7 @@
     }
 
     function onPresencePageHide() {
-        if (currentPresenceUid && db) {
-            db.collection('chat_presence').doc(currentPresenceUid).delete().catch(() => {});
-        }
+        if (currentPresenceUid && db) db.collection('chat_presence').doc(currentPresenceUid).delete().catch(() => {});
     }
 
     function trackPresence() {
@@ -770,9 +1121,7 @@
     function teardownPresenceChannel() {
         if (presenceInterval) { clearInterval(presenceInterval); presenceInterval = null; }
         if (presenceUnsub) { presenceUnsub(); presenceUnsub = null; }
-        if (currentPresenceUid && db) {
-            db.collection('chat_presence').doc(currentPresenceUid).delete().catch(() => {});
-        }
+        if (currentPresenceUid && db) db.collection('chat_presence').doc(currentPresenceUid).delete().catch(() => {});
         currentPresenceUid = null;
         presenceBeat = null;
         document.removeEventListener('visibilitychange', onPresenceVisibility);
@@ -781,13 +1130,13 @@
         renderOnlineBadges();
     }
 
+    // Heartbeat 30s ke chat_presence/{uid}; entri dianggap online kalau ts < 90s
     function setupPresenceChannel() {
         teardownPresenceChannel();
         if (!db || !currentUser) return;
         const uid = currentUser.uid;
         currentPresenceUid = uid;
-
-        const beat = () => {
+        presenceBeat = () => {
             db.collection('chat_presence').doc(uid).set({
                 name: currentUser.displayName || currentUser.email || 'Anonim',
                 room: currentRoomId || null,
@@ -795,51 +1144,49 @@
                 online_at: firebase.firestore.FieldValue.serverTimestamp(),
             }).catch(() => {});
         };
-        presenceBeat = beat;
-        beat();
-        presenceInterval = setInterval(beat, 30000);
-
+        presenceBeat();
+        presenceInterval = setInterval(presenceBeat, 30000);
         document.addEventListener('visibilitychange', onPresenceVisibility);
         window.addEventListener('pagehide', onPresencePageHide);
-
-        const ttl = 90000;
         presenceUnsub = db.collection('chat_presence').onSnapshot((snap) => {
-            const now = Date.now();
-            const data = {};
-            snap.forEach((doc) => {
-                const d = doc.data();
-                if (d && d.ts && now - d.ts < ttl) data[doc.id] = d;
-            });
+            const now = Date.now(), data = {};
+            snap.forEach((doc) => { const d = doc.data(); if (d && d.ts && now - d.ts < 90000) data[doc.id] = d; });
             presenceState = data;
             renderOnlineBadges();
         }, () => {});
     }
 
     function initServices() {
-        if (typeof firebase === 'undefined' || !firebase.firestore || !firebase.auth) {
-            return; // SDK belum kemuat (mis. diblok jaringan), landing page tetap jalan tanpa auth
-        }
-        if (typeof FIREBASE_CONFIG === 'undefined' || !FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey.startsWith('%%')) {
-            return; // secret belum ke-inject (build lokal tanpa GitHub Actions)
-        }
-        if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
-        db = firebase.firestore();
+        if (typeof firebase === 'undefined' || !firebase.firestore || !firebase.auth || !window.AuthHelper) return;
+        if (typeof FIREBASE_CONFIG === 'undefined' || !FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey.startsWith('%%')) return;
+        const app = firebase.apps.find((a) => a.name === 'chat') || firebase.initializeApp({ ...FIREBASE_CONFIG, authDomain: AUTH_DOMAIN }, 'chat');
+        window.AuthHelper.use(app);
+        db = app.firestore();
 
-        const auth = firebase.auth();
+        const auth = app.auth();
         if (auth.useDeviceLanguage) auth.useDeviceLanguage();
-        // Selesaikan redirect login yang tertunda (kalau page sempat pindah selama OAuth).
-        if (window.AuthHelper) window.AuthHelper.settleRedirectResult(auth).catch(() => {});
+        window.AuthHelper.settleRedirectResult(auth).catch(() => {});
 
         auth.onAuthStateChanged(async (user) => {
             currentUser = user;
             isAdmin = false;
             accessibleRooms = [];
+            if (!user) { readPolicy = 'closed'; myVote = null; }
             updateAccountIcon();
             if (user) {
-                await window.AuthHelper.ensureProfile(user);
-                isAdmin = (await window.AuthHelper.resolveRole(user)).isAdmin;
-                await loadAccess();
-                maybeRequestNotificationPermission();
+                // Cache akses terakhir → kelas disetujui langsung dikenali, koreksi menyusul dari server
+                try {
+                    const c = JSON.parse(localStorage.getItem('chatAccess:' + user.uid) || '[]');
+                    accessibleRooms = ['public', 'announcement'].concat(c.filter((r) => CLASS_ROOM_IDS.includes(r)));
+                    updateMyRooms();
+                } catch (e) { /* cache rusak, abaikan */ }
+                window.AuthHelper.ensureProfile(user); // tidak perlu ditunggu
+                // 3 query independen jalan paralel (sebelumnya berurutan = 4x round-trip)
+                const roleP = window.AuthHelper.resolveRole(user), accessP = loadAccess(), pollP = loadPoll();
+                isAdmin = (await roleP).isAdmin;
+                await Promise.all([accessP, pollP]);
+                if (isAdmin) accessibleRooms = ALL_ROOM_IDS.slice();
+                else try { localStorage.setItem('chatAccess:' + user.uid, JSON.stringify(accessibleRooms.filter((r) => CLASS_ROOM_IDS.includes(r)))); } catch (e) { /* storage penuh */ }
                 computeUnreadCounts();
                 setupUnreadChannel();
                 setupPresenceChannel();
@@ -851,13 +1198,116 @@
                 renderUnreadBadges();
             }
             refreshRoomStatuses();
+            updateMyRooms();
+            renderPoll();
             if (isChatPath(window.location.pathname)) render();
+        });
+    }
+
+
+    // ── logout confirm ──────────────────────────────────────────
+    function openLogoutModal() {
+        const m = document.getElementById('chat-logout-modal');
+        if (!m) { window.AuthHelper.signOut(); return; }
+        m.hidden = false;
+        document.getElementById('chat-logout-cancel').focus();
+    }
+
+    function bindLogoutModal() {
+        const m = document.getElementById('chat-logout-modal');
+        if (!m) return;
+        const close = () => { m.hidden = true; };
+        document.getElementById('chat-logout-cancel').addEventListener('click', close);
+        m.addEventListener('click', (e) => { if (e.target === m) close(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !m.hidden) close(); });
+        document.getElementById('chat-logout-ok').addEventListener('click', async () => {
+            close();
+            await window.AuthHelper.signOut();
+        });
+    }
+
+    // ── polling akses baca kelas (terbanyak menang; seri/kosong = tertutup) ──
+    const POLL_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+    let readPolicy = 'closed';
+    let pollTally = { open: 0, closed: 0 };
+    let myVote = null;
+
+    async function loadPoll() {
+        if (!db || !currentUser) return;
+        const [t, v] = await Promise.all([
+            db.collection('polls').doc('read_access').get().catch(() => null),
+            db.collection('poll_votes').doc(currentUser.uid + '_read_access').get().catch(() => null),
+        ]);
+        const d = t && t.exists ? t.data() : {};
+        pollTally = { open: d.open || 0, closed: d.closed || 0 };
+        myVote = v && v.exists ? v.data().choice : null;
+        readPolicy = pollTally.open > pollTally.closed ? 'open' : 'closed';
+    }
+
+    function pollDismissKey() { return currentUser ? 'chatPollDismissed:' + currentUser.uid : null; }
+
+    function renderPoll() {
+        const box = document.getElementById('chat-poll');
+        if (!box) return;
+        const key = pollDismissKey();
+        let dismissed = 0;
+        try { dismissed = key ? Number(localStorage.getItem(key)) || 0 : 0; } catch (e) { /* abaikan */ }
+        const show = !!(currentUser && db && (Date.now() - dismissed) >= POLL_COOLDOWN_MS);
+        box.hidden = !show;
+        if (!show) return;
+        const total = pollTally.open + pollTally.closed;
+        ['open', 'closed'].forEach((c) => {
+            const pct = total ? Math.round(pollTally[c] / total * 100) : 0;
+            box.querySelector('[data-pct="' + c + '"]').textContent = myVote ? pct + '%' : '';
+            box.querySelector('[data-bar="' + c + '"]').style.width = myVote ? pct + '%' : '0';
+            box.querySelector('.chat-poll-opt[data-choice="' + c + '"]').classList.toggle('is-picked', myVote === c);
+        });
+        document.getElementById('chat-poll-foot').textContent = (myVote ? 'Terima kasih! Kamu bisa ganti pilihan kapan saja. ' : '') +
+            total + ' suara · Aturan saat ini: ' + (readPolicy === 'open' ? 'semua bisa membaca' : 'khusus anggota kelas');
+    }
+
+    async function castVote(choice) {
+        if (!db || !currentUser || choice === myVote) return;
+        const btns = document.querySelectorAll('#chat-poll .chat-poll-opt');
+        btns.forEach((b) => { b.disabled = true; });
+        const batch = db.batch();
+        const tallyRef = db.collection('polls').doc('read_access');
+        const next = { open: pollTally.open, closed: pollTally.closed };
+        if (myVote) next[myVote] = Math.max(0, next[myVote] - 1);
+        next[choice] += 1;
+        batch.set(db.collection('poll_votes').doc(currentUser.uid + '_read_access'), {
+            user_id: currentUser.uid, poll_id: 'read_access', choice: choice,
+            voted_at: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+        batch.set(tallyRef, next);
+        try {
+            await batch.commit();
+            pollTally = next; myVote = choice;
+            readPolicy = pollTally.open > pollTally.closed ? 'open' : 'closed';
+        } catch (e) {
+            await loadPoll(); // counter basi / ditolak rules: sinkron ulang
+            showChatToast('Gagal mengirim suara, coba lagi.');
+        }
+        btns.forEach((b) => { b.disabled = false; });
+        renderPoll();
+    }
+
+    function bindPoll() {
+        const box = document.getElementById('chat-poll');
+        if (!box) return;
+        box.querySelectorAll('.chat-poll-opt').forEach((b) => b.addEventListener('click', () => castVote(b.dataset.choice)));
+        document.getElementById('chat-poll-x').addEventListener('click', () => {
+            const key = pollDismissKey();
+            if (key) { try { localStorage.setItem(key, String(Date.now())); } catch (e) { /* abaikan */ } }
+            box.hidden = true;
         });
     }
 
     function init() {
         if (!document.getElementById('chat-view')) return;
         bindNav();
+        bindLogoutModal();
+        bindPoll();
         render();
         initServices();
     }
