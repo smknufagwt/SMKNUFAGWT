@@ -377,7 +377,7 @@
                     () => "System stable." + vis(),
                     () => "Monitoring network..." + vis()
                 ];
-                const vis = () => this.currentVisits > 0 ? " | " + this.currentVisits.toLocaleString('id-ID') + " visitor" : "";
+                const vis = () => this.currentVisits > 0 ? " | " + this.currentVisits.toLocaleString('id-ID') + " pengunjung" : "";
                 let i = 0;
                 setInterval(() => {
                     this.log.classList.remove('log-tick'); void this.log.offsetWidth; this.log.classList.add('log-tick');

@@ -115,7 +115,7 @@
         <div id="chat-dashboard" onclick="GlobalChat.toggleOnlineList()">
             <div id="chat-online-left">
                 <span class="dot-online"></span>
-                <span id="chat-online-count"><span class="num">0</span> ONLINE</span>
+                <span id="chat-online-count"><span class="num">0</span> <span class="online-word">ONLINE</span></span>
                 <span id="chat-online-updated"></span>
             </div>
             <span id="chat-net-label"><i class="fa-solid fa-tower-broadcast"></i> <span class="net-label-text">JARINGAN AKTIF</span></span>
@@ -301,6 +301,7 @@
         <script src="assets/logic/page-transition.js" defer></script>
         <script src="assets/logic/gallery.js"></script>
         <script src="assets/logic/footer-fx.js" defer></script>
+        <script src="assets/logic/online-blink.js" defer></script>
    <script>/* chat.js — Firebase config, IpMask, WordFilter, PrivacyBoard, MediaPrefs, ChatFormat, GlobalChat */
         const FIREBASE_CONFIG = {
             apiKey: "%%FIREBASE_API_KEY%%",
@@ -998,7 +999,8 @@
                 const countEl = document.getElementById('chat-online-count');
                 if (countEl) {
                     const prev = this._prevOnlineCount;
-                    countEl.innerHTML = `<span class="num">${count}</span> ONLINE`;
+                    countEl.innerHTML = `<span class="num">${count}</span> <span class="online-word">ONLINE</span>`;
+                    if (window.OnlineBlink) OnlineBlink.set(count);
                     if (typeof prev === 'number' && prev !== count) {
                         countEl.classList.remove('bump');
                         void countEl.offsetWidth;

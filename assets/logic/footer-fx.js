@@ -9,7 +9,7 @@
         if (!log || document.getElementById('footer-visitors')) return document.getElementById('footer-visitors');
         const box = document.createElement('div');
         box.style.textAlign = 'center';
-        box.innerHTML = '<span id="footer-visitors"><span class="vdot"></span><span class="vnum">--</span> VISITOR</span>';
+        box.innerHTML = '<span id="footer-visitors"><span class="vdot"></span><span class="vnum">--</span> PENGUNJUNG</span>';
         log.insertAdjacentElement('afterend', box);
         return document.getElementById('footer-visitors');
     }
@@ -60,7 +60,42 @@
         io.observe(f);
     }
 
-    function init() { mountBadge(); initReveal(); }
+    function initBeams() {
+        const f = document.querySelector('footer');
+        if (!f || f.querySelector('.footer-beams')) return;
+        if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const wrap = document.createElement('div');
+        wrap.className = 'footer-beams';
+        wrap.setAttribute('aria-hidden', 'true');
+        f.insertBefore(wrap, f.firstChild);
+        const rnd = (a, b) => a + Math.random() * (b - a);
+        const colors = ['var(--neon)', '#ffffff', 'var(--glitch-blue)'];
+        function shuffle(b, force) {
+            const on = force || Math.random() < 0.6;
+            b.style.setProperty('--bw', rnd(18, 48).toFixed(0) + '%');
+            b.style.setProperty('--bdur', rnd(2.2, 6).toFixed(2) + 's');
+            b.style.setProperty('--bcol', colors[Math.floor(Math.random() * colors.length)]);
+            b.style.setProperty('--bh', rnd(1.5, 3).toFixed(1) + 'px');
+            b.style.animationDirection = Math.random() < 0.3 ? 'reverse' : 'normal';
+            b.style.visibility = on ? 'visible' : 'hidden';
+        }
+        const count = 1 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < 3; i++) {
+            const b = document.createElement('span');
+            b.className = 'footer-beam';
+            shuffle(b, i === 0);
+            b.style.animationDelay = (-rnd(0, 4)).toFixed(2) + 's';
+            if (i >= count) b.style.visibility = 'hidden';
+            b.addEventListener('animationiteration', () => {
+                shuffle(b, i === 0);
+                const alive = Array.from(wrap.children).filter(x => x.style.visibility !== 'hidden').length;
+                if (alive === 0) b.style.visibility = 'visible';
+            });
+            wrap.appendChild(b);
+        }
+    }
+
+    function init() { mountBadge(); initReveal(); initBeams(); }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
     window.addEventListener('load', () => { initCounter().catch(() => {}); });
 })();

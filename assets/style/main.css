@@ -1067,13 +1067,15 @@
 
 
 /* ── Footer FX ── */
-footer { position: relative; overflow: hidden; }
-footer::before {
-    content: ''; position: absolute; top: 0; left: -40%; width: 40%; height: 2px;
-    background: linear-gradient(90deg, transparent, var(--neon), #fff, var(--neon), transparent);
-    box-shadow: 0 0 10px var(--neon); animation: footer-beam 4s ease-in-out infinite; pointer-events: none;
+footer { position: relative; }
+.footer-beams { position: absolute; top: 0; left: 0; right: 0; height: 4px; overflow: hidden; pointer-events: none; }
+.footer-beam {
+    position: absolute; top: 0; left: -50%; width: var(--bw, 30%); height: var(--bh, 2px);
+    background: linear-gradient(90deg, transparent, var(--bcol, var(--neon)), transparent);
+    box-shadow: 0 0 10px var(--bcol, var(--neon));
+    animation: footer-beam var(--bdur, 4s) ease-in-out infinite;
 }
-@keyframes footer-beam { 0% { left: -40%; } 100% { left: 100%; } }
+@keyframes footer-beam { 0% { left: -50%; } 100% { left: 100%; } }
 .footer-fx-in { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease; }
 .footer-fx-in.is-in { opacity: 1; transform: none; }
 footer .author-link { position: relative; overflow: hidden; }
@@ -1093,5 +1095,19 @@ footer .author-link:hover::after { left: 140%; }
 #footer-visitors .vdot { width: 7px; height: 7px; border-radius: 50%; background: var(--neon); box-shadow: 0 0 8px var(--neon); animation: blink-cursor 1.2s step-end infinite; }
 #footer-visitors .vnum { min-width: 4ch; text-align: center; font-weight: bold; }
 #footer-visitors.bump .vnum { animation: num-bump .5s ease; }
-@media (prefers-reduced-motion: reduce) { footer::before, #footer-visitors .vdot, .glitch::before, .glitch::after { animation: none; } .footer-fx-in { transition: none; opacity: 1; transform: none; } }
-.lite-mode footer::before { animation: none; display: none; }
+@media (prefers-reduced-motion: reduce) { #footer-visitors .vdot, .footer-beam, .online-word, .glitch::before, .glitch::after { animation: none; } .footer-fx-in { transition: none; opacity: 1; transform: none; } }
+.lite-mode .footer-beams { display: none; }
+.lite-mode .online-word { animation: none; }
+
+/* ── Dashboard chat: kata ONLINE getar hacker ringan ── */
+.online-word { display: inline-block; animation: online-jitter 2.8s steps(1) infinite; }
+@keyframes online-jitter {
+    0%, 82%, 100% { transform: translate(0, 0); text-shadow: none; }
+    84% { transform: translate(-1px, 0); text-shadow: 1px 0 var(--glitch-red), -1px 0 var(--glitch-blue); }
+    86% { transform: translate(1px, -1px); text-shadow: -1px 0 var(--glitch-red), 1px 0 var(--glitch-blue); }
+    88% { transform: translate(0, 1px); text-shadow: 1px 0 var(--glitch-blue); }
+    90% { transform: translate(-1px, 0); text-shadow: -1px 0 var(--glitch-red); }
+    92% { transform: translate(0, 0); text-shadow: none; }
+    95% { transform: translate(1px, 0); text-shadow: 1px 0 var(--glitch-blue), -1px 0 var(--glitch-red); }
+}
+.dot-online.is-dyn { animation: none; transition: opacity .06s linear, box-shadow .06s linear; }
