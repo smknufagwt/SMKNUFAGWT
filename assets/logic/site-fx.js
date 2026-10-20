@@ -373,12 +373,14 @@
                 // this.currentVisits versi terbaru (bukan snapshot lama sebelum syncVisitorCount() selesai).
                 const logLines = [
                     () => "Scanning connection...",
-                    () => "Encrypting connection...",
-                    () => "System stable.",
-                    () => "Monitoring network..."
+                    () => "Encrypting connection..." + vis(),
+                    () => "System stable." + vis(),
+                    () => "Monitoring network..." + vis()
                 ];
+                const vis = () => this.currentVisits > 0 ? " | " + this.currentVisits.toLocaleString('id-ID') + " visitor" : "";
                 let i = 0;
                 setInterval(() => {
+                    this.log.classList.remove('log-tick'); void this.log.offsetWidth; this.log.classList.add('log-tick');
                     this.log.innerText = ">> " + logLines[i]();
                     i = (i + 1) % logLines.length;
                 }, 2400);
@@ -943,3 +945,56 @@ toggleLatency: function() {
             }
         }); // akhir DOMContentLoaded utama
 
+// Heading acak: tiap huruf (semua baris, termasuk yang wrap di HP) dikunci dalam urutan acak baru tiap siklus.
+function startChaosMode() {
+    const title = document.querySelector('.glitch');
+    if (!title || title._fxOn) return;
+    title._fxOn = true;
+    const original = title.textContent.trim();
+    const pool = '!<>-_\\/[]{}—=+*^?#01$%&@';
+    const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const noise = ['SYSTEM_FAILURE', '0x00_FATAL_ERR', '404_NOT_FOUND', 'ENCRYPT_//_99%', 'CONNECTING...'];
+    let raf = 0;
+
+    function scramble(target, dur, done) {
+        const n = target.length;
+        const order = Array.from({ length: n }, (_, i) => i);
+        for (let i = n - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+        const lockAt = new Array(n);
+        order.forEach((idx, rank) => { lockAt[idx] = (rank / n) * dur * 0.85 + Math.random() * dur * 0.15; });
+        const start = performance.now();
+        let last = 0;
+        cancelAnimationFrame(raf);
+        (function frame(now) {
+            if (now - last >= 33) {
+                last = now;
+                const t = now - start;
+                let out = '';
+                for (let i = 0; i < n; i++) {
+                    const c = target[i];
+                    out += (c === ' ' || t >= lockAt[i]) ? c : pool[Math.floor(Math.random() * pool.length)];
+                }
+                title.textContent = out;
+                title.setAttribute('data-text', out);
+                if (t >= dur) { title.textContent = target; title.setAttribute('data-text', target); if (done) done(); return; }
+            }
+            raf = requestAnimationFrame(frame);
+        })(performance.now());
+    }
+
+    function loop() {
+        setTimeout(() => {
+            if (document.hidden) return loop();
+            const glitchy = Math.random() < 0.25;
+            title.classList.toggle('critical-error', glitchy);
+            const src = glitchy ? noise[Math.floor(Math.random() * noise.length)] : original;
+            scramble(src, 700 + Math.random() * 600, () => {
+                if (glitchy) setTimeout(() => { title.classList.remove('critical-error'); scramble(original, 600, null); }, 250);
+            });
+            loop();
+        }, 5000 + Math.random() * 9000);
+    }
+    if (reduce) return;
+    scramble(original, 1100, null);
+    loop();
+}

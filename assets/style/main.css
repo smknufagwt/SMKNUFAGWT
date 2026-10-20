@@ -53,7 +53,8 @@
         }
         .scanlines { display: none; } 
 
-        .glitch-wrapper { position: relative; display: inline-block; }
+        .glitch-wrapper { position: relative; display: inline-block; max-width: 100%; }
+        .glitch { overflow-wrap: anywhere; line-height: 1.25; }
         .glitch {
             position: relative; color: var(--neon); font-size: 2rem; 
             letter-spacing: 3px; font-weight: bold; text-transform: uppercase;
@@ -64,29 +65,29 @@
             background: var(--bg-color);
         }
         .glitch::before {
-            left: 2px; text-shadow: -1px 0 var(--glitch-red); clip: rect(24px, 550px, 90px, 0);
+            left: 2px; text-shadow: -1px 0 var(--glitch-red); clip-path: inset(0 0 100% 0);
             animation: glitch-anim-2 3s infinite linear alternate-reverse;
         }
         .glitch::after {
-            left: -2px; text-shadow: -1px 0 var(--glitch-blue); clip: rect(85px, 550px, 140px, 0);
+            left: -2px; text-shadow: -1px 0 var(--glitch-blue); clip-path: inset(0 0 100% 0);
             animation: glitch-anim 2.5s infinite linear alternate-reverse;
         }
 
         @keyframes glitch-anim {
-            0% { clip: rect(10px, 9999px, 30px, 0); transform: skew(0.5deg); }
-            20% { clip: rect(80px, 9999px, 100px, 0); transform: skew(0.3deg); }
-            40% { clip: rect(10px, 9999px, 80px, 0); transform: skew(0.8deg); }
-            60% { clip: rect(50px, 9999px, 20px, 0); transform: skew(0.2deg); }
-            80% { clip: rect(20px, 9999px, 90px, 0); transform: skew(0.6deg); }
-            100% { clip: rect(90px, 9999px, 10px, 0); transform: skew(0.4deg); }
+            0% { clip-path: inset(5% 0 80% 0); transform: skew(0.5deg); }
+            20% { clip-path: inset(60% 0 10% 0); transform: skew(0.3deg); }
+            40% { clip-path: inset(25% 0 45% 0); transform: skew(0.8deg); }
+            60% { clip-path: inset(75% 0 5% 0); transform: skew(0.2deg); }
+            80% { clip-path: inset(10% 0 70% 0); transform: skew(0.6deg); }
+            100% { clip-path: inset(45% 0 30% 0); transform: skew(0.4deg); }
         }
         @keyframes glitch-anim-2 {
-            0% { clip: rect(60px, 9999px, 10px, 0); transform: skew(0.8deg); }
-            20% { clip: rect(20px, 9999px, 40px, 0); transform: skew(0.2deg); }
-            40% { clip: rect(90px, 9999px, 30px, 0); transform: skew(0.6deg); }
-            60% { clip: rect(10px, 9999px, 80px, 0); transform: skew(0.4deg); }
-            80% { clip: rect(50px, 9999px, 20px, 0); transform: skew(0.1deg); }
-            100% { clip: rect(30px, 9999px, 70px, 0); transform: skew(0.7deg); }
+            0% { clip-path: inset(70% 0 5% 0); transform: skew(0.8deg); }
+            20% { clip-path: inset(15% 0 60% 0); transform: skew(0.2deg); }
+            40% { clip-path: inset(85% 0 0% 0); transform: skew(0.6deg); }
+            60% { clip-path: inset(5% 0 75% 0); transform: skew(0.4deg); }
+            80% { clip-path: inset(40% 0 35% 0); transform: skew(0.1deg); }
+            100% { clip-path: inset(20% 0 55% 0); transform: skew(0.7deg); }
         }
 
         .critical-error { color: red !important; text-shadow: 2px 2px 0px #000; }
@@ -1063,3 +1064,34 @@
         text-decoration: underline;
     }
 
+
+
+/* ── Footer FX ── */
+footer { position: relative; overflow: hidden; }
+footer::before {
+    content: ''; position: absolute; top: 0; left: -40%; width: 40%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neon), #fff, var(--neon), transparent);
+    box-shadow: 0 0 10px var(--neon); animation: footer-beam 4s ease-in-out infinite; pointer-events: none;
+}
+@keyframes footer-beam { 0% { left: -40%; } 100% { left: 100%; } }
+.footer-fx-in { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease; }
+.footer-fx-in.is-in { opacity: 1; transform: none; }
+footer .author-link { position: relative; overflow: hidden; }
+footer .author-link::after {
+    content: ''; position: absolute; top: 0; left: -120%; width: 60%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,.35), transparent);
+    transform: skewX(-20deg); transition: left .5s ease; pointer-events: none;
+}
+footer .author-link:hover::after { left: 140%; }
+#system-log.log-tick { animation: log-tick .35s ease; }
+@keyframes log-tick { 0% { opacity: .2; transform: translateX(-6px); } 100% { opacity: .65; transform: none; } }
+#footer-visitors {
+    display: inline-flex; align-items: center; gap: 8px; margin: 6px auto 14px; padding: 5px 14px;
+    border: 1px solid var(--neon-dim); border-radius: 999px; font-size: .75rem; letter-spacing: 2px;
+    background: rgba(0,0,0,.45); color: var(--neon); text-shadow: 0 0 6px var(--neon);
+}
+#footer-visitors .vdot { width: 7px; height: 7px; border-radius: 50%; background: var(--neon); box-shadow: 0 0 8px var(--neon); animation: blink-cursor 1.2s step-end infinite; }
+#footer-visitors .vnum { min-width: 4ch; text-align: center; font-weight: bold; }
+#footer-visitors.bump .vnum { animation: num-bump .5s ease; }
+@media (prefers-reduced-motion: reduce) { footer::before, #footer-visitors .vdot, .glitch::before, .glitch::after { animation: none; } .footer-fx-in { transition: none; opacity: 1; transform: none; } }
+.lite-mode footer::before { animation: none; display: none; }

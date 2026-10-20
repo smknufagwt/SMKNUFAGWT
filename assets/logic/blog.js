@@ -91,7 +91,7 @@ function observeEntries() {
                 observer.unobserve(item.target);
             }
         });
-    }, { threshold: 0.25 });
+    }, { threshold: 0, rootMargin: '0px 0px -8% 0px' });
     document.querySelectorAll('.entry').forEach(el => observer.observe(el));
 }
 

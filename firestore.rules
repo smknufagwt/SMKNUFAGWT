@@ -141,6 +141,15 @@ service cloud.firestore {
       allow read, write: if true;
     }
 
+    // ── counter pengunjung (footer index.html) ──────────────
+    // Hanya doc 'total' yang boleh dibuat/dinaikkan tepat +1 per tulis.
+    match /user_in/{doc} {
+      allow read: if true;
+      allow create: if doc == 'total' && request.resource.data.keys().hasOnly(['count']) && request.resource.data.count == 1;
+      allow update: if doc == 'total' && request.resource.data.keys().hasOnly(['count']) && request.resource.data.count == resource.data.count + 1;
+      allow delete: if false;
+    }
+
     match /_notify_state/{doc} {
       allow read, write: if true;
     }
