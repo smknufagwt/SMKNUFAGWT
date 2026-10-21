@@ -41,15 +41,15 @@ export default async function handler(req, res) {
         included_segments:   ['All'],
         headings:            { en: `💬 ${maskedIp} • Global Chat Nufa` },
         contents:            { en: body },
-        url:                 'https://smknufagwt.vercel.app/',
-        chrome_web_icon:     'https://smknufagwt.vercel.app/favicon.ico',
-        chrome_web_badge:    'https://smknufagwt.vercel.app/favicon.ico',
+        url:                 'https://smknufa-bdp.vercel.app/',
+        chrome_web_icon:     'https://smknufa-bdp.vercel.app/favicon.ico',
+        chrome_web_badge:    'https://smknufa-bdp.vercel.app/favicon.ico',
         // Collapse key — notif lama diganti notif baru (tidak numpuk)
         collapse_id:         'nufa-global-chat',
         // Data ekstra untuk SW handle klik
        data: { ts, ip },
         web_buttons: [
-          { id: 'open', text: '📂 Buka Chat', url: 'https://smknufagwt.vercel.app/' },
+          { id: 'open', text: '📂 Buka Chat', url: 'https://smknufa-bdp.vercel.app/' },
         ],
       }),
     });

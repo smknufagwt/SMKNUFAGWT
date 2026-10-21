@@ -517,7 +517,7 @@ TERAKREDITASI  :   BAN-SM Nomor 1857/BAN-SM/SK/2022 ">
                 const alt = facadeEl.dataset.alt || '';
 
                 const ytParams = new URLSearchParams({
-                    autoplay: '0',         // sengaja SELALU 0 di URL — play sungguhan ditembak lewat postMessage saat onReady (lihat listener di atas), biar gak bentrok sama loop
+                    autoplay: '0',         // selalu 0; play dipicu via postMessage saat onReady
                     mute: sound ? '0' : '1',
                     loop: loop ? '1' : '0',
                     playlist: ytId,       // wajib diisi ulang ID sendiri agar loop:1 berfungsi pada single video

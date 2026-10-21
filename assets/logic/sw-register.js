@@ -11,12 +11,10 @@
     }
     try {
       swReg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-      console.log('[SW-Client] SW terdaftar:', swReg.scope);
       swReg.addEventListener('updatefound', () => {
         const newWorker = swReg.installing;
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            console.log('[SW-Client] Versi baru SW tersedia.');
             if (navigator.serviceWorker.controller) {
               navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
             }

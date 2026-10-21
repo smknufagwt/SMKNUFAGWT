@@ -408,7 +408,7 @@
                 this._startBgmScheduler();
                 const playPromise = this.bgm.play();
                 if (playPromise !== undefined) {
-                    playPromise.catch(error => { console.log("Audio autoplay prevented."); });
+                    playPromise.catch(() => {});
                 }
                 this.bgm.volume = 0.7;
 
@@ -952,7 +952,7 @@ toggleLatency: function() {
                     if (bgmAudio) {
                         bgmAudio.src = interlinkedBgmUrl;
                         bgmAudio.load();
-                        bgmAudio.play().catch(e => console.log("Audio play diblokir:", e));
+                        bgmAudio.play().catch(() => {});
                     }
                     if (typeof AudioFX !== 'undefined') AudioFX.click();
                 } else {
@@ -968,7 +968,7 @@ toggleLatency: function() {
                         if (typeof System !== 'undefined') System._bgmScheduleKey = sched.key;
                         bgmAudio.src = sched.url;
                         bgmAudio.load();
-                        bgmAudio.play().catch(e => console.log("Audio play diblokir:", e));
+                        bgmAudio.play().catch(() => {});
                     }
                     if (typeof AudioFX !== 'undefined') AudioFX.click();
                 }

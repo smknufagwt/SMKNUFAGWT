@@ -128,7 +128,7 @@
                 const alt = facadeEl.dataset.alt || '';
 
                 const ytParams = new URLSearchParams({
-                    autoplay: '0',         // sengaja SELALU 0 di URL — play sungguhan ditembak lewat postMessage saat onReady (lihat listener di atas), biar gak bentrok sama loop
+                    autoplay: '0',         // selalu 0; play dipicu via postMessage saat onReady
                     mute: sound ? '0' : '1',
                     loop: loop ? '1' : '0',
                     playlist: ytId,       // wajib diisi ulang ID sendiri agar loop:1 berfungsi pada single video
@@ -239,13 +239,10 @@
                         }
                         const isKnownImage = ['png', 'jpg', 'jpeg', 'webp'].includes(ext);
                         if (isKnownImage) {
-                            // Ekstensi gambar eksplisit ada di URL → coba thumbnail ringan dulu (bukan uc?export=view
-                            // yang sering diblok Google utk hotlink & bikin gambar ke-kill). Gagal → fallback ke preview universal.
+                            // Ekstensi gambar eksplisit: thumbnail dulu, gagal → preview universal.
                             return `<img src="https://drive.google.com/thumbnail?id=${driveId}&sz=w1000" alt="${alt}" class="chat-media" loading="lazy" onerror="ChatFormat.driveFallback(this,'${driveId}','${alt}')">`;
                         }
-                        // Ekstensi tidak diketahui (link share Drive standar TIDAK membawa ekstensi sama sekali —
-                        // ini kasus paling umum), atau mp4/webm/mp3: pakai preview universal Drive, yang otomatis
-                        // mendeteksi tipe file asli (video/gambar/audio/pdf) dan render dgn benar tanpa risiko hotlink-block.
+                        // Tanpa ekstensi (kasus umum) atau mp4/webm/mp3: preview universal Drive.
                         // Facade dulu (thumbnail Drive, endpoint sama kayak gambar di atas) — iframe preview asli
                         // baru dimount ChatFormat.mountDrive pas kelihatan/di-tap (lihat ChatFormat.observe).
                         return `<div class="chat-media-wrap" id="${mid}"><div class="drive-facade" data-drive-id="${driveId}" data-alt="${alt}" onclick="ChatFormat.mountDrive(this)"><img class="drive-facade-thumb" src="https://drive.google.com/thumbnail?id=${driveId}&sz=w1000" alt="" loading="lazy" onerror="this.remove()"><button type="button" class="yt-facade-play" tabindex="-1" aria-hidden="true"><i class="fa-solid fa-file-arrow-down"></i></button></div></div>`;
@@ -295,7 +292,7 @@
                 return text.replace(/\n/g, '<br>');
             },
 
-            // Versi ringkas teks-saja (untuk marquee/toast) — tanpa tag/media biar tidak merusak layout scroll.
+            // Teks-saja untuk marquee/toast.
             toPlain(raw) {
                 let text = String(raw);
                 text = text.replace(/\[([^\[\]]*)\]\{([^{}]+)\}/g, (m, alt) => alt ? `📷 ${alt}` : '📷');
