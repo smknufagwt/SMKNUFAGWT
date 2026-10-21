@@ -126,12 +126,6 @@ serviceWorkerPath:  '/sw.js',
           }
         },
 
-        // Cek status subscribe (untuk sinkronisasi tombol bell)
-        async isSubscribed() {
-          if (!_oneSignalReady) return false;
-          try { return !!(await OneSignal.User.PushSubscription.optedIn); }
-          catch { return false; }
-        },
       };
 
     })();

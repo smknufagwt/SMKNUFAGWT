@@ -86,7 +86,7 @@
                     cache.unshift(item); // foto terbaru tampil di atas
                     localStorage.setItem('nufa_gallery_cache', JSON.stringify(cache));
                 } catch (e) {
-                    console.log('Gagal simpan cache lokal:', e);
+                    /* storage penuh/diblok, abaikan */
                 }
             },
 

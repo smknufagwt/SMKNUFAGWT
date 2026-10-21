@@ -196,7 +196,7 @@
         return d.getDate() + ' ' + MONTHS_ID[d.getMonth()] + ' ' + String(d.getFullYear()).slice(-2);
     }
 
-    // Sisipkan sesuai urutan (waktu kirim, lalu id) — tidak bergantung urutan kedatangan dari Firestore
+    // Sisipkan urut waktu kirim, lalu id.
     function insertSorted(container, el) {
         const items = container.querySelectorAll('.chat-thread-msg');
         let ref = null;
@@ -324,7 +324,7 @@
         for (let i = 0; i < items.length - 200; i++) items[i].remove();
     }
 
-    // Dipanggil saat dokumen 'modified': edit isi/tanda diedit, atau created_at server terisi (posisi dikoreksi)
+    // Dokumen 'modified': isi diedit atau created_at server terisi.
     function updateMessageEl(container, msg) {
         const el = container.querySelector('[data-msg-id="' + msg.id + '"]');
         if (!el) return;

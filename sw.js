@@ -329,14 +329,12 @@ const MessageModule = {
 // ============================================================
 
 self.addEventListener('install', event => {
-  console.log('[SW] Install');
   event.waitUntil(
     CacheModule.preCacheStatic().then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate');
   MessageModule.init();
   event.waitUntil(
     CacheModule.cleanOldCaches().then(() => self.clients.claim())

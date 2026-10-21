@@ -1098,7 +1098,7 @@ html[data-chat-theme="light"] .chat-nav-title { text-shadow: none; }
     #chat-view *, #chat-view *::before, #chat-view *::after { animation: none !important; transition: none !important; }
 }
 
-/* Kutip: sapuan cahaya mulus — digerakkan transform (GPU), memudar di tepi sehingga tak ada lompatan saat loop */
+/* Kutip: sapuan cahaya via transform, memudar di tepi. */
 .chat-text .chat-inline-quote::before {
     background-size: 100% 100%; transform: translate3d(-100%, 0, 0); will-change: transform, opacity;
     animation: quote-sweep 5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
@@ -1218,7 +1218,7 @@ html[data-chat-theme="light"] .chat-nav-title { text-shadow: none; }
 .chat-settings-check input { width: 16px; height: 16px; accent-color: var(--chat-gold); }
 @media (prefers-reduced-motion: reduce) { .chat-room-item.is-promoted { animation: none; } }
 
-/* Kelas disetujui naik menimpa item Info: z-index tinggi + latar solid supaya menutupi teks di bawahnya */
+/* Kelas disetujui naik menimpa item Info (z-index tinggi, latar solid). */
 .chat-room-item.is-rising {
     position: relative; z-index: 30; transform-origin: center;
     background: linear-gradient(rgba(var(--chat-gold-rgb), 0.2), rgba(var(--chat-gold-rgb), 0.2)), var(--chat-bg);

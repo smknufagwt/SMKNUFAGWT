@@ -6,7 +6,7 @@
     const BG = { dark: '#060502', light: '#fbf7ee' };
     const root = document.documentElement;
 
-    // Palet tema beranda (disalin dari System.colors di site-fx.js); indeks aktif ada di localStorage 'nufa_theme'
+    // Palet tema beranda (salinan System.colors, indeks di 'nufa_theme').
     const BERANDA = [
         { neon: '#ffffff', dim: '#8ce6ef' },
         { neon: '#0f0', dim: '#008F11' },
@@ -72,7 +72,7 @@
         }
         return fromHsl(hsl[0], hsl[1], dir < 0 ? 0 : 1);
     };
-    // Permukaan terburuk tempat kutip tampil: bubble sendiri + tint aksen terkuat (gelap di mode terang, terang di mode gelap)
+    // Permukaan kontras terburuk untuk kutip (bubble sendiri + tint aksen).
     const REF = { light: [210, 204, 186], dark: [56, 52, 42] };
     const berandaColors = () => {
         const i = parseInt(read('nufa_theme', ''), 10);
