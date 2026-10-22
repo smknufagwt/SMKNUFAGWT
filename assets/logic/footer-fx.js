@@ -24,24 +24,33 @@
         if (old !== '--' && old !== num.textContent) { badge.classList.remove('bump'); void badge.offsetWidth; badge.classList.add('bump'); }
     }
 
+    async function countOnce(ref) {
+        if (counted || navigator.onLine === false) return;
+        try { if (localStorage.getItem(LS_KEY)) return; localStorage.setItem(LS_KEY, String(Date.now())); }
+        catch (e) { return; }
+        counted = true;
+        const inc = () => ref.update({ count: firebase.firestore.FieldValue.increment(1) });
+        try {
+            try { await inc(); }
+            catch (e) {
+                if (e.code !== 'not-found') throw e;
+                try { await ref.set({ count: 1 }); } catch (e2) { await inc(); }
+            }
+        } catch (e) {
+            console.warn('[user_in] gagal hitung:', e.code || e.message);
+            try { localStorage.removeItem(LS_KEY); } catch (_) {}
+            counted = false;
+        }
+    }
+
     async function initCounter() {
         if (typeof firebase === 'undefined' || !firebase.firestore || typeof FIREBASE_CONFIG === 'undefined') return;
         if (!FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey.startsWith('%%')) return;
         if (!firebase.apps.some(a => a.name === '[DEFAULT]')) firebase.initializeApp(FIREBASE_CONFIG);
         const ref = firebase.firestore().collection('user_in').doc('total');
 
-        if (!localStorage.getItem(LS_KEY) && !counted) {
-            counted = true;
-            const inc = () => ref.update({ count: firebase.firestore.FieldValue.increment(1) });
-            try {
-                try { await inc(); }
-                catch (e) {
-                    if (e.code !== 'not-found') throw e;
-                    try { await ref.set({ count: 1 }); } catch (e2) { await inc(); }
-                }
-                localStorage.setItem(LS_KEY, String(Date.now()));
-            } catch (e) { console.warn('[user_in] gagal hitung:', e.code || e.message); counted = false; }
-        }
+        countOnce(ref);
+        window.addEventListener('online', () => countOnce(ref));
 
         ref.onSnapshot(snap => {
             const n = snap.exists ? Number(snap.data().count) || 0 : 0;

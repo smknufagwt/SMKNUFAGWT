@@ -175,6 +175,7 @@
                 this.drops = []; this.ripples = [];
                 this.enabled = true; this._running = true;
                 this._lastFrame = 0; this._frameInterval = 1000 / 30;
+                this._nextBin = performance.now() + 2000;
                 this.resize();
                 let resizeTO;
                 window.addEventListener('resize', () => { clearTimeout(resizeTO); resizeTO = setTimeout(() => this.resize(), 150); });
@@ -192,7 +193,7 @@
                 const columns = Math.ceil(this.canvas.width / spacing);
                 this.drops = [];
                 for (let i = 0; i < columns; i++) {
-                    this.drops.push({ x: i * spacing, y: Math.random() * this.canvas.height, speed: Math.random() * 0.5 + 0.5, depth: Math.random() > 0.8 ? 2 : 1 });
+                    this.drops.push({ x: i * spacing, y: Math.random() * this.canvas.height, speed: Math.random() * 0.5 + 0.5, depth: Math.random() > 0.8 ? 2 : 1, bin: 0, binFrom: 0, binUntil: 0 });
                 }
             }
             createRipple(e) {
@@ -201,6 +202,22 @@
                 this.ripples.push({x, y, size: 0, life: 1});
             }
             setColor(c) { this.color = c; }
+            _triggerBinary(t) {
+                const n = this.drops.length;
+                if (!n) return;
+                const dur = 2500 + Math.random() * 3500;
+                const mode = Math.floor(Math.random() * 3);
+                if (mode === 0) {
+                    const w = Math.max(4, Math.floor(n * (0.08 + Math.random() * 0.12)));
+                    const s = Math.floor(Math.random() * Math.max(1, n - w));
+                    for (let i = s; i < s + w && i < n; i++) { this.drops[i].binFrom = t; this.drops[i].binUntil = t + dur; }
+                } else if (mode === 1) {
+                    const step = 25 + Math.random() * 35, fwd = Math.random() < 0.5;
+                    this.drops.forEach((d, i) => { d.binFrom = t + (fwd ? i : n - 1 - i) * step; d.binUntil = d.binFrom + dur * 0.6; });
+                } else {
+                    this.drops.forEach(d => { if (Math.random() < 0.25) { d.binFrom = t + Math.random() * 800; d.binUntil = d.binFrom + dur; } });
+                }
+            }
             setEnabled(on) {
                 this.enabled = on;
                 this.canvas.style.display = on ? 'block' : 'none';
@@ -218,8 +235,12 @@
                     r.size += 2; r.life -= 0.05; if(r.life <= 0) this.ripples.splice(i, 1);
                 }
                 this.ctx.font = "14px monospace";
+                const t = performance.now();
+                if (t >= this._nextBin) { this._triggerBinary(t); this._nextBin = t + 1500 + Math.random() * 3500; }
                 this.drops.forEach(drop => {
-                    const text = Math.floor(Math.random() * 10).toString();
+                    drop.bin += (((t >= drop.binFrom && t < drop.binUntil) ? 1 : 0) - drop.bin) * 0.08;
+                    if (drop.bin < 0.01) drop.bin = 0;
+                    const text = Math.random() < drop.bin ? (Math.random() < 0.5 ? '0' : '1') : Math.floor(Math.random() * 10).toString();
                     this.ctx.fillStyle = drop.depth === 2 ? "#fff" : this.color;
                     this.ctx.fillText(text, drop.x, drop.y);
                     if (drop.y > this.canvas.height && Math.random() > 0.975) drop.y = 0;
@@ -322,7 +343,6 @@
                 { neon: '#FF10F0', dim: '#d11fb0', hex: '#FF10F0' }  
 
             ],
-            baseOffset: 6340,
             currentVisits: 0, 
 
             typeWriter: function(elementId, text, speed = 100) {
