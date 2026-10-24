@@ -142,7 +142,12 @@ service cloud.firestore {
     }
 
     match /_notify_state/{doc} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if doc == 'last' &&
+        request.resource.data.keys().hasOnly(['ts']) &&
+        request.resource.data.ts is int &&
+        request.resource.data.ts <= request.time.toMillis() + 600000 &&
+        (resource == null || request.resource.data.ts >= resource.data.ts);
     }
 
     // ── polling akses baca kelas ────────────────────────────
