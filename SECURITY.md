@@ -4,8 +4,8 @@
 
 | Branch | Deployment | Status |
 |--------|-----------|--------|
-| `main` | smknufa-bdp.vercel.app | ✅ Actively maintained |
-| `nufabase` | nufabase.web.app | ✅ Actively maintained |
+| [main](https://github.com/smknufagwt/SMKNUFAGWT/) | `smknufa-bdp.vercel.app` | ✅ Actively maintained |
+| [nufabase](https://github.com/smknufagwt/SMKNUFAGWT/tree/nufabase) | `nufabase.web.app` | ✅ Actively maintained |
 
 Older/experimental branches (QA-*, feature branches) are not covered by this policy.
 
@@ -15,8 +15,8 @@ Please **do not** open a public GitHub issue for security vulnerabilities.
 
 Instead, report privately via:
 - 📧 Email: [smknufagwt@gmail.com](mailto:smknufagwt@gmail.com)
-- 💬 WhatsApp: [+62 831-9975-3711](https://wa.me/6283199753711)
 
+---
 Include, if possible:
 1. A description of the vulnerability and its impact
 2. Steps to reproduce (PoC if applicable)
