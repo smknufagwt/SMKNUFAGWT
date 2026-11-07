@@ -8,8 +8,8 @@
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-1f4788?style=for-the-badge)](LICENSE)
 
 ---
-| **[Support branch](https://github.com/smknufagwt/SMKNUFAGWT/tree/main?tab=security-ov-file#supported-branches)** |
-| ----------------------- |
+|  **[Support branch](https://github.com/smknufagwt/SMKNUFAGWT/tree/main?tab=security-ov-file#supported-branches)** |
+| ---- |
 ---
 ## ⚡ The Ultimate Constraint: 100% Pure Vibe Coding
 
@@ -317,10 +317,9 @@ Found a vulnerability? See [SECURITY.md](SECURITY.md) for how to report it.
 ## 👨‍💻 Creator & Contact
 
 **Arlingga Ainul Yakin**  
-Fullstack Dev Engineer | Backend | DevOps | Frontend | AI Engineering
+Fullstack Dev Engineer | Backend | DevOps | Frontend | `AI Engineering Promtping`
 
 📧 **Email:** [smknufagwt@gmail.com](mailto:smknufagwt@gmail.com)  
-💬 **WhatsApp:** [+62 831-9975-3711](https://wa.me/6283199753711)  
 🤖 **Github:** [arlingkin](https://github.com/arlingkin)
 
 ### **About the Build**
@@ -374,7 +373,7 @@ All contributions welcome! Please include:
 If this project inspired you or helped you learn something new:
 - ⭐ **Star this repo** on GitHub
 - 📢 **Share** with your community
-- 💬 **Give feedback** to [@arlingkin](https://tiktok.com/@arlingkin)
+- 💬 **Give feedback** to [@arlingkin](https://arlingkin.vercel.app)
 
 ---
 
