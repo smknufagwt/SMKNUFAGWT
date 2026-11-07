@@ -33,7 +33,7 @@
         try {
             try { await inc(); }
             catch (e) {
-                if (e.code !== 'not-found') throw e;
+                if (e.code !== 'not-found' && e.code !== 'permission-denied') throw e;
                 try { await ref.set({ count: 1 }); } catch (e2) { await inc(); }
             }
         } catch (e) {
@@ -53,6 +53,7 @@
         window.addEventListener('online', () => countOnce(ref));
 
         ref.onSnapshot(snap => {
+            if (!snap.exists && snap.metadata.fromCache) return;
             const n = snap.exists ? Number(snap.data().count) || 0 : 0;
             paint(n);
         }, err => console.warn('[user_in] listen:', err.code || err.message));
