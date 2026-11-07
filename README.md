@@ -8,7 +8,9 @@
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-1f4788?style=for-the-badge)](LICENSE)
 
 ---
-
+| **[Support branch](https://github.com/smknufagwt/SMKNUFAGWT/tree/main?tab=security-ov-file#supported-branches)** |
+| ----------------------- |
+---
 ## ⚡ The Ultimate Constraint: 100% Pure Vibe Coding
 
 This entire architecture was designed, engineered, debugged, and deployed **exclusively on a mobile device** (Xiaomi Redmi A8 Pro, 3GB RAM / 32GB ROM) using **AI-assisted orchestration (Claude)** directly from a mobile browser.
