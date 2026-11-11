@@ -1107,3 +1107,36 @@ footer .author-link:hover::after { left: 140%; }
     95% { transform: translate(1px, 0); text-shadow: 1px 0 var(--glitch-blue), -1px 0 var(--glitch-red); }
 }
 .dot-online.is-dyn { animation: none; transition: opacity .06s linear, box-shadow .06s linear; }
+
+/* ── Design tokens (skala; dipakai bertahap) ── */
+:root {
+    --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px;
+    --fs-xs: 0.68rem; --fs-sm: 0.78rem; --fs-md: 0.9rem; --fs-lg: 1.1rem; --fs-xl: 1.5rem;
+    --r-sm: 4px; --r-md: 8px; --r-pill: 999px;
+    --glow-1: 0 0 6px var(--neon); --glow-2: 0 0 18px var(--neon);
+    --dur: 150ms; --ease: cubic-bezier(.22, 1, .36, 1);
+    --ring: 2px solid var(--neon); --tap: 44px;
+}
+
+/* ── A11y: fokus keyboard terlihat di halaman utama ── */
+:where(button, a, input, textarea, [role="button"], [tabindex="0"]):focus-visible {
+    outline: var(--ring); outline-offset: 2px;
+}
+.control-btn:focus-visible { box-shadow: var(--glow-2); }
+
+/* ── Touch target ≥ 40–44px di layar sentuh tanpa mengubah layout desktop ── */
+@media (pointer: coarse) {
+    .fmt-btn { width: 40px; height: 40px; }
+    .nav-btn { min-height: var(--tap); }
+    .chat-icon-btn { position: relative; }
+    .chat-icon-btn::after { content: ''; position: absolute; inset: -9px; }
+}
+
+/* ── Reduced motion: animasi loop yang belum tercakup blok di atas ── */
+@media (prefers-reduced-motion: reduce) {
+    .scan-beam, .petir-bolt, .lock-icon, .bumi-muter-3d, #hologram-upload-btn,
+    #hologram-upload-btn i, .upload-panel, .dot-online, .typing-cursor::after,
+    #chat-headline-text, #chat-marquee-track, .marquee-content { animation: none !important; }
+    .petir-fx { display: none; }
+    .slide { animation-duration: 0.01ms; }
+}

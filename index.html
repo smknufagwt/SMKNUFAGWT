@@ -79,13 +79,13 @@
         <button class="btn-enter" onclick="System.enter()">BUKA AKSES DATA</button>
     </div>
 
-    <div id="music-btn" class="control-btn" onclick="System.toggleMusic()">
+    <div id="music-btn" class="control-btn" aria-label="Musik latar" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}" onclick="System.toggleMusic()">
         <span id="music-icon">🔊</span>
     </div>
-    <div id="color-btn" class="control-btn" onclick="System.toggleColor()">
+    <div id="color-btn" class="control-btn" aria-label="Ganti warna tema" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}" onclick="System.toggleColor()">
         <span id="color-icon">🎨</span>
     </div>
-    <div id="chat-btn" class="control-btn" onclick="GlobalChat.toggle()" title="Global Live Chat">
+    <div id="chat-btn" class="control-btn" aria-label="Buka global live chat" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}" onclick="GlobalChat.toggle()" title="Global Live Chat">
         <i class="fa-solid fa-comments"></i>
         <span class="chat-dot" id="chat-dot"></span>
     </div>
