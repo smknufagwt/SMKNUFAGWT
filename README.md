@@ -8,7 +8,7 @@
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-1f4788?style=for-the-badge)](LICENSE)
 
 ---
-|  [![Support branch](https://img.shields.io/badge/Supported_Branch-nufabase-white)](https://github.com/smknufagwt/SMKNUFAGWT/tree/main?tab=security-ov-file#supported-branches) |
+|  [![Support branch](https://img.shields.io/badge/Supported_Branch-nufabase_&_main-white?logo=github)](https://github.com/smknufagwt/SMKNUFAGWT/tree/main?tab=security-ov-file#supported-branches) |
 | ---- |
 ---
 ## ⚡ The Ultimate Constraint: 100% Pure Vibe Coding
