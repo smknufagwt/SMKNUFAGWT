@@ -2,6 +2,7 @@
 (function () {
     'use strict';
     const LS_KEY = 'nufa_user_in_counted';
+    const ID_KEY = 'nufa_vid';
     let counted = false;
 
     function mountBadge() {
@@ -24,21 +25,55 @@
         if (old !== '--' && old !== num.textContent) { badge.classList.remove('bump'); void badge.offsetWidth; badge.classList.add('bump'); }
     }
 
+    function ckGet(k) { const m = document.cookie.match(new RegExp('(?:^|; )' + k + '=([^;]*)')); return m ? decodeURIComponent(m[1]) : null; }
+    function ckSet(k, v) { document.cookie = k + '=' + encodeURIComponent(v) + '; max-age=63072000; path=/; SameSite=Lax'; }
+    function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+    function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+
+    function getVid() {
+        let id = lsGet(ID_KEY) || ckGet(ID_KEY);
+        if (!id || !/^[A-Za-z0-9_-]{16,64}$/.test(id)) {
+            id = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2, 12)).replace(/[^A-Za-z0-9_-]/g, '');
+            if (id.length < 16) id += Math.random().toString(36).slice(2, 12);
+        }
+        lsSet(ID_KEY, id); ckSet(ID_KEY, id);
+        return id;
+    }
+
+    function markCounted() { lsSet(LS_KEY, String(Date.now())); ckSet(LS_KEY, '1'); counted = true; }
+    function isCounted() { return counted || !!lsGet(LS_KEY) || ckGet(LS_KEY) === '1'; }
+
     async function countOnce(ref) {
-        if (counted || navigator.onLine === false) return;
-        try { if (localStorage.getItem(LS_KEY)) return; localStorage.setItem(LS_KEY, String(Date.now())); }
-        catch (e) { return; }
+        if (isCounted() || navigator.onLine === false) { if (isCounted()) markCounted(); return; }
         counted = true;
+        const db = firebase.firestore();
+        const visitor = db.collection('user_in_visitors').doc(getVid());
         const inc = () => ref.update({ count: firebase.firestore.FieldValue.increment(1) });
+        try {
+            const batch = db.batch();
+            batch.set(visitor, { ts: firebase.firestore.FieldValue.serverTimestamp() });
+            batch.update(ref, { count: firebase.firestore.FieldValue.increment(1) });
+            await batch.commit();
+            markCounted();
+            return;
+        } catch (e) {
+            if (e.code === 'permission-denied') {
+                try { if ((await visitor.get()).exists) { markCounted(); return; } } catch (_) {}
+            } else if (e.code !== 'not-found') {
+                console.warn('[user_in] gagal hitung:', e.code || e.message);
+                counted = false;
+                return;
+            }
+        }
         try {
             try { await inc(); }
             catch (e) {
                 if (e.code !== 'not-found' && e.code !== 'permission-denied') throw e;
                 try { await ref.set({ count: 1 }); } catch (e2) { await inc(); }
             }
+            markCounted();
         } catch (e) {
             console.warn('[user_in] gagal hitung:', e.code || e.message);
-            try { localStorage.removeItem(LS_KEY); } catch (_) {}
             counted = false;
         }
     }

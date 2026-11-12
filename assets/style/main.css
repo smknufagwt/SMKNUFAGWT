@@ -152,33 +152,6 @@
             position: relative;
         }
         .marquee-clip { overflow: hidden; white-space: nowrap; }
-        .petir-fx {
-            position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%);
-            width: 70%; max-width: 260px; height: 26px;
-            display: flex; align-items: flex-start; justify-content: center; gap: 22px;
-            pointer-events: none; z-index: 3;
-            filter: drop-shadow(0 0 4px var(--neon)) drop-shadow(0 0 12px var(--neon));
-        }
-        .petir-bolt {
-            width: 7px; height: 100%;
-            background: linear-gradient(180deg, transparent, var(--neon) 35%, #fff 55%, var(--neon) 100%);
-            clip-path: polygon(50% 0%, 100% 18%, 55% 42%, 100% 58%, 35% 100%, 45% 58%, 0% 42%, 45% 18%);
-            opacity: 0;
-            animation-name: petir-flash;
-            animation-timing-function: ease-in-out;
-            animation-iteration-count: infinite;
-            animation-duration: var(--petir-dur, 3.2s);
-            animation-delay: var(--petir-delay, 0s);
-        }
-        @keyframes petir-flash {
-            0%, 84%, 100% { opacity: 0; }
-            85% { opacity: 1; }
-            87% { opacity: 0.2; }
-            89% { opacity: 1; }
-            91% { opacity: 0.35; }
-            94% { opacity: 0.9; }
-            97% { opacity: 0; }
-        }
         .marquee-content {
             display: inline-block; padding-left: 100%;
             animation: scroll-text 13s linear infinite;
@@ -1134,9 +1107,28 @@ footer .author-link:hover::after { left: 140%; }
 
 /* ── Reduced motion: animasi loop yang belum tercakup blok di atas ── */
 @media (prefers-reduced-motion: reduce) {
-    .scan-beam, .petir-bolt, .lock-icon, .bumi-muter-3d, #hologram-upload-btn,
+    .scan-beam, .lock-icon, .bumi-muter-3d, #hologram-upload-btn,
     #hologram-upload-btn i, .upload-panel, .dot-online, .typing-cursor::after,
     #chat-headline-text, #chat-marquee-track, .marquee-content { animation: none !important; }
-    .petir-fx { display: none; }
     .slide { animation-duration: 0.01ms; }
 }
+
+
+/* ── Polish: rounded UI, fokus & transisi halus ── */
+:root { --r-sm: 10px; --r-md: 14px; --r-lg: 20px; --r-pill: 999px; }
+::selection { background: var(--neon); color: #000; }
+:focus-visible { outline: 2px solid var(--neon); outline-offset: 2px; border-radius: var(--r-sm); }
+header, .slide { border-radius: var(--r-lg); }
+.school-info-card, .desc-box, .gallery-item, .comp-btn, #privacy-board, #lb-img { border-radius: var(--r-md); }
+.nav-btn, .btn-enter, .author-link, .privacy-link, .lb-nav-btn, #hologram-upload-btn, #upload-submit { border-radius: var(--r-pill); }
+.upload-panel { border-radius: var(--r-lg); }
+.upload-field input[type="password"], .upload-field input[type="text"], .upload-dropzone { border-radius: var(--r-sm); }
+#chat-panel { border-radius: var(--r-lg) var(--r-lg) 0 0; }
+.chat-toast { border-radius: var(--r-md); }
+.marquee-container {
+    border: 1px solid var(--neon-dim); border-radius: var(--r-md); overflow: hidden;
+    box-shadow: 0 0 14px rgba(0, 255, 65, 0.12), inset 0 0 16px rgba(0, 255, 65, 0.06);
+}
+.nav-btn, .comp-btn, .gallery-item, .author-link, .privacy-link { transition: background .25s ease, color .25s ease, border-color .25s ease, box-shadow .25s ease, transform .25s ease; }
+.nav-btn:hover, .comp-btn:hover { transform: translateY(-2px); }
+.nav-btn:active, .comp-btn:active { transform: translateY(0) scale(.97); }

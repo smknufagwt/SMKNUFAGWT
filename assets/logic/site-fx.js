@@ -46,11 +46,6 @@
                     <div class="marquee-clip">
                         <div class="marquee-content">SMK NUFA JAYA &nbsp;///&nbsp; BISA - HEBAT - DISIPLIN - KOMPETEN - SIAP KERJA &nbsp;///&nbsp; SYSTEM ONLINE &nbsp;///&nbsp; SMK NUFA JAYA</div>
                     </div>
-                    <div class="petir-fx" id="petir-fx">
-                        <div class="petir-bolt"></div>
-                        <div class="petir-bolt"></div>
-                        <div class="petir-bolt"></div>
-                    </div>
                 </div>
             `,
             visi: `
@@ -454,7 +449,6 @@
                 this.initLog(); 
 
                 Scrambler.write(document.getElementById('home-content'), DATABASE_CONTENT.home);
-                this.randomizePetir();
 
                 document.getElementById('overlay').style.opacity = '0';
                 setTimeout(() => {
@@ -470,14 +464,6 @@
                 this.colorIndex = (this.colorIndex + 1) % this.colors.length;
                 try { localStorage.setItem('nufa_theme', this.colorIndex); } catch(e) {}
                 this.applyTheme();
-            },
-
-            // Acak variabel CSS tiap bolt petir biar polanya gak keliatan monoton/looping sama
-            randomizePetir: function() {
-                document.querySelectorAll('#petir-fx .petir-bolt').forEach(el => {
-                    el.style.setProperty('--petir-dur', (2.5 + Math.random() * 3).toFixed(2) + 's');
-                    el.style.setProperty('--petir-delay', (Math.random() * 4).toFixed(2) + 's');
-                });
             },
 
    renderGallery: function(photos) {
@@ -623,7 +609,6 @@ toggleLatency: function() {
 
                 if(id === 'home') {
                     Scrambler.write(document.getElementById('home-content'), DATABASE_CONTENT.home);
-                    this.randomizePetir();
                 } else if (id === 'visi') {
                     Scrambler.write(document.getElementById('visi-content'), DATABASE_CONTENT.visi);
                 } else if (id === 'gallery') {

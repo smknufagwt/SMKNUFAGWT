@@ -150,6 +150,15 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Registri unik pengunjung: 1 doc per visitor-id, hanya bisa dibuat sekali (dedupe permanen server-side).
+    match /user_in_visitors/{vid} {
+      allow get: if true;
+      allow create: if vid.matches('^[A-Za-z0-9_-]{16,64}$') &&
+        request.resource.data.keys().hasOnly(['ts']) &&
+        request.resource.data.ts == request.time;
+      allow list, update, delete: if false;
+    }
+
     match /_notify_state/{doc} {
       allow read: if true;
       allow write: if doc == 'last' &&
