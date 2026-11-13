@@ -150,6 +150,19 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Pesan suara (base64 Opus/AAC, maks ~30 dtk): dibuat sekali, hanya bisa dibaca per-ID (tanpa list).
+    match /voice_notes/{vid} {
+      allow get: if true;
+      allow create: if vid.matches('^[A-Za-z0-9]{20}$') &&
+        request.resource.data.keys().hasOnly(['d','m','s','ts']) &&
+        request.resource.data.d is string && request.resource.data.d.size() <= 480000 &&
+        request.resource.data.m is string && request.resource.data.m.size() <= 60 &&
+        request.resource.data.m.matches('^audio/.*') &&
+        request.resource.data.s is int && request.resource.data.s >= 1 && request.resource.data.s <= 31 &&
+        request.resource.data.ts == request.time;
+      allow list, update, delete: if false;
+    }
+
     // Registri unik pengunjung: 1 doc per visitor-id, hanya bisa dibuat sekali (dedupe permanen server-side).
     match /user_in_visitors/{vid} {
       allow get: if true;

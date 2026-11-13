@@ -1,0 +1,44 @@
+/* voice-note.css — pemutar & perekam pesan suara. Warna ikut tema: neon di beranda, gold di /chat. */
+.voice-note, .vn-bar { --vn: var(--neon, #0f0); --vn-dim: var(--neon-dim, #008f11); }
+#chat-view .voice-note, #chat-view .vn-bar { --vn: var(--chat-gold, #d9c089); --vn-dim: var(--chat-gold-dim, #8a7645); }
+
+.voice-note {
+    display: inline-flex; align-items: center; gap: 8px; min-width: 190px; max-width: 100%;
+    margin-top: 6px; padding: 6px 12px 6px 6px; border: 1px solid var(--vn-dim);
+    border-radius: 999px; background: rgba(0, 0, 0, .35); color: var(--vn);
+    transition: border-color .25s ease, box-shadow .25s ease;
+}
+.voice-note[data-state="playing"] { border-color: var(--vn); box-shadow: 0 0 10px var(--vn-dim); }
+.voice-note[data-state="error"] { border-color: #ff003c; }
+.voice-play {
+    flex: 0 0 auto; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; border: 1px solid var(--vn); background: transparent; color: var(--vn);
+    font-size: .7rem; cursor: pointer; transition: background .2s ease, color .2s ease;
+}
+.voice-play:hover, .voice-note[data-state="playing"] .voice-play { background: var(--vn); color: #000; }
+.voice-note[data-state="error"] .voice-play { color: #ff003c; border-color: #ff003c; }
+.voice-track { flex: 1; min-width: 60px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, .14); overflow: hidden; }
+.voice-fill { display: block; height: 100%; width: 0; background: var(--vn); box-shadow: 0 0 6px var(--vn); }
+.voice-time { font-size: .68rem; opacity: .85; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.vn-bar {
+    display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+    border: 1px solid var(--vn-dim); border-radius: 999px; background: rgba(0, 0, 0, .45);
+    font-size: .72rem; color: var(--vn);
+}
+.vn-bar [data-s] { display: none; }
+.vn-bar[data-state="recording"] [data-s~="recording"],
+.vn-bar[data-state="ready"] [data-s~="ready"],
+.vn-bar[data-state="sending"] [data-s~="sending"],
+.vn-bar[data-state="note"] [data-s~="note"] { display: inline-flex; align-items: center; justify-content: center; }
+.vn-time, .vn-note { margin-right: auto; font-variant-numeric: tabular-nums; }
+.vn-dot { width: 8px; height: 8px; border-radius: 50%; background: #ff003c; box-shadow: 0 0 8px #ff003c; animation: vn-pulse 1s ease-in-out infinite; }
+@keyframes vn-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .4; transform: scale(.8); } }
+.vn-btn {
+    width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--vn-dim);
+    background: #000; color: var(--vn); font-size: .7rem; cursor: pointer; transition: background .2s ease, color .2s ease;
+}
+.vn-btn:hover { background: var(--vn); color: #000; }
+.vn-btn:disabled { opacity: .4; pointer-events: none; }
+.vn-mic-btn.rec { background: #ff003c; border-color: #ff003c; color: #fff; }
+@media (prefers-reduced-motion: reduce) { .vn-dot { animation: none; } }
