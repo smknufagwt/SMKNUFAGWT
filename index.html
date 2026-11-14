@@ -144,9 +144,13 @@
             <label><input type="checkbox" id="ms-matrix" onchange="GlobalChat.toggleMatrixRain(this.checked)"> Animasi rain matrix</label>
             <label><input type="checkbox" id="ms-lite" onchange="GlobalChat.toggleLiteMode(this.checked)"> Lite Mode (device RAM/CPU rendah)</label>
         </div>
-        <textarea id="chat-input" rows="1" maxlength="1024" placeholder="Tulis pesan ke semua orang..." oninput="GlobalChat.autoGrow(this)"></textarea>
+        <div id="chat-compose">
+            <div id="chat-field">
+                <textarea id="chat-input" rows="1" maxlength="1024" placeholder="Tulis pesan ke semua orang..." oninput="GlobalChat.autoGrow(this)"></textarea>
+            </div>
+            <button id="chat-send" onclick="GlobalChat.send()" aria-label="Kirim pesan" title="Kirim"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
     </div>
-    <button id="chat-send" onclick="GlobalChat.send()"><i class="fa-solid fa-paper-plane"></i></button>
 </div>
     </div>
 

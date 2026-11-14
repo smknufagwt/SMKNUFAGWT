@@ -113,7 +113,7 @@
 
     // ── perekam ──
     const rec = { ac: null, an: null, buf: null, mr: null, stream: null, chunks: [], timer: null, t0: 0, blob: null, mime: '', dur: 0, preview: null, previewUrl: null, bgm: false };
-    let bar = null, mic = null, noteTimer = null;
+    let bar = null, mic = null, noteTimer = null, composer = null;
 
     function supported() { return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder); }
     function pickMime() {
@@ -125,6 +125,15 @@
         bar.dataset.state = state;
         mic.classList.toggle('rec', state === 'recording');
         bar.querySelectorAll('.vn-send, .vn-prev, .vn-cancel').forEach((b) => { b.disabled = state === 'sending'; });
+        if (!composer) return;
+        // Mode composer (beranda): mic = rekam/stop/rekam ulang, tombol kirim #chat-send tetap satu-satunya.
+        composer.field.classList.toggle('vn-active', state !== 'idle');
+        composer.send.classList.toggle('vn-hold', state === 'recording' || state === 'sending');
+        mic.firstElementChild.className = 'fa-solid fa-' + (state === 'recording' ? 'stop' : state === 'ready' ? 'rotate-right' : 'microphone');
+        const lbl = state === 'recording' ? 'Berhenti merekam' : state === 'ready' ? 'Rekam ulang' : 'Rekam pesan suara';
+        mic.title = lbl;
+        mic.setAttribute('aria-label', lbl);
+        mic.disabled = state === 'sending';
     }
     function note(msg) {
         bar.querySelector('.vn-note').textContent = msg;
@@ -282,41 +291,61 @@
     }
 
     function mount() {
-        const fb = $('chat-format-bar');
-        if (!fb || !supported() || fb.querySelector('.vn-mic-btn')) return;
+        const comp = $('chat-compose'), field = $('chat-field'), sendBtn = $('chat-send'), fb = $('chat-format-bar');
+        const inComposer = !!(comp && field && sendBtn);
+        if ((!inComposer && !fb) || !supported() || document.querySelector('.vn-mic-btn')) return;
         mic = document.createElement('button');
         mic.type = 'button';
-        mic.className = 'fmt-btn vn-mic-btn';
         mic.title = 'Pesan suara';
         mic.setAttribute('aria-label', 'Rekam pesan suara');
         mic.innerHTML = '<i class="fa-solid fa-microphone"></i>';
-        fb.appendChild(mic);
 
         bar = document.createElement('div');
         bar.className = 'vn-bar';
         bar.setAttribute('role', 'status');
         bar.hidden = true;
         bar.dataset.state = 'idle';
-        bar.innerHTML =
-            '<span class="vn-dot" data-s="recording"></span>' +
-            '<span class="vn-meter" data-s="recording"><i></i></span>' +
-            '<span class="vn-time" data-s="recording ready sending">0:00</span>' +
-            '<span class="vn-note" data-s="note"></span>' +
-            '<button type="button" class="vn-btn vn-stop" data-s="recording" aria-label="Berhenti"><i class="fa-solid fa-stop"></i></button>' +
-            '<button type="button" class="vn-btn vn-prev" data-s="ready sending" aria-label="Dengarkan"><i class="fa-solid fa-play"></i></button>' +
-            '<button type="button" class="vn-btn vn-send" data-s="ready sending" aria-label="Kirim"><i class="fa-solid fa-paper-plane"></i></button>' +
-            '<button type="button" class="vn-btn vn-cancel" data-s="recording ready" aria-label="Batal"><i class="fa-solid fa-xmark"></i></button>';
-        fb.insertAdjacentElement('afterend', bar);
+        const parts = {
+            dot: '<span class="vn-dot" data-s="recording"></span>',
+            meter: '<span class="vn-meter" data-s="recording"><i></i></span>',
+            time: '<span class="vn-time" data-s="recording ready sending">0:00</span>',
+            note: '<span class="vn-note" data-s="note"></span>',
+            stop: '<button type="button" class="vn-btn vn-stop" data-s="recording" aria-label="Berhenti"><i class="fa-solid fa-stop"></i></button>',
+            prev: '<button type="button" class="vn-btn vn-prev" data-s="ready sending" aria-label="Dengarkan"><i class="fa-solid fa-play"></i></button>',
+            send: '<button type="button" class="vn-btn vn-send" data-s="ready sending" aria-label="Kirim"><i class="fa-solid fa-paper-plane"></i></button>',
+            cancel: '<button type="button" class="vn-btn vn-cancel" data-s="recording ready" aria-label="Batal"><i class="fa-solid fa-xmark"></i></button>',
+        };
+        if (inComposer) {
+            composer = { field, send: sendBtn };
+            mic.className = 'vn-mic-btn vn-mic-compose';
+            comp.insertBefore(mic, field);
+            bar.innerHTML = parts.cancel + parts.dot + parts.meter + parts.time + parts.note + parts.prev;
+            field.appendChild(bar);
+            // Tombol kirim tunggal: saat rekaman siap, kirim suara; saat merekam/mengirim, abaikan klik.
+            comp.addEventListener('click', (e) => {
+                if (!e.target.closest('#chat-send')) return;
+                const s = bar.dataset.state;
+                if (s === 'ready') { e.preventDefault(); e.stopPropagation(); send(); }
+                else if (s === 'recording' || s === 'sending') { e.preventDefault(); e.stopPropagation(); }
+            }, true);
+        } else {
+            mic.className = 'fmt-btn vn-mic-btn';
+            fb.appendChild(mic);
+            bar.innerHTML = parts.dot + parts.meter + parts.time + parts.note + parts.stop + parts.prev + parts.send + parts.cancel;
+            fb.insertAdjacentElement('afterend', bar);
+        }
 
         mic.addEventListener('click', () => {
             const s = bar.dataset.state;
             if (s === 'recording') stop();
+            else if (s === 'ready' && composer) { resetRec(); start(); }
             else if (s === 'idle' || s === 'note') start();
         });
-        bar.querySelector('.vn-stop').addEventListener('click', stop);
-        bar.querySelector('.vn-prev').addEventListener('click', togglePreview);
-        bar.querySelector('.vn-send').addEventListener('click', send);
-        bar.querySelector('.vn-cancel').addEventListener('click', resetRec);
+        const on = (sel, fn) => { const el = bar.querySelector(sel); if (el) el.addEventListener('click', fn); };
+        on('.vn-stop', stop);
+        on('.vn-prev', togglePreview);
+        on('.vn-send', send);
+        on('.vn-cancel', resetRec);
         window.addEventListener('pagehide', () => { releaseStream(); });
     }
 

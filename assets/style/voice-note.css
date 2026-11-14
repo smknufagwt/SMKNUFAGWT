@@ -50,3 +50,14 @@
 .vn-btn:disabled { opacity: .4; pointer-events: none; }
 .vn-mic-btn.rec { background: #ff003c; border-color: #ff003c; color: #fff; }
 @media (prefers-reduced-motion: reduce) { .vn-dot, .voice-note, .vn-bar { animation: none; } .voice-fill, .vn-meter i { transition: none; } }
+
+/* ── Composer beranda: mic kiri, bar rekam menggantikan textarea, kirim tetap 1 tombol ── */
+.vn-mic-compose {
+    flex: 0 0 auto; width: 36px; height: 36px; padding: 0; border-radius: 50%;
+    border: 1px solid var(--neon-dim, #008f11); background: #000; color: var(--neon, #0f0);
+    font-size: .85rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+.vn-mic-compose:hover { background: var(--neon, #0f0); color: #000; border-color: var(--neon, #0f0); }
+.vn-mic-compose:disabled { opacity: .4; pointer-events: none; }
+#chat-field .vn-bar { flex: 1; min-width: 0; height: 36px; box-sizing: border-box; padding: 0 4px; gap: 6px; }

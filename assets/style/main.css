@@ -1132,3 +1132,19 @@ header, .slide { border-radius: var(--r-lg); }
 .nav-btn, .comp-btn, .gallery-item, .author-link, .privacy-link { transition: background .25s ease, color .25s ease, border-color .25s ease, box-shadow .25s ease, transform .25s ease; }
 .nav-btn:hover, .comp-btn:hover { transform: translateY(-2px); }
 .nav-btn:active, .comp-btn:active { transform: translateY(0) scale(.97); }
+
+/* ── Global Live Chat: composer kompak (mic kiri · textarea · kirim tunggal kanan) ── */
+#chat-panel #chat-input-row { display: block; padding: 6px 8px 8px; }
+#chat-panel #chat-input-wrap { gap: 4px; }
+#chat-panel #chat-format-bar { gap: 4px; }
+#chat-panel #chat-format-bar .fmt-btn { width: 26px; height: 26px; font-size: 0.72rem; }
+#chat-panel .media-settings-panel { padding: 6px 8px; gap: 3px; }
+#chat-compose { display: flex; align-items: flex-end; gap: 6px; }
+#chat-field { flex: 1; min-width: 0; display: flex; align-items: flex-end; }
+#chat-field #chat-input { flex: 1; min-width: 0; }
+#chat-field.vn-active #chat-input { display: none; }
+#chat-compose #chat-send { min-width: 36px; padding: 0; display: flex; align-items: center; justify-content: center; }
+#chat-compose #chat-send.vn-hold { opacity: 0.45; cursor: not-allowed; }
+@media (pointer: coarse) {
+    #chat-panel #chat-format-bar .fmt-btn { width: 34px; height: 34px; }
+}
