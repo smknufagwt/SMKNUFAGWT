@@ -7,7 +7,9 @@
     margin-top: 6px; padding: 6px 12px 6px 6px; border: 1px solid var(--vn-dim);
     border-radius: 999px; background: rgba(0, 0, 0, .35); color: var(--vn);
     transition: border-color .25s ease, box-shadow .25s ease;
+    animation: vn-in .3s ease;
 }
+@keyframes vn-in { from { opacity: 0; transform: translateY(4px) scale(.97); } to { opacity: 1; transform: none; } }
 .voice-note[data-state="playing"] { border-color: var(--vn); box-shadow: 0 0 10px var(--vn-dim); }
 .voice-note[data-state="error"] { border-color: #ff003c; }
 .voice-play {
@@ -17,8 +19,11 @@
 }
 .voice-play:hover, .voice-note[data-state="playing"] .voice-play { background: var(--vn); color: #000; }
 .voice-note[data-state="error"] .voice-play { color: #ff003c; border-color: #ff003c; }
-.voice-track { flex: 1; min-width: 60px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, .14); overflow: hidden; }
-.voice-fill { display: block; height: 100%; width: 0; background: var(--vn); box-shadow: 0 0 6px var(--vn); }
+.voice-track {
+    flex: 1; min-width: 60px; height: 16px; padding: 6px 0; box-sizing: border-box; cursor: pointer;
+    background: rgba(255, 255, 255, .14) content-box; border-radius: 2px; overflow: hidden;
+}
+.voice-fill { display: block; height: 100%; width: 0; background: var(--vn); box-shadow: 0 0 6px var(--vn); border-radius: 2px; transition: width .2s linear; }
 .voice-time { font-size: .68rem; opacity: .85; white-space: nowrap; font-variant-numeric: tabular-nums; }
 
 .vn-bar {
@@ -26,11 +31,14 @@
     border: 1px solid var(--vn-dim); border-radius: 999px; background: rgba(0, 0, 0, .45);
     font-size: .72rem; color: var(--vn);
 }
+.vn-bar { --vn-level: 0; animation: vn-in .25s ease; }
 .vn-bar [data-s] { display: none; }
 .vn-bar[data-state="recording"] [data-s~="recording"],
 .vn-bar[data-state="ready"] [data-s~="ready"],
 .vn-bar[data-state="sending"] [data-s~="sending"],
 .vn-bar[data-state="note"] [data-s~="note"] { display: inline-flex; align-items: center; justify-content: center; }
+.vn-meter { flex: 1; min-width: 40px; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, .12); overflow: hidden; }
+.vn-meter i { display: block; height: 100%; width: 100%; border-radius: 3px; background: var(--vn); box-shadow: 0 0 8px var(--vn); transform-origin: left; transform: scaleX(calc(.04 + var(--vn-level) * .96)); transition: transform .1s linear; }
 .vn-time, .vn-note { margin-right: auto; font-variant-numeric: tabular-nums; }
 .vn-dot { width: 8px; height: 8px; border-radius: 50%; background: #ff003c; box-shadow: 0 0 8px #ff003c; animation: vn-pulse 1s ease-in-out infinite; }
 @keyframes vn-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .4; transform: scale(.8); } }
@@ -41,4 +49,4 @@
 .vn-btn:hover { background: var(--vn); color: #000; }
 .vn-btn:disabled { opacity: .4; pointer-events: none; }
 .vn-mic-btn.rec { background: #ff003c; border-color: #ff003c; color: #fff; }
-@media (prefers-reduced-motion: reduce) { .vn-dot { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .vn-dot, .voice-note, .vn-bar { animation: none; } .voice-fill, .vn-meter i { transition: none; } }

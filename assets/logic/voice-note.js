@@ -20,7 +20,7 @@
     // ── render token [🎤 0:12]{voice:ID} di bubble ──
     function voiceHtml(label, id) {
         const t = (String(label).match(/\d+:\d{2}/) || ['0:00'])[0];
-        return '<span class="voice-note" data-vid="' + id + '" data-state="idle"><button type="button" class="voice-play" aria-label="Putar pesan suara"><i class="fa-solid fa-play"></i></button><span class="voice-track"><i class="voice-fill"></i></span><span class="voice-time">' + t + '</span></span>';
+        return '<span class="voice-note" data-vid="' + id + '" data-state="idle" role="group" aria-label="Pesan suara"><button type="button" class="voice-play" aria-label="Putar pesan suara"><i class="fa-solid fa-play"></i></button><span class="voice-track" role="presentation"><i class="voice-fill"></i></span><span class="voice-time">' + t + '</span></span>';
     }
     function wrap(name, fn) {
         const orig = CF[name];
@@ -73,6 +73,7 @@
         c.audio.pause();
         const fill = c.box.querySelector('.voice-fill');
         if (fill) fill.style.width = '0%';
+        if (c.total) c.box.querySelector('.voice-time').textContent = c.total;
         setState(c.box, 'idle');
         cur = null;
     }
@@ -83,9 +84,14 @@
         try {
             const audio = new Audio(await loadUrl(box.dataset.vid));
             const fill = box.querySelector('.voice-fill');
-            const me = { box, audio, locked: false };
+            const me = { box, audio, locked: false, total: box.querySelector('.voice-time').textContent };
             cur = me;
-            audio.addEventListener('timeupdate', () => { if (audio.duration) fill.style.width = (audio.currentTime / audio.duration * 100) + '%'; });
+            const tEl = box.querySelector('.voice-time');
+            audio.addEventListener('timeupdate', () => {
+                if (!audio.duration) return;
+                fill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+                tEl.textContent = fmt(audio.currentTime);
+            });
             audio.addEventListener('play', () => { if (cur === me) { setState(box, 'playing'); soundLock(true); } });
             audio.addEventListener('pause', () => { if (cur === me && !audio.ended) { setState(box, 'paused'); soundLock(false); } });
             audio.addEventListener('ended', () => { if (cur === me) stopCur(); });
@@ -97,11 +103,16 @@
     }
     document.addEventListener('click', (e) => {
         const b = e.target.closest('.voice-play');
-        if (b) toggle(b.closest('.voice-note'));
+        if (b) { toggle(b.closest('.voice-note')); return; }
+        const tr = e.target.closest('.voice-track');
+        if (tr && cur && cur.box.contains(tr) && cur.audio.duration) {
+            const r = tr.getBoundingClientRect();
+            cur.audio.currentTime = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * cur.audio.duration;
+        }
     });
 
     // ── perekam ──
-    const rec = { mr: null, stream: null, chunks: [], timer: null, t0: 0, blob: null, mime: '', dur: 0, preview: null, previewUrl: null, bgm: false };
+    const rec = { ac: null, an: null, buf: null, mr: null, stream: null, chunks: [], timer: null, t0: 0, blob: null, mime: '', dur: 0, preview: null, previewUrl: null, bgm: false };
     let bar = null, mic = null, noteTimer = null;
 
     function supported() { return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder); }
@@ -121,7 +132,31 @@
         clearTimeout(noteTimer);
         noteTimer = setTimeout(() => { if (bar.dataset.state === 'note') setUi('idle'); }, 3200);
     }
+    function closeMeter() {
+        if (rec.ac) { rec.ac.close().catch(() => {}); }
+        rec.ac = rec.an = rec.buf = null;
+        if (bar) bar.style.setProperty('--vn-level', '0');
+    }
+    function openMeter() {
+        try {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return;
+            rec.ac = new AC();
+            rec.an = rec.ac.createAnalyser();
+            rec.an.fftSize = 512;
+            rec.ac.createMediaStreamSource(rec.stream).connect(rec.an);
+            rec.buf = new Uint8Array(rec.an.fftSize);
+        } catch (e) { closeMeter(); }
+    }
+    function readLevel() {
+        if (!rec.an) return;
+        rec.an.getByteTimeDomainData(rec.buf);
+        let sum = 0;
+        for (let i = 0; i < rec.buf.length; i++) { const v = (rec.buf[i] - 128) / 128; sum += v * v; }
+        bar.style.setProperty('--vn-level', Math.min(1, Math.sqrt(sum / rec.buf.length) * 4).toFixed(2));
+    }
     function releaseStream() {
+        closeMeter();
         if (rec.stream) rec.stream.getTracks().forEach((t) => t.stop());
         rec.stream = null;
     }
@@ -154,14 +189,16 @@
         rec.mr.onstop = onStopped;
         if (typeof System !== 'undefined' && System.bgm && !System.bgm.paused) { rec.bgm = true; System.bgm.pause(); }
         rec.mr.start(250);
+        openMeter();
         rec.t0 = Date.now();
         bar.querySelector('.vn-time').textContent = '0:00';
         setUi('recording');
         rec.timer = setInterval(() => {
+            readLevel();
             const s = (Date.now() - rec.t0) / 1000;
             bar.querySelector('.vn-time').textContent = fmt(s) + ' / ' + fmt(MAX_SEC);
             if (s >= MAX_SEC) stop();
-        }, 200);
+        }, 100);
     }
     function stop() {
         clearInterval(rec.timer);
@@ -257,10 +294,12 @@
 
         bar = document.createElement('div');
         bar.className = 'vn-bar';
+        bar.setAttribute('role', 'status');
         bar.hidden = true;
         bar.dataset.state = 'idle';
         bar.innerHTML =
             '<span class="vn-dot" data-s="recording"></span>' +
+            '<span class="vn-meter" data-s="recording"><i></i></span>' +
             '<span class="vn-time" data-s="recording ready sending">0:00</span>' +
             '<span class="vn-note" data-s="note"></span>' +
             '<button type="button" class="vn-btn vn-stop" data-s="recording" aria-label="Berhenti"><i class="fa-solid fa-stop"></i></button>' +
