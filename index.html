@@ -128,19 +128,23 @@
         <div id="chat-input-row">
     <div id="chat-input-wrap">
         <div id="chat-format-bar">
-            <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('bold')" title="Tebal"><b>B</b></button>
-            <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('underline')" title="Garis bawah"><u>U</u></button>
-            <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('strike')" title="Coret"><s>S</s></button>
-            <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('quote-inline')" title='Kutip "teks"'>&quot;</button>
-            <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('link')" title="Tautan [teks](url)"><i class="fa-solid fa-link"></i></button>
-            <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('media')" title="Gambar/GIF/Video [alt]{url}"><i class="fa-solid fa-image"></i></button>
-            <button type="button" class="fmt-btn" id="media-settings-btn" onclick="GlobalChat.toggleMediaSettings()" title="Pengaturan pemutaran media"><i class="fa-solid fa-gear"></i></button>
+            <div class="fmt-main">
+                <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('bold')" title="Tebal"><b>B</b></button>
+                <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('underline')" title="Garis bawah"><u>U</u></button>
+                <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('strike')" title="Coret"><s>S</s></button>
+                <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('quote-inline')" title='Kutip "teks"'>&quot;</button>
+                <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('link')" title="Tautan [teks](url)"><i class="fa-solid fa-link"></i></button>
+                <button type="button" class="fmt-btn" onclick="GlobalChat.insertFormat('media')" title="Gambar/GIF/Video [alt]{url}"><i class="fa-solid fa-image"></i></button>
+            </div>
+            <div class="fmt-tools">
+                <button type="button" class="tool-btn" id="media-settings-btn" aria-label="Pengaturan pemutaran media" onclick="GlobalChat.toggleMediaSettings()" title="Pengaturan pemutaran media"><i class="fa-solid fa-gear"></i></button>
+                <button type="button" class="tool-btn" id="chat-wide-btn" aria-pressed="false" aria-label="Perlebar panel chat" onclick="GlobalChat.toggleWideMode(!GlobalChat.wideMode)" title="Perlebar panel chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="ic-out" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"/><path class="ic-in" d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25"/></svg></button>
+            </div>
         </div>
         <div id="media-settings-panel" class="media-settings-panel">
             <label><input type="checkbox" id="ms-autoplay" onchange="GlobalChat.updateMediaPref('autoplay', this.checked)"> Autoplay video</label>
             <label><input type="checkbox" id="ms-loop" onchange="GlobalChat.updateMediaPref('loop', this.checked)"> Loop video</label>
             <label><input type="checkbox" id="ms-sound" onchange="GlobalChat.updateMediaPref('soundDefault', this.checked)"> Suara default </label>
-            <label><input type="checkbox" id="ms-widescreen" onchange="GlobalChat.toggleWideMode(this.checked)"> Perlebar panel chat</label>
             <label><input type="checkbox" id="ms-matrix" onchange="GlobalChat.toggleMatrixRain(this.checked)"> Animasi rain matrix</label>
             <label><input type="checkbox" id="ms-lite" onchange="GlobalChat.toggleLiteMode(this.checked)"> Lite Mode (device RAM/CPU rendah)</label>
         </div>
@@ -743,6 +747,7 @@
 
                 this.wideMode = localStorage.getItem('nufa_chat_wide') === 'on';
                 if (this.wideMode) document.getElementById('chat-panel').classList.add('wide');
+                this._syncWideBtn();
 
                 this.matrixOn = localStorage.getItem('nufa_matrix_on') !== 'off';
                 if (typeof MatrixFX !== 'undefined') MatrixFX.setEnabled(this.matrixOn);
@@ -1484,7 +1489,6 @@ listEl.innerHTML = ids.map(key => {
                     document.getElementById('ms-autoplay').checked = MediaPrefs.autoplay;
                     document.getElementById('ms-loop').checked = MediaPrefs.loop;
                     document.getElementById('ms-sound').checked = MediaPrefs.soundDefault;
-                    document.getElementById('ms-widescreen').checked = this.wideMode;
                     document.getElementById('ms-matrix').checked = this.matrixOn;
                     document.getElementById('ms-lite').checked = this.liteMode;
                 }
@@ -1496,6 +1500,12 @@ listEl.innerHTML = ids.map(key => {
 
             // ── A. Perlebar panel chat + animasi ke atas (default OFF) ──
             wideMode: false,
+            _syncWideBtn() {
+                const b = document.getElementById('chat-wide-btn');
+                if (!b) return;
+                b.classList.toggle('on', this.wideMode);
+                b.setAttribute('aria-pressed', String(this.wideMode));
+            },
             toggleWideMode(checked) {
                 if (typeof AudioFX !== 'undefined') AudioFX.click();
                 this.wideMode = checked;
@@ -1503,6 +1513,7 @@ listEl.innerHTML = ids.map(key => {
                 panel.classList.toggle('wide', checked);
                 panel.classList.add('expanding');
                 setTimeout(() => panel.classList.remove('expanding'), 500);
+                this._syncWideBtn();
                 try { localStorage.setItem('nufa_chat_wide', checked ? 'on' : 'off'); } catch(e) {}
                 this._showToast({ ip: 'SYSTEM', text: `⚙ Panel chat ${checked ? 'diperlebar' : 'dikembalikan normal'}.` });
             },
