@@ -4,6 +4,12 @@
    ========================================================================== */
 const POSTS = [
     {
+        date: "2026-11-15",
+        tag: "UPDATE",
+        title: "Pesan suara makin rapi: slider putar, animasi mulus, dan email pengirim di /chat",
+        body: "Update kali ini fokus ke <b>pesan suara</b> dan kejelasan bubble chat.\n\n<b>Pesan suara kini sama di mana saja</b>\n<ul>\n<li>Tombol mikrofon di <b>/chat</b> sekarang sama persis dengan Global Live Chat di beranda: mic di kiri, kolom tulis berubah jadi bar rekam, dan tombol kirim tetap satu.</li>\n<li>Begitu rekaman selesai, muncul <b>slider putar</b> di dalam kolom tulis. Kamu bisa dengar ulang dan geser ke bagian mana pun sebelum dikirim.</li>\n<li>Animasi pemutaran dibenahi, baik di kolom tulis maupun di bubble setelah terkirim: bar kemajuan bergerak mulus per frame (pakai <code>requestAnimationFrame</code>), tombol play berdenyut saat memutar, dan hanya satu suara yang bunyi dalam satu waktu.</li>\n<li>Mode Lite dan pengaturan 'kurangi gerakan' di perangkatmu tetap dihormati, jadi animasinya otomatis mati.</li>\n</ul>\n\n<b>Siapa yang bicara jadi lebih jelas</b>\n<ul>\n<li>Di <b>/chat</b>, bubble kini menampilkan <b>email pengirim</b> di atasnya. Di Global Live Chat beranda yang tampil tetap IP yang disamarkan.</li>\n<li>Tombol roda gigi dan perlebar panel kini menyala terisi dengan efek glow saat aktif, jadi mudah dibedakan dari yang mati.</li>\n</ul>\n\n<b>Di balik layar</b>\nRekaman Opus/WebM sering dilaporkan browser punya durasi <code>Infinity</code>, sehingga slider tidak mau bergerak; sekarang dipakai durasi cadangan dari rekaman itu sendiri. Untuk email pengirim, aturan database (Firestore rules) ditambah field <code>user_email</code> yang hanya diterima kalau cocok dengan akun Google yang sedang login, jadi tidak bisa dipalsukan. Pesan lama belum punya field itu, jadi tetap menampilkan nama."
+    },
+    {
         date: "2026-10-11",
         tag: "UPDATE",
         title: "Chat NUFABASE makin rapi dan nyaman: pilihan tampilan, foto profil, dan kotak usul fitur",
