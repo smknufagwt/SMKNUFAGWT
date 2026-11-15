@@ -53,7 +53,8 @@ service cloud.firestore {
 
     function validMsg(room) {
       let d = request.resource.data;
-      return d.keys().hasOnly(['room_id','user_id','display_name','content','created_at','photo_url']) &&
+      return d.keys().hasOnly(['room_id','user_id','display_name','content','created_at','photo_url','user_email']) &&
+        (!('user_email' in d) || d.user_email == request.auth.token.email) &&
         (!('photo_url' in d) || (d.photo_url is string && d.photo_url.size() <= 300 &&
           d.photo_url.matches('https://lh[0-9]\\.googleusercontent\\.com/.*'))) &&
         d.room_id == room &&

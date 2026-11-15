@@ -11,6 +11,15 @@
 
     const fmt = (s) => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
     const $ = (id) => document.getElementById(id);
+    const secs = (t) => { const m = String(t).match(/(\d+):(\d{2})/); return m ? m[1] * 60 + +m[2] : 0; };
+    // Opus/WebM hasil MediaRecorder sering melapor duration = Infinity -> pakai durasi label/rekaman sebagai cadangan.
+    const dur = (a, fb) => (isFinite(a.duration) && a.duration > 0 ? a.duration : fb);
+    // Loop rAF biar slider mulus (timeupdate cuma ~4x/detik).
+    function ticker(audio, fb, paint) {
+        let id = 0;
+        const frame = () => { paint(audio.currentTime, dur(audio, fb)); id = requestAnimationFrame(frame); };
+        return { start() { cancelAnimationFrame(id); frame(); }, stop() { cancelAnimationFrame(id); id = 0; } };
+    }
 
     function getDb() {
         if (typeof firebase === 'undefined' || !firebase.apps || !firebase.apps.length) return null;
@@ -70,6 +79,7 @@
         if (!cur) return;
         const c = cur;
         soundLock(false);
+        if (c.tick) c.tick.stop();
         c.audio.pause();
         const fill = c.box.querySelector('.voice-fill');
         if (fill) fill.style.width = '0%';
@@ -80,20 +90,22 @@
     async function toggle(box) {
         if (cur && cur.box === box) { cur.audio.paused ? cur.audio.play().catch(() => {}) : cur.audio.pause(); return; }
         stopCur();
+        pausePreview();
         setState(box, 'loading');
         try {
             const audio = new Audio(await loadUrl(box.dataset.vid));
             const fill = box.querySelector('.voice-fill');
-            const me = { box, audio, locked: false, total: box.querySelector('.voice-time').textContent };
-            cur = me;
             const tEl = box.querySelector('.voice-time');
-            audio.addEventListener('timeupdate', () => {
-                if (!audio.duration) return;
-                fill.style.width = (audio.currentTime / audio.duration * 100) + '%';
-                tEl.textContent = fmt(audio.currentTime);
-            });
-            audio.addEventListener('play', () => { if (cur === me) { setState(box, 'playing'); soundLock(true); } });
-            audio.addEventListener('pause', () => { if (cur === me && !audio.ended) { setState(box, 'paused'); soundLock(false); } });
+            const total = tEl.textContent;
+            const me = { box, audio, locked: false, total, fb: secs(total), tick: null, paint: null };
+            me.paint = (t, d) => {
+                fill.style.width = (d ? Math.min(1, t / d) * 100 : 0) + '%';
+                tEl.textContent = fmt(t);
+            };
+            me.tick = ticker(audio, me.fb, me.paint);
+            cur = me;
+            audio.addEventListener('play', () => { if (cur === me) { setState(box, 'playing'); soundLock(true); me.tick.start(); } });
+            audio.addEventListener('pause', () => { if (cur === me && !audio.ended) { setState(box, 'paused'); soundLock(false); me.tick.stop(); } });
             audio.addEventListener('ended', () => { if (cur === me) stopCur(); });
             await audio.play();
         } catch (e) {
@@ -105,14 +117,18 @@
         const b = e.target.closest('.voice-play');
         if (b) { toggle(b.closest('.voice-note')); return; }
         const tr = e.target.closest('.voice-track');
-        if (tr && cur && cur.box.contains(tr) && cur.audio.duration) {
+        if (tr && cur && cur.box.contains(tr)) {
+            const d = dur(cur.audio, cur.fb);
+            if (!d) return;
             const r = tr.getBoundingClientRect();
-            cur.audio.currentTime = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * cur.audio.duration;
+            const t = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * d;
+            cur.audio.currentTime = t;
+            cur.paint(t, d);
         }
     });
 
     // ── perekam ──
-    const rec = { ac: null, an: null, buf: null, mr: null, stream: null, chunks: [], timer: null, t0: 0, blob: null, mime: '', dur: 0, preview: null, previewUrl: null, bgm: false };
+    const rec = { ac: null, an: null, buf: null, mr: null, stream: null, chunks: [], timer: null, t0: 0, blob: null, mime: '', dur: 0, preview: null, previewUrl: null, previewTick: null, seeking: false, bgm: false };
     let bar = null, mic = null, noteTimer = null, composer = null;
 
     function supported() { return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder); }
@@ -124,7 +140,7 @@
         bar.hidden = state === 'idle';
         bar.dataset.state = state;
         mic.classList.toggle('rec', state === 'recording');
-        bar.querySelectorAll('.vn-send, .vn-prev, .vn-cancel').forEach((b) => { b.disabled = state === 'sending'; });
+        bar.querySelectorAll('.vn-prev, .vn-cancel, .vn-seek').forEach((b) => { b.disabled = state === 'sending'; });
         if (!composer) return;
         // Mode composer (beranda): mic = rekam/stop/rekam ulang, tombol kirim #chat-send tetap satu-satunya.
         composer.field.classList.toggle('vn-active', state !== 'idle');
@@ -169,14 +185,29 @@
         if (rec.stream) rec.stream.getTracks().forEach((t) => t.stop());
         rec.stream = null;
     }
+    function paintSeek(t, d) {
+        if (rec.seeking) return;
+        const p = d ? Math.min(1, t / d) : 0;
+        bar.querySelector('.vn-seek').value = Math.round(p * 1000);
+        bar.style.setProperty('--vn-p', (p * 100).toFixed(1) + '%');
+        bar.querySelector('.vn-time').textContent = fmt(t) + ' / ' + fmt(rec.dur);
+    }
+    function previewIdle() {
+        bar.dataset.play = '0';
+        bar.querySelector('.vn-prev i').className = 'fa-solid fa-play';
+        bar.querySelector('.vn-seek').value = 0;
+        bar.style.setProperty('--vn-p', '0%');
+        if (rec.blob) bar.querySelector('.vn-time').textContent = fmt(rec.dur);
+    }
     function resetRec() {
         clearInterval(rec.timer);
         if (rec.mr && rec.mr.state !== 'inactive') { rec.mr.onstop = null; try { rec.mr.stop(); } catch (e) {} }
         releaseStream();
+        if (rec.previewTick) { rec.previewTick.stop(); rec.previewTick = null; }
         if (rec.preview) { rec.preview.pause(); rec.preview = null; }
         if (rec.previewUrl) { URL.revokeObjectURL(rec.previewUrl); rec.previewUrl = null; }
         rec.mr = null; rec.chunks = []; rec.blob = null; rec.dur = 0;
-        bar.querySelector('.vn-prev i').className = 'fa-solid fa-play';
+        previewIdle();
         if (rec.bgm && typeof System !== 'undefined' && System.bgm) System.bgm.play().catch(() => {});
         rec.bgm = false;
         setUi('idle');
@@ -219,19 +250,26 @@
         rec.dur = Math.min(MAX_SEC, Math.max(1, Math.round((Date.now() - rec.t0) / 1000)));
         if (rec.blob.size < 800) { resetRec(); note('Rekaman terlalu pendek.'); return; }
         if (rec.blob.size > MAX_BLOB) { resetRec(); note('Rekaman terlalu besar, coba lebih singkat.'); return; }
-        bar.querySelector('.vn-time').textContent = fmt(rec.dur);
+        previewIdle();
         setUi('ready');
     }
+    function ensurePreview() {
+        if (rec.preview) return rec.preview;
+        rec.previewUrl = URL.createObjectURL(rec.blob);
+        const a = new Audio(rec.previewUrl);
+        const tk = ticker(a, rec.dur, paintSeek);
+        rec.preview = a;
+        rec.previewTick = tk;
+        a.addEventListener('play', () => { bar.dataset.play = '1'; bar.querySelector('.vn-prev i').className = 'fa-solid fa-pause'; tk.start(); });
+        a.addEventListener('pause', () => { if (a.ended) return; tk.stop(); bar.dataset.play = '0'; bar.querySelector('.vn-prev i').className = 'fa-solid fa-play'; });
+        a.addEventListener('ended', () => { tk.stop(); a.currentTime = 0; previewIdle(); });
+        return a;
+    }
+    function pausePreview() { if (rec.preview && !rec.preview.paused) rec.preview.pause(); }
     function togglePreview() {
         if (!rec.blob) return;
-        const icon = bar.querySelector('.vn-prev i');
-        if (!rec.preview) {
-            rec.previewUrl = URL.createObjectURL(rec.blob);
-            rec.preview = new Audio(rec.previewUrl);
-            rec.preview.addEventListener('ended', () => { icon.className = 'fa-solid fa-play'; });
-        }
-        if (rec.preview.paused) { rec.preview.play().catch(() => {}); icon.className = 'fa-solid fa-pause'; }
-        else { rec.preview.pause(); icon.className = 'fa-solid fa-play'; }
+        const a = ensurePreview();
+        if (a.paused) { stopCur(); a.play().catch(() => {}); } else a.pause();
     }
 
     function blobToB64(blob) {
@@ -290,14 +328,26 @@
         }
     }
 
+    // Dua host composer: beranda (#chat-compose) & /chat (form#chat-thread-form) — struktur mic/bar/kirim identik.
+    function findComposer() {
+        const comp = $('chat-compose'), field = $('chat-field'), sendBtn = $('chat-send');
+        if (comp && field && sendBtn) return { comp, field, send: sendBtn, before: field, isForm: false };
+        const form = $('chat-thread-form');
+        const wrapEl = form && form.querySelector('.chat-input-wrap');
+        const sendEl = form && form.querySelector(':scope > button[type="submit"]');
+        if (form && wrapEl && sendEl) return { comp: form, field: wrapEl, send: sendEl, before: wrapEl, isForm: true };
+        return null;
+    }
+
     function mount() {
-        const comp = $('chat-compose'), field = $('chat-field'), sendBtn = $('chat-send'), fb = $('chat-format-bar');
-        const inComposer = !!(comp && field && sendBtn);
-        if ((!inComposer && !fb) || !supported() || document.querySelector('.vn-mic-btn')) return;
+        const c = findComposer();
+        if (!c || !supported() || document.querySelector('.vn-mic-btn')) return;
+        const { comp, field, send: sendBtn } = c;
         mic = document.createElement('button');
         mic.type = 'button';
         mic.title = 'Pesan suara';
         mic.setAttribute('aria-label', 'Rekam pesan suara');
+        mic.className = 'vn-mic-btn vn-mic-compose';
         mic.innerHTML = '<i class="fa-solid fa-microphone"></i>';
 
         bar = document.createElement('div');
@@ -305,47 +355,53 @@
         bar.setAttribute('role', 'status');
         bar.hidden = true;
         bar.dataset.state = 'idle';
-        const parts = {
-            dot: '<span class="vn-dot" data-s="recording"></span>',
-            meter: '<span class="vn-meter" data-s="recording"><i></i></span>',
-            time: '<span class="vn-time" data-s="recording ready sending">0:00</span>',
-            note: '<span class="vn-note" data-s="note"></span>',
-            stop: '<button type="button" class="vn-btn vn-stop" data-s="recording" aria-label="Berhenti"><i class="fa-solid fa-stop"></i></button>',
-            prev: '<button type="button" class="vn-btn vn-prev" data-s="ready sending" aria-label="Dengarkan"><i class="fa-solid fa-play"></i></button>',
-            send: '<button type="button" class="vn-btn vn-send" data-s="ready sending" aria-label="Kirim"><i class="fa-solid fa-paper-plane"></i></button>',
-            cancel: '<button type="button" class="vn-btn vn-cancel" data-s="recording ready" aria-label="Batal"><i class="fa-solid fa-xmark"></i></button>',
-        };
-        if (inComposer) {
-            composer = { field, send: sendBtn };
-            mic.className = 'vn-mic-btn vn-mic-compose';
-            comp.insertBefore(mic, field);
-            bar.innerHTML = parts.cancel + parts.dot + parts.meter + parts.time + parts.note + parts.prev;
-            field.appendChild(bar);
-            // Tombol kirim tunggal: saat rekaman siap, kirim suara; saat merekam/mengirim, abaikan klik.
-            comp.addEventListener('click', (e) => {
-                if (!e.target.closest('#chat-send')) return;
+        bar.dataset.play = '0';
+        bar.innerHTML =
+            '<button type="button" class="vn-btn vn-cancel" data-s="recording ready" aria-label="Batal"><i class="fa-solid fa-xmark"></i></button>' +
+            '<span class="vn-dot" data-s="recording"></span>' +
+            '<button type="button" class="vn-btn vn-prev" data-s="ready sending" aria-label="Dengarkan"><i class="fa-solid fa-play"></i></button>' +
+            '<span class="vn-meter" data-s="recording"><i></i></span>' +
+            '<input type="range" class="vn-seek" data-s="ready sending" min="0" max="1000" value="0" step="1" aria-label="Posisi pemutaran pesan suara">' +
+            '<span class="vn-time" data-s="recording ready sending">0:00</span>' +
+            '<span class="vn-note" data-s="note"></span>';
+        composer = { field, send: sendBtn };
+        comp.insertBefore(mic, c.before);
+        field.appendChild(bar);
+        // Tombol kirim tunggal: saat rekaman siap, kirim suara; saat merekam/mengirim, abaikan klik.
+        comp.addEventListener('click', (e) => {
+            if (!sendBtn.contains(e.target)) return;
+            const s = bar.dataset.state;
+            if (s === 'ready') { e.preventDefault(); e.stopPropagation(); send(); }
+            else if (s === 'recording' || s === 'sending') { e.preventDefault(); e.stopPropagation(); }
+        }, true);
+        if (c.isForm) {
+            comp.addEventListener('submit', (e) => {
                 const s = bar.dataset.state;
-                if (s === 'ready') { e.preventDefault(); e.stopPropagation(); send(); }
-                else if (s === 'recording' || s === 'sending') { e.preventDefault(); e.stopPropagation(); }
+                if (s === 'idle' || s === 'note') return;
+                e.preventDefault(); e.stopImmediatePropagation();
+                if (s === 'ready') send();
             }, true);
-        } else {
-            mic.className = 'fmt-btn vn-mic-btn';
-            fb.appendChild(mic);
-            bar.innerHTML = parts.dot + parts.meter + parts.time + parts.note + parts.stop + parts.prev + parts.send + parts.cancel;
-            fb.insertAdjacentElement('afterend', bar);
         }
 
         mic.addEventListener('click', () => {
             const s = bar.dataset.state;
             if (s === 'recording') stop();
-            else if (s === 'ready' && composer) { resetRec(); start(); }
+            else if (s === 'ready') { resetRec(); start(); }
             else if (s === 'idle' || s === 'note') start();
         });
-        const on = (sel, fn) => { const el = bar.querySelector(sel); if (el) el.addEventListener('click', fn); };
-        on('.vn-stop', stop);
-        on('.vn-prev', togglePreview);
-        on('.vn-send', send);
-        on('.vn-cancel', resetRec);
+        bar.querySelector('.vn-prev').addEventListener('click', togglePreview);
+        bar.querySelector('.vn-cancel').addEventListener('click', resetRec);
+        const sk = bar.querySelector('.vn-seek');
+        sk.addEventListener('input', () => {
+            if (!rec.blob) return;
+            rec.seeking = true;
+            const a = ensurePreview();
+            const t = (sk.value / 1000) * dur(a, rec.dur);
+            a.currentTime = t;
+            bar.style.setProperty('--vn-p', (sk.value / 10) + '%');
+            bar.querySelector('.vn-time').textContent = fmt(t) + ' / ' + fmt(rec.dur);
+        });
+        ['change', 'pointerup', 'pointercancel', 'blur'].forEach((ev) => sk.addEventListener(ev, () => { rec.seeking = false; }));
         window.addEventListener('pagehide', () => { releaseStream(); });
     }
 

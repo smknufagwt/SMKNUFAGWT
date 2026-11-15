@@ -281,7 +281,7 @@
 
         const name = document.createElement('span');
         name.className = 'chat-thread-msg-name';
-        name.textContent = msg.display_name || 'Anonim';
+        name.textContent = msg.user_email || (isOwn && currentUser && currentUser.email) || msg.display_name || 'Anonim';
 
         const content = document.createElement('span');
         content.className = 'chat-thread-msg-content chat-text';
@@ -490,15 +490,21 @@
             content: text, created_at: firebase.firestore.FieldValue.serverTimestamp(),
         };
         const photo = safeAvatar(currentUser.photoURL, 64);
-        try {
-            await roomMsgs(roomId).add(photo ? { ...doc, photo_url: photo } : doc);
-        } catch (e) {
-            // Rules lama (belum mengenal photo_url) menolak field tambahan -> kirim ulang tanpa foto
-            if (e.code === 'permission-denied' && photo) {
-                try { await roomMsgs(roomId).add(doc); return; } catch (e2) { e = e2; }
+        const email = currentUser.email ? String(currentUser.email).slice(0, 120) : '';
+        // Tangga fallback: rules lama menolak field tambahan (user_email / photo_url) -> turunkan bertahap
+        const variants = [];
+        if (photo && email) variants.push({ photo_url: photo, user_email: email });
+        if (email) variants.push({ user_email: email });
+        if (photo) variants.push({ photo_url: photo });
+        variants.push({});
+        let err = null;
+        for (const extra of variants) {
+            try { await roomMsgs(roomId).add({ ...doc, ...extra }); return; } catch (e) {
+                err = e;
+                if (e.code !== 'permission-denied') break;
             }
-            showChatToast(e.code === 'permission-denied' ? 'Tidak punya akses tulis di ruang ini.' : 'Gagal kirim pesan.');
         }
+        showChatToast(err && err.code === 'permission-denied' ? 'Tidak punya akses tulis di ruang ini.' : 'Gagal kirim pesan.');
     }
 
     function accessRequestDocId(uid, roomId) { return uid + '_' + roomId; }
