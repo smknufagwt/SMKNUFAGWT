@@ -1,6 +1,10 @@
 name: Nufabase — Manual Deploy (Firebase)
 
 on:
+  push:
+    branches: [nufabase]
+    paths:
+      - ".github/workflows/version"
   workflow_dispatch:
     inputs:
       channel:
@@ -16,8 +20,37 @@ on:
         required: false
         default: "7d"
 
+concurrency:
+  group: nufabase-deploy
+  cancel-in-progress: false
+
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      go: ${{ steps.v.outputs.go }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cek versi naik
+        id: v
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ]; then echo "go=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          new=$(tr -dc '0-9' < .github/workflows/version)
+          old=$(git show "$BEFORE:.github/workflows/version" 2>/dev/null | tr -dc '0-9' || true)
+          old=${old:--1}
+          echo "version: $old -> $new"
+          if [ -n "$new" ] && [ "$new" -gt "$old" ]; then echo "go=true" >> "$GITHUB_OUTPUT"; else echo "go=false" >> "$GITHUB_OUTPUT"; fi
+
   deploy:
+    needs: check
+    if: ${{ needs.check.outputs.go == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -41,9 +74,9 @@ jobs:
           sed -i "s|%%NOTIFY_SECRET%%|${{ secrets.NOTIFY_SECRET }}|g"     assets/logic/notify-throttle.js
 
       - name: Deploy — live (hosting:nufabase + firestore)
-        if: ${{ inputs.channel == 'live' }}
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.channel == 'live' }}
         run: npx firebase-tools deploy --only hosting:nufabase,firestore --token "${{ secrets.FIREBASE_TOKEN }}"
 
       - name: Deploy — preview channel (hosting:nufabase)
-        if: ${{ inputs.channel == 'preview' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.channel == 'preview' }}
         run: npx firebase-tools hosting:channel:deploy manual-preview --only nufabase --expires ${{ inputs.preview_expires }} --token "${{ secrets.FIREBASE_TOKEN }}"
