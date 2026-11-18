@@ -775,9 +775,12 @@
         const iconEl = document.getElementById('chat-account-icon');
         const greetEl = document.getElementById('chat-room-greeting');
         if (!iconEl) return;
-        if (currentUser && currentUser.photoURL) {
+        if (currentUser && /^https:\/\//i.test(currentUser.photoURL || '')) {
             iconEl.classList.remove('is-locked');
-            iconEl.innerHTML = '<img src="' + currentUser.photoURL + '" alt="Akun">';
+            const img = document.createElement('img');
+            img.src = currentUser.photoURL;
+            img.alt = 'Akun';
+            iconEl.replaceChildren(img);
         } else if (currentUser) {
             iconEl.classList.remove('is-locked');
             iconEl.textContent = '👤';

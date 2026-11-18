@@ -18,9 +18,11 @@ importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 // [1] CONFIG — Ubah sesuai kebutuhan
 // ============================================================
 const CONFIG = {
-  CACHE_NAME: 'nufa-cache-v2',
+  CACHE_NAME: 'nufa-cache-v3',
   THUMB_CACHE_NAME: 'nufa-yt-thumb-v1',
   RUNTIME_CACHE_MAX: 80,
+  TRIM_EVERY: 10,          // trim cache tiap N penulisan, bukan tiap request
+  NETWORK_TIMEOUT_MS: 4000, // jaringan lambat & ada cache → pakai cache dulu
   THUMB_CACHE_MAX: 150,
   STATIC_ASSETS: [
     '/',
@@ -40,8 +42,6 @@ const CONFIG = {
   ],
   // Tag untuk background sync antrian pesan chat
   SYNC_TAG_CHAT: 'nufa-sync-chat',
-  // Nama channel BroadcastChannel (harus sama dengan di index.html)
-  BC_NAME: 'nufa-realtime',
   // Ikon untuk push notification
   ICON: '/appcover.jpg',
   BADGE: '/favicon.ico',
@@ -54,6 +54,8 @@ const CONFIG = {
 // [2] CACHE_MODULE — Caching aset statis saat install
 // ============================================================
 const CacheModule = {
+  _puts: 0,
+
   async trimCache(cacheName, maxEntries) {
     const cache = await caches.open(cacheName);
     const keys = await cache.keys();
@@ -61,13 +63,10 @@ const CacheModule = {
     await Promise.all(keys.slice(0, keys.length - maxEntries).map(k => cache.delete(k)));
   },
 
+  // Satu aset gagal tidak membatalkan yang lain (addAll bersifat atomik)
   async preCacheStatic() {
     const cache = await caches.open(CONFIG.CACHE_NAME);
-    try {
-      await cache.addAll(CONFIG.STATIC_ASSETS);
-    } catch (e) {
-      console.warn('[SW][Cache] Gagal pre-cache:', e);
-    }
+    await Promise.allSettled(CONFIG.STATIC_ASSETS.map(u => cache.add(u)));
   },
 
   async cleanOldCaches() {
@@ -79,35 +78,48 @@ const CacheModule = {
     );
   },
 
-  // Strategi: Network First, fallback ke cache
-  async fetchWithFallback(request) {
-    try {
-      const response = await fetch(request);
-      if (response && response.ok) {
-        const cache = await caches.open(CONFIG.CACHE_NAME);
-        cache.put(request, response.clone());
-        this.trimCache(CONFIG.CACHE_NAME, CONFIG.RUNTIME_CACHE_MAX);
+  _offline() {
+    return new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+  },
+
+  // Strategi: Network First. Kalau ada cache tapi jaringan lambat (> NETWORK_TIMEOUT_MS)
+  // atau gagal, langsung pakai cache; respons jaringan yang telat tetap memperbarui cache.
+  // Tanpa cache → tunggu jaringan apa adanya (tidak di-abort, aman untuk koneksi lambat).
+  async fetchWithFallback(event) {
+    const request = event.request;
+    const cache = await caches.open(CONFIG.CACHE_NAME);
+    const cached = await cache.match(request);
+
+    const network = fetch(request).then(res => {
+      // Hanya 200 penuh: 206 (range) & opaque tidak boleh/tak berguna di-cache
+      if (res.status === 200 && res.type !== 'opaque') {
+        const job = cache.put(request, res.clone())
+          .then(() => (++this._puts % CONFIG.TRIM_EVERY === 0) && this.trimCache(CONFIG.CACHE_NAME, CONFIG.RUNTIME_CACHE_MAX))
+          .catch(() => {});
+        try { event.waitUntil(job); } catch (_) { /* event sudah selesai, job tetap jalan */ }
       }
-      return response;
-    } catch (_) {
-      const cached = await caches.match(request);
-      return cached || new Response('Offline', { status: 503 });
-    }
+      return res;
+    });
+
+    if (!cached) return network.catch(() => this._offline());
+    const slow = new Promise(resolve => setTimeout(() => resolve(cached), CONFIG.NETWORK_TIMEOUT_MS));
+    return Promise.race([network, slow]).catch(() => cached);
   },
 
   // Thumbnail statis pihak ketiga (i.ytimg.com / drive.google.com/thumbnail): cache-first,
   // toleran response "opaque" (no-cors) — thumbnail jarang berubah & gak butuh baca isi
-  // respons buat divalidasi, jadi aman disimpan apa adanya. Dipakai facade thumbnail chat
-  // (YouTube & Drive generic) biar media yang sama gak nembak jaringan ulang tiap muncul
-  // lagi di riwayat chat.
-  async fetchThumbCacheFirst(request) {
+  // respons buat divalidasi. Dipakai facade thumbnail chat (YouTube & Drive).
+  async fetchThumbCacheFirst(event) {
+    const request = event.request;
     const cache = await caches.open(CONFIG.THUMB_CACHE_NAME);
     const cached = await cache.match(request);
     if (cached) return cached;
     try {
       const response = await fetch(request);
-      cache.put(request, response.clone());
-      this.trimCache(CONFIG.THUMB_CACHE_NAME, CONFIG.THUMB_CACHE_MAX);
+      const job = cache.put(request, response.clone())
+        .then(() => this.trimCache(CONFIG.THUMB_CACHE_NAME, CONFIG.THUMB_CACHE_MAX))
+        .catch(() => {});
+      try { event.waitUntil(job); } catch (_) { /* abaikan */ }
       return response;
     } catch (_) {
       return new Response('', { status: 503 });
@@ -154,84 +166,94 @@ const PushModule = {
 
 // ============================================================
 // [4] SYNC_MODULE — Background Sync (kirim pesan saat offline)
-//     Antrian pesan tersimpan di IndexedDB lewat halaman,
-//     lalu SW mengirim ulang saat koneksi kembali.
+//     Antrian pesan + projectId Firebase disimpan di IndexedDB
+//     (tahan SW di-restart oleh browser), dikirim ulang saat online.
 // ============================================================
 const SyncModule = {
   DB_NAME: 'nufa-sync-db',
   STORE:   'pending-messages',
+  META:    'meta',
+  _dbp:    null,
 
-  /** Buka atau buat IndexedDB kecil untuk antrian pesan */
+  /** Buka IndexedDB sekali, koneksi dipakai ulang */
   _openDB() {
-    return new Promise((resolve, reject) => {
-      const req = indexedDB.open(this.DB_NAME, 1);
+    if (this._dbp) return this._dbp;
+    this._dbp = new Promise((resolve, reject) => {
+      const req = indexedDB.open(this.DB_NAME, 2);
       req.onupgradeneeded = e => {
-        e.target.result.createObjectStore(this.STORE, { autoIncrement: true });
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(this.STORE)) db.createObjectStore(this.STORE, { autoIncrement: true });
+        if (!db.objectStoreNames.contains(this.META)) db.createObjectStore(this.META);
       };
-      req.onsuccess = e => resolve(e.target.result);
-      req.onerror   = e => reject(e.target.error);
+      req.onsuccess = e => {
+        const db = e.target.result;
+        db.onversionchange = () => { db.close(); this._dbp = null; };
+        resolve(db);
+      };
+      req.onerror = e => { this._dbp = null; reject(e.target.error); };
     });
+    return this._dbp;
   },
 
-  /** Simpan pesan ke antrian (dipanggil dari halaman via postMessage) */
-  async enqueue(payload) {
-    const db    = await this._openDB();
-    const tx    = db.transaction(this.STORE, 'readwrite');
-    const store = tx.objectStore(this.STORE);
+  /** Jalankan fn(store) dalam 1 transaksi; resolve setelah transaksi commit */
+  async _tx(storeName, mode, fn) {
+    const db = await this._openDB();
     return new Promise((resolve, reject) => {
-      const req  = store.add(payload);
-      req.onsuccess = () => resolve(req.result);
-      req.onerror   = () => reject(req.error);
+      const tx = db.transaction(storeName, mode);
+      const r = fn(tx.objectStore(storeName));
+      tx.oncomplete = () => resolve(r && r.result);
+      tx.onerror = tx.onabort = () => reject(tx.error);
     });
   },
 
-  /** Ambil semua antrian pesan */
-  async getAll() {
-    const db    = await this._openDB();
-    const tx    = db.transaction(this.STORE, 'readonly');
-    const store = tx.objectStore(this.STORE);
+  enqueue(payload)  { return this._tx(this.STORE, 'readwrite', s => s.add(payload)); },
+  setProjectId(id)  { return this._tx(this.META, 'readwrite', s => s.put(id, 'projectId')); },
+  getProjectId()    { return this._tx(this.META, 'readonly', s => s.get('projectId')); },
+
+  /** Ambil antrian beserta key-nya, supaya yang sukses saja yang dihapus */
+  async getAllWithKeys() {
+    const db = await this._openDB();
     return new Promise((resolve, reject) => {
-      const req = store.getAll();
-      req.onsuccess = () => resolve(req.result);
-      req.onerror   = () => reject(req.error);
+      const tx = db.transaction(this.STORE, 'readonly');
+      const s = tx.objectStore(this.STORE);
+      const kReq = s.getAllKeys(), vReq = s.getAll();
+      tx.oncomplete = () => resolve(kReq.result.map((key, i) => ({ key, value: vReq.result[i] })));
+      tx.onerror = tx.onabort = () => reject(tx.error);
     });
   },
 
-  /** Hapus semua antrian setelah berhasil dikirim */
-  async clearAll() {
-    const db    = await this._openDB();
-    const tx    = db.transaction(this.STORE, 'readwrite');
-    tx.objectStore(this.STORE).clear();
+  async deleteKeys(keys) {
+    if (!keys.length) return;
+    await this._tx(this.STORE, 'readwrite', s => { keys.forEach(k => s.delete(k)); });
   },
 
   /**
-   * Jalankan saat background sync trigger.
-   * Kirim ulang semua pesan pending ke Firestore REST API.
-   * Gunakan endpoint Firestore REST (tidak perlu SDK di SW).
+   * Jalankan saat background sync trigger. Kirim ulang pesan pending ke Firestore REST API.
+   * Pesan yang sukses dihapus satu per satu; kalau ada yang gagal, lempar error supaya
+   * browser menjadwalkan sync ulang (tanpa kirim dobel pesan yang sudah terkirim).
    */
   async handleSync(tag) {
     if (tag !== CONFIG.SYNC_TAG_CHAT) return;
 
-    const pending = await this.getAll();
+    const pending = await this.getAllWithKeys();
     if (!pending.length) return;
 
-    // Ambil FIREBASE_CONFIG dari halaman via message (sudah disimpan di sini oleh MessageModule)
-    const fbConfig = SyncModule._fbConfig;
-    if (!fbConfig || !fbConfig.projectId) {
-      console.warn('[SW][Sync] Firebase config belum diterima dari halaman.');
+    const projectId = await this.getProjectId();
+    if (!projectId) {
+      console.warn('[SW][Sync] projectId belum diterima dari halaman.');
       return;
     }
 
-    const baseUrl = `https://firestore.googleapis.com/v1/projects/${fbConfig.projectId}/databases/(default)/documents/global_chat`;
+    const baseUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/global_chat`;
+    const done = [];
 
-    let allOk = true;
-    for (const msg of pending) {
+    for (const { key, value: msg } of pending) {
       try {
         const body = {
           fields: {
-            ip:   { stringValue: msg.ip   || 'UNKNOWN' },
-            uid:  { stringValue: msg.uid  || 'SW-sync' },
-            text: { stringValue: msg.text || '' },
+            ip:   { stringValue: String(msg.ip   || 'UNKNOWN').slice(0, 64) },
+            uid:  { stringValue: String(msg.uid  || 'SW-sync').slice(0, 128) },
+            text: { stringValue: String(msg.text || '').slice(0, 1024) },
             ts:   { integerValue: String(msg.ts || Date.now()) },
           }
         };
@@ -240,18 +262,16 @@ const SyncModule = {
           headers: { 'Content-Type': 'application/json' },
           body:    JSON.stringify(body),
         });
-        if (!res.ok) allOk = false;
+        // 400 = payload cacat permanen → buang, jangan diulang selamanya
+        if (res.ok || res.status === 400) done.push(key);
       } catch (e) {
         console.warn('[SW][Sync] Gagal kirim pesan pending:', e);
-        allOk = false;
       }
     }
 
-    if (allOk) await this.clearAll();
+    await this.deleteKeys(done);
+    if (done.length < pending.length) throw new Error('sync-incomplete');
   },
-
-  // Disimpan oleh MessageModule saat halaman kirim config
-  _fbConfig: null,
 };
 
 
@@ -259,37 +279,33 @@ const SyncModule = {
 // [5] MESSAGE_MODULE — Komunikasi dua arah SW ↔ halaman
 // ============================================================
 const MessageModule = {
-  bc: null, // BroadcastChannel
-
-  init() {
-    if (typeof BroadcastChannel !== 'undefined') {
-      this.bc = new BroadcastChannel(CONFIG.BC_NAME);
-    }
-  },
-
-  /** Terima pesan dari halaman → SW */
+  /** Terima pesan dari halaman → SW (hanya dari window same-origin) */
   async handleMessage(event) {
+    const src = event.source;
+    if (!src || typeof src.url !== 'string' || !src.url.startsWith(self.location.origin)) return;
     const { type, payload } = event.data || {};
 
     switch (type) {
-      // Halaman kirim Firebase config agar SyncModule bisa pakai REST API
-      case 'SET_FIREBASE_CONFIG':
-        SyncModule._fbConfig = payload;
+      // Halaman kirim projectId Firebase agar SyncModule bisa pakai REST API
+      case 'SET_FIREBASE_CONFIG': {
+        const pid = payload && payload.projectId;
+        if (typeof pid === 'string' && /^[a-z0-9-]{4,64}$/.test(pid)) await SyncModule.setProjectId(pid);
         break;
+      }
 
       // Halaman minta SW simpan pesan ke antrian offline
       case 'ENQUEUE_MESSAGE':
-        await SyncModule.enqueue(payload);
-        // Daftarkan sync agar dikirim saat online
+        if (!payload || typeof payload.text !== 'string' || !payload.text.trim()) break;
+        await SyncModule.enqueue({
+          ip:   String(payload.ip  || '').slice(0, 64),
+          uid:  String(payload.uid || '').slice(0, 128),
+          text: payload.text.slice(0, 1024),
+          ts:   Number(payload.ts) || Date.now(),
+        });
         if (self.registration.sync) {
           try { await self.registration.sync.register(CONFIG.SYNC_TAG_CHAT); }
           catch (e) { console.warn('[SW][Sync] sync.register gagal:', e); }
         }
-        break;
-
-      // Halaman minta skip waiting agar SW baru langsung aktif
-      case 'SKIP_WAITING':
-        self.skipWaiting();
         break;
 
       // Halaman minta SW kirim push ke semua tab (simulasi realtime)
@@ -300,7 +316,7 @@ const MessageModule = {
       // Halaman lapor jumlah pesan /chat yang belum dibaca — set app badge kalau browser dukung
       case 'SET_UNREAD_BADGE':
         try {
-          const count = (payload && payload.count) || 0;
+          const count = Number(payload && payload.count) || 0;
           if (count > 0 && 'setAppBadge' in navigator) {
             navigator.setAppBadge(count);
           } else if ('clearAppBadge' in navigator) {
@@ -311,13 +327,9 @@ const MessageModule = {
     }
   },
 
-  /** Broadcast pesan ke semua tab/windows yang terbuka */
+  /** Kirim ke semua tab terbuka — SATU jalur (postMessage); halaman mendengar BC & SW,
+   *  jadi lewat dua jalur bikin notifikasi dobel. */
   async broadcastToClients(msg) {
-    // Via BroadcastChannel (lebih efisien)
-    if (this.bc) {
-      this.bc.postMessage(msg);
-    }
-    // Via postMessage ke setiap client (fallback & lebih luas)
     const allClients = await clients.matchAll({ includeUncontrolled: true });
     allClients.forEach(client => client.postMessage(msg));
   }
@@ -335,7 +347,6 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  MessageModule.init();
   event.waitUntil(
     CacheModule.cleanOldCaches().then(() => self.clients.claim())
   );
@@ -352,7 +363,7 @@ self.addEventListener('fetch', event => {
   // "drive.google.com" sama kayak iframe live /file/.../preview yang justru mau di-exclude,
   // jadi urutan & kekhususan path ini yang bikin keduanya kebedain dgn benar.
   if (url.includes('i.ytimg.com') || url.includes('drive.google.com/thumbnail')) {
-    event.respondWith(CacheModule.fetchThumbCacheFirst(event.request));
+    event.respondWith(CacheModule.fetchThumbCacheFirst(event));
     return;
   }
 
@@ -360,7 +371,7 @@ self.addEventListener('fetch', event => {
   // biarin browser handle native (lihat CONFIG.EXCLUDE_EMBED_HOSTS).
   if (CONFIG.EXCLUDE_EMBED_HOSTS.some(host => url.includes(host))) return;
 
-  event.respondWith(CacheModule.fetchWithFallback(event.request));
+  event.respondWith(CacheModule.fetchWithFallback(event));
 });
 
 // Push dari server
@@ -380,5 +391,5 @@ self.addEventListener('sync', event => {
 
 // Pesan dari halaman
 self.addEventListener('message', event => {
-  MessageModule.handleMessage(event);
+  event.waitUntil(MessageModule.handleMessage(event).catch(e => console.warn('[SW][Message]', e)));
 });

@@ -99,8 +99,8 @@
     // ── Glitch micro-shift acak ───────────────────────────────
     function scheduleGlitch(el) {
         glitchTimer = setInterval(() => {
-            // Hanya glitch kalau tidak sedang scramble
-            if (!el.classList.contains('scrambling')) {
+            // Hanya glitch kalau tab terlihat & tidak sedang scramble
+            if (!document.hidden && !el.classList.contains('scrambling')) {
                 el.classList.remove('glitch-fire');
                 void el.offsetWidth;
                 el.classList.add('glitch-fire');

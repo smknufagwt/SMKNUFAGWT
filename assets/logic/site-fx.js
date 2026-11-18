@@ -395,6 +395,7 @@
                 const vis = () => this.currentVisits > 0 ? " | " + this.currentVisits.toLocaleString('id-ID') + " pengunjung" : "";
                 let i = 0;
                 setInterval(() => {
+                    if (document.hidden) return;
                     this.log.classList.remove('log-tick'); void this.log.offsetWidth; this.log.classList.add('log-tick');
                     this.log.innerText = ">> " + logLines[i]();
                     i = (i + 1) % logLines.length;
