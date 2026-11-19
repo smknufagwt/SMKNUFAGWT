@@ -259,7 +259,7 @@
 
 <a id="btn-pembuat" href="https://arlingkin.vercel.app/" target="_blank" rel="noopener noreferrer" class="author-link" onclick="AudioFX.click()"
    style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border: 2px solid #071a3b !important; color: #ffffff !important; background-color: #000000 !important; border-radius: 4px; text-decoration: none; box-shadow: 0 0 10px #071a3b, 0 0 20px rgba(7, 26, 59, 0.6); font-weight: bold;">
-    <img src="https://raw.githubusercontent.com/arlingkin/about/refs/heads/main/favicon.ico" alt="Icon" width="16" height="16" style="width: 16px; height: 16px; object-fit: contain; display: block;">
+    <img src="https://raw.githubusercontent.com/arlingkin/about/refs/heads/main/favicon.ico" alt="Icon" width="16" height="16" loading="lazy" decoding="async" style="width: 16px; height: 16px; object-fit: contain; display: block;">
     <span>PEMBUAT</span>
 </a>
 
@@ -398,6 +398,8 @@
         };
         document.addEventListener('DOMContentLoaded', () => PrivacyBoard.init());
 
+        const YT_ORIGIN = 'https://www.youtube-nocookie.com'; // origin player YouTube (iframe embed)
+
         const MediaPrefs = {
             autoplay: localStorage.getItem('nufa_media_autoplay') !== 'off',
             loop: localStorage.getItem('nufa_media_loop') !== 'off',
@@ -423,13 +425,14 @@
         // lalu playVideo baru ditembak via postMessage command setelah player kirim event "onReady" —
         // exact sama pola command yang dipakai tombol mute & lite-mode observer, cuma nunggu ready dulu.
         window.addEventListener('message', (e) => {
+            if (e.origin !== YT_ORIGIN) return; // hanya terima event dari player YouTube
             let data;
             try { data = JSON.parse(e.data); } catch { return; }
             if (data.event !== 'onReady' || !e.source) return;
             document.querySelectorAll('#chat-messages iframe.chat-yt, #chat-messages iframe.chat-yt-short').forEach(f => {
                 if (f.contentWindow !== e.source) return;
                 if (f.dataset.autoplay === '1') {
-                    f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
+                    f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), YT_ORIGIN);
                 }
             });
         });
@@ -500,7 +503,7 @@
                         media.muted = !willUnmute;
                         if (willUnmute) media.play().catch(() => {});
                     } else if (type === 'yt' && media.contentWindow) {
-                        media.contentWindow.postMessage(JSON.stringify({ event: 'command', func: willUnmute ? 'unMute' : 'mute', args: [] }), '*');
+                        media.contentWindow.postMessage(JSON.stringify({ event: 'command', func: willUnmute ? 'unMute' : 'mute', args: [] }), YT_ORIGIN);
                     }
                 }
                 btn.classList.toggle('muted', !willUnmute);
@@ -881,8 +884,7 @@
                 });
 
                 const goOffline = () => { try { presenceRef.remove(); } catch (e) {} };
-                window.addEventListener('pagehide', goOffline);
-                window.addEventListener('beforeunload', goOffline);
+                window.addEventListener('pagehide', goOffline); // pagehide cukup; beforeunload bisa memblok bfcache
 
                 // onValue di sini PUSH dari server tiap ada perubahan — bukan polling —
                 
@@ -992,8 +994,7 @@
                 });
 
                 const goOffline = () => { try { ref.delete(); } catch (e) {} };
-                window.addEventListener('pagehide', goOffline);
-                window.addEventListener('beforeunload', goOffline);
+                window.addEventListener('pagehide', goOffline); // pagehide cukup; beforeunload bisa memblok bfcache
 
                 this.db.collection('presence_global').onSnapshot((snap) => {
                     const now = Date.now();
@@ -1037,9 +1038,9 @@
                 const listEl = document.getElementById('chat-online-list');
                 if (!listEl) return;
 const brandIcons = ['fa-android','fa-apple','fa-windows','fa-linux'];
-listEl.innerHTML = ids.map(key => {
+const onlineHtml = ids.map(key => {
     const d = map[key];
-    const rawIcon = (d.device && d.device.icon) ? d.device.icon : 'fa-mobile-screen';
+    const rawIcon = (d.device && /^fa-[a-z0-9-]{1,40}$/.test(d.device.icon)) ? d.device.icon : 'fa-mobile-screen';
     const iconClass = brandIcons.includes(rawIcon) ? `fa-brands ${rawIcon}` : `fa-solid ${rawIcon}`;
     const isYou = d.isYou;
     const ipDisplay = isYou ? this.myIp : this._maskIp(d.ip);
@@ -1056,6 +1057,7 @@ listEl.innerHTML = ids.map(key => {
             ${tag}
         </div>`;
 }).join('') || '<div class="chat-online-item">// Tidak ada yang online</div>';
+                if (onlineHtml !== this._lastOnlineHtml) { this._lastOnlineHtml = onlineHtml; listEl.innerHTML = onlineHtml; }
             },
 
             toggleOnlineList() {
@@ -1376,11 +1378,11 @@ listEl.innerHTML = ids.map(key => {
             },
             _playLiteMedia(media) {
                 if (media.tagName === 'VIDEO') { media.play().catch(() => {}); }
-                else if (media.contentWindow) { media.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*'); }
+                else if (media.contentWindow) { media.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), YT_ORIGIN); }
             },
             _pauseLiteMedia(media) {
                 if (media.tagName === 'VIDEO') { media.pause(); }
-                else if (media.contentWindow) { media.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }), '*'); }
+                else if (media.contentWindow) { media.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }), YT_ORIGIN); }
             },
             _observeLiteMedia() {
                 const observer = this._setupLiteMediaObserver();
@@ -1398,7 +1400,7 @@ listEl.innerHTML = ids.map(key => {
                     `<span class="mq-item"><span class="mq-ip">[${this._esc(m.ip === 'SYSTEM' ? 'SYSTEM' : (this._maskIp(m.ip) || 'ANONIM'))}]</span>${ChatFormat.toPlain(WordFilter.clean(m.text))}</span>`
                 ).join('');
                 // duplikat agar scroll infinite mulus
-                track.innerHTML = html + html;
+                if (html !== this._lastMarqueeHtml) { this._lastMarqueeHtml = html; track.innerHTML = html + html; }
                 bar.classList.add('live');
             },
 
@@ -1602,7 +1604,7 @@ listEl.innerHTML = ids.map(key => {
                     if (System.bgm) System.bgm.pause();
                     document.querySelectorAll('#chat-messages video').forEach(v => v.pause());
                     document.querySelectorAll('#chat-messages iframe.chat-yt, #chat-messages iframe.chat-yt-short').forEach(f => {
-                        if (f.contentWindow) f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }), '*');
+                        if (f.contentWindow) f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }), YT_ORIGIN);
                     });
                     this._activeLiteMedia = null;
                     // Feedback murah: icon tombol musik existing dipakai lagi (gak spawn elemen baru).
@@ -1646,7 +1648,7 @@ listEl.innerHTML = ids.map(key => {
                     if (this.liteMode || !document.hidden) { this._stopBgMediaWatchdog(); return; }
                     document.querySelectorAll('#chat-messages video[loop]').forEach(v => { if (v.paused) v.play().catch(() => {}); });
                     document.querySelectorAll('#chat-messages iframe.chat-yt, #chat-messages iframe.chat-yt-short').forEach(f => {
-                        if (f.contentWindow) f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
+                        if (f.contentWindow) f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), YT_ORIGIN);
                     });
                 }, 5000);
             },
@@ -1739,7 +1741,8 @@ listEl.innerHTML = ids.map(key => {
                         btn.removeAttribute('data-cd');
                         return;
                     }
-                    btn.setAttribute('data-cd', Math.ceil(remain / 1000) + 's');
+                    const label = Math.ceil(remain / 1000) + 's';
+                    if (btn.getAttribute('data-cd') !== label) btn.setAttribute('data-cd', label);
                     requestAnimationFrame(tick);
                 };
                 tick();

@@ -7,6 +7,7 @@
  *   ONESIGNAL_APP_ID       = 24018ed8-5d9e-4e5e-b651-f8e94bf58a53
  *   ONESIGNAL_REST_API_KEY = (dari OneSignal Dashboard → Keys & IDs)
  *   NOTIFY_SECRET          = (string bebas, sama dengan di GitHub Secret)
+ *   ALLOWED_ORIGINS        = (opsional) origin tambahan untuk CORS, pisah koma
  */
 
 // Banding string tanpa short-circuit (cegah timing attack); false bila salah satu bukan string/kosong
@@ -17,7 +18,26 @@ function safeEqual(a, b) {
   return diff === 0;
 }
 
+// CORS allowlist (menggantikan Access-Control-Allow-Origin: * di vercel.json).
+// Klien non-browser (GitHub Actions) tidak kirim Origin, jadi tidak terpengaruh.
+const ALLOWED_ORIGINS = new Set([
+  'https://nufabase.web.app',
+  'https://smknufa-bdp.vercel.app',
+  ...(process.env.ALLOWED_ORIGINS || '').split(',').map(o => o.trim()).filter(Boolean),
+]);
+
 export default async function handler(req, res) {
+  const origin = req.headers.origin;
+  res.setHeader('Vary', 'Origin');
+  if (origin && ALLOWED_ORIGINS.has(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-notify-secret');
+    res.setHeader('Access-Control-Max-Age', '86400');
+  }
+  // Preflight harus 2xx tanpa body, kalau tidak browser memblok request lintas origin
+  if (req.method === 'OPTIONS') return res.status(204).end();
+
   // Hanya terima POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
