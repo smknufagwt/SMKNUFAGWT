@@ -22,6 +22,7 @@ By leveraging **highly structured Vanilla JS** without bloated modern frameworks
 | **OneSignal** | Push notifications (cross-device, background) |
 | **Service Worker** | Offline-first, background sync, cache strategy |
 | **BroadcastChannel API** | Instant tab-to-tab communication |
+| **MediaRecorder + Web Audio API** | Voice note recording (Opus) & live level meter |
 
 ---
 
@@ -33,6 +34,7 @@ By leveraging **highly structured Vanilla JS** without bloated modern frameworks
 │  • Matrix rain canvas background                        │
 │  • Cyberpunk neon UI with glitch effects                │
 │  • Real-time chat panel (bottom center)                 │
+│  • Voice note recorder (Opus) & lazy player            │
 │  • Image gallery with lightbox viewer                   │
 │  • Music toggle & color theme control                   │
 └─────────────────────────────────────────────────────────┘
@@ -40,6 +42,7 @@ By leveraging **highly structured Vanilla JS** without bloated modern frameworks
 ┌─────────────────────────────────────────────────────────┐
 │  🔥 FIREBASE FIRESTORE                                  │
 │  • global_chat collection (real-time listeners)         │
+│  • voice_notes collection (Base64 Opus, get-by-ID)     │
 │  • Message sync across all clients instantly            │
 │  • Fallback broadcast matrix for delivery               │
 └─────────────────────────────────────────────────────────┘
@@ -78,8 +81,8 @@ SMKNUFAGWT/
 │
 ├── 🎨 assets/
 │   ├─ audio/                  BGM & scene audio
-│   ├─ logic/                  Chat, transitions, site FX modules
-│   └─ style/                  CSS variables & theming
+│   ├─ logic/                  Chat, voice note, transitions, site FX modules
+│   └─ style/                  CSS variables, theming & voice note UI
 │
 ├── 🖼️ images/                  Gallery & static image assets
 ├── ⚙️ sw.js                    Service worker (cache, push, offline sync)
@@ -88,6 +91,7 @@ SMKNUFAGWT/
 │
 ├── 🖼️ appcover.jpg             Social share image
 ├── 📋 firebase.json / .firebaserc   Firebase Hosting config
+├── 🔒 firestore.rules          Firestore security rules (chat, voice_notes, …)
 ├── 📋 vercel.json              Edge deployment config
 ├── 📋 .env.example             Environment variables template
 ├── 📋 robots.txt / sitemap.xml SEO metadata
@@ -155,6 +159,25 @@ ruby -run -ehttpd . -p8000
 - Throttled triggers (10s between spam-prevention)
 - Retry logic with exponential backoff
 - User IP & timestamp tracking
+
+### 🎤 Voice Notes (WhatsApp-style, Base64 transport)
+Record, preview, and send voice messages straight from the chat composer (home panel and `/chat`) — no Firebase Storage, no extra service.
+
+- **Recording** — `MediaRecorder` with **Opus** (`webm`/`ogg`, `audio/mp4` fallback), mono 48 kHz, **64 kbps**, echo cancellation + noise suppression + auto gain, **max 30 s**
+- **Live level meter** — Web Audio `AnalyserNode` drives the recording bar; background music auto-pauses while recording and resumes after
+- **Draft before send** — play/pause preview, seekable slider, re-record, or cancel (like WhatsApp's lock-and-review flow)
+- **Transport** — `Blob` → **Base64** (`FileReader`) → **one Firestore document** in `voice_notes` (`{ d, m, s, ts }`). The chat message itself only carries a tiny token: `[🎤 0:12]{voice:<20-char-id>}`
+- **Lazy playback** — audio is fetched **only when the user taps play** (single `get()` by ID), decoded (`atob` → `Uint8Array` → `Blob` → `createObjectURL`) and cached per ID. One active player at a time, `requestAnimationFrame` progress bar, tap the track to seek
+- **Light chat stream** — the 50-message live listener never downloads audio, so scrolling and notifications stay cheap on low-end phones; marquee/plain-text views show `🎤 Pesan suara`
+- **Needs a connection** — voice send is blocked when offline (not queued in the IndexedDB outbox), with a 20 s upload timeout
+
+| Guardrail | Client (`voice-note.js`) | Server (`firestore.rules`) |
+|---|---|---|
+| Duration | ≤ 30 s | `s` int, 1–31 |
+| Size | blob 800 B – 340 KB | `d` Base64 string ≤ 480,000 chars |
+| Format | Opus / AAC via `MediaRecorder` | `m` must match `audio/*`, ≤ 60 chars |
+| Fields | `d`, `m`, `s`, `ts` | `keys().hasOnly(['d','m','s','ts'])`, `ts == request.time` |
+| Access | lazy read by ID | `get` by 20-char ID only; `list`, `update`, `delete` denied |
 
 ### 💬 Offline-First Architecture
 - Messages queued in **IndexedDB** when offline
@@ -237,6 +260,31 @@ bc.onmessage = (event) => {
 };
 ```
 
+### **Voice Note Transport (Opus → Base64 → Firestore)**
+```
+ 🎙️ mic ──► MediaRecorder (Opus 64 kbps, ≤30 s) ──► Blob ──► preview / re-record
+                                                          │ send
+                                                          ▼
+                              FileReader → Base64 ──► Firestore  voice_notes/{id}  { d, m, s, ts }
+                                                          │
+            chat message = "[🎤 0:12]{voice:<id>}" ◄──────┘  (normal GlobalChat / thread send path)
+                                                          │
+ receiver renders token as player ──(tap)──► get(id) → atob → Blob → objectURL → <audio>
+```
+```javascript
+// Send: encode once, store as a single create-only document
+const d = await blobToB64(blob);                       // FileReader.readAsDataURL → Base64
+const ref = db.collection('voice_notes').doc();
+await ref.set({ d, m: mime, s: seconds, ts: firebase.firestore.FieldValue.serverTimestamp() });
+deliver('[🎤 ' + fmt(seconds) + ']{voice:' + ref.id + '}');   // token goes through regular chat send
+
+// Play: lazy fetch on tap, no listener, cached per ID
+const { d, m } = (await db.collection('voice_notes').doc(id).get()).data();
+const u8 = Uint8Array.from(atob(d), c => c.charCodeAt(0));
+const url = URL.createObjectURL(new Blob([u8], { type: m }));
+```
+`voice-note.js` plugs into the existing chat by wrapping `ChatFormat.toHtml` (token → player markup) and `toPlain`/`toPlainText` (token → `🎤 Pesan suara`), so no chat renderer was rewritten. Because the audio sits in its own collection, the `global_chat` listener stays small.
+
 ---
 
 ## 🛠️ How to Customize
@@ -292,6 +340,7 @@ Create new `.html` files in root; link from main nav buttons in header.
 - **HTTPS enforced** on production (Vercel auto-HTTPS)
 - **CORS configured** to allow only same-origin requests
 - **Service Worker scope** limited to `/` (single domain)
+- **Voice notes** are create-only and readable per ID only (no listing); size, duration, MIME type and field set are validated in `firestore.rules`
 
 Found a vulnerability? See [SECURITY.md](SECURITY.md) for how to report it.
 
@@ -309,6 +358,7 @@ Found a vulnerability? See [SECURITY.md](SECURITY.md) for how to report it.
 - [Service Worker API](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API)
 - [Background Sync API](https://developer.chrome.com/docs/capabilities/web-apis/background-sync/)
 - [BroadcastChannel API](https://developer.mozilla.org/en-US/docs/Web/API/BroadcastChannel)
+- [MediaRecorder API](https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder)
 - [OneSignal Web Push](https://onesignal.com/webpush)
 
 ---
@@ -350,6 +400,7 @@ In short:
 | **Real-Time Chat** | ✅ Stable, Scaled to 1000+ users |
 | **Notifications** | ✅ Stable, Throttled & Reliable |
 | **Offline Sync** | ✅ Stable, 100% delivery |
+| **Voice Notes** | ✅ Live, Opus → Base64, ≤ 30 s |
 | **Blog/Journal** | ✅ Active, Updated regularly |
 | **Mobile UI** | ✅ Responsive, Touch-optimized |
 
