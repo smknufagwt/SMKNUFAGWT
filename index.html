@@ -759,7 +759,7 @@
                 this._applyLiteMode(this.liteMode);
                 this.initBackgroundHandling();
 
-                this.init();
+                this.init().catch(e => console.warn('[Chat] init gagal:', e));
             },
 
             async init() {
@@ -768,8 +768,9 @@
                 this.presenceId = sessionStorage.getItem('nufa_presence_id') || ('U-' + Math.random().toString(36).slice(2, 9));
                 sessionStorage.setItem('nufa_presence_id', this.presenceId);
 
-                // Ambil IP publik pengirim (dipakai di payload pesan, bukan ditampilkan lokal)
-                this.myIp = await this._resolveMyIp();
+                // IP publik di-resolve paralel (tidak blokir init Firebase/listen). Presence & send
+                // menunggu this._ipReady; promise ini tidak pernah reject (gagal = 'UNKNOWN').
+                this._ipReady = this._resolveMyIp().then(ip => (this.myIp = ip));
 
                 const configured = FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith('GANTI') && !FIREBASE_CONFIG.apiKey.startsWith('%%');
                 if (configured && typeof firebase !== 'undefined') {
@@ -787,6 +788,7 @@
                             }
                         }
                         this.listen();
+                        await this._ipReady;
                         this.startPresence();
                         return;
                     } catch (e) {
@@ -794,6 +796,7 @@
                     }
                 }
                 
+                await this._ipReady;
                 this.renderMessages([
                     { ip: 'SYSTEM', text: '⚠️ — chat ini cuma lokal di browser kamu sendiri. aktifkan internet untuk mengaktifkan global live chat sungguhan.', ts: Date.now() }
                 ]);
@@ -930,8 +933,7 @@
 
             // Resolusi IP publik dengan fallback chain — beberapa browser/DNS mobile
             // (ad-block DNS, private DNS, Brave, dsb) suka nge-block domain fingerprinting
-            // kayak ipify. Coba beberapa provider berurutan, tiap percobaan dikasih timeout
-            // sendiri biar gak nge-hang lama kalau satu provider gak respon sama sekali.
+            // kayak ipify. Beberapa provider ditembak paralel biar satu yang diblok gak bikin lambat.
             async _resolveMyIp() {
                 // Cache sessionStorage 10 menit — IP publik jarang berubah dalam satu sesi,
                 // jadi buka/tutup chat berkali-kali gak perlu nembak 4 provider ulang tiap kali.
@@ -948,24 +950,32 @@
                     { url: 'https://ipapi.co/json/', pick: d => d.ip },
                     { url: 'https://api.myip.com', pick: d => d.ip }
                 ];
-                for (const p of providers) {
-                    try {
-                        const ip = p.pick(await this._fetchJsonWithTimeout(p.url, 4000));
-                        if (ip && typeof ip === 'string') {
-                            try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ip, ts: Date.now() })); } catch (e) {}
-                            return ip;
-                        }
-                    } catch (e) { /* lanjut ke provider berikutnya */ }
-                }
-                return 'UNKNOWN';
-            },
-
-            _fetchJsonWithTimeout(url, ms) {
+                // Semua provider ditembak paralel, yang pertama valid menang; sisanya di-abort.
+                // Satu timeout bersama (4 dtk) menggantikan timeout 4 dtk x 4 provider berurutan.
                 const ctrl = new AbortController();
-                const timer = setTimeout(() => ctrl.abort(), ms);
-                return fetch(url, { signal: ctrl.signal })
-                    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-                    .finally(() => clearTimeout(timer));
+                const timer = setTimeout(() => ctrl.abort(), 4000);
+                try {
+                    const ip = await new Promise((resolve, reject) => {
+                        let left = providers.length;
+                        providers.forEach(p => {
+                            fetch(p.url, { signal: ctrl.signal })
+                                .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+                                .then(d => {
+                                    const v = p.pick(d);
+                                    if (!v || typeof v !== 'string') throw new Error('IP tidak valid');
+                                    resolve(v);
+                                })
+                                .catch(() => { if (--left === 0) reject(new Error('semua provider gagal')); });
+                        });
+                    });
+                    try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ip, ts: Date.now() })); } catch (e) {}
+                    return ip;
+                } catch (e) {
+                    return 'UNKNOWN';
+                } finally {
+                    clearTimeout(timer);
+                    ctrl.abort();
+                }
             },
 
             
@@ -1693,6 +1703,7 @@ listEl.innerHTML = ids.map(key => {
                 // Kata kasar otomatis disensor jadi tanda bintang sebelum disimpan.
                 const text = WordFilter.clean(rawText.slice(0, 1024));
 
+                if (!this.myIp && this._ipReady) await this._ipReady;
                 const payload = {
                     ip: this._maskIp(this.myIp),
                     uid: this.presenceId,
