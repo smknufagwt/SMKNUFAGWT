@@ -43,7 +43,10 @@
     let presenceInterval = null;
     let presenceBeat = null;
     let currentPresenceUid = null;
-    let presenceState = {}; // { uid: { name, room, ts } }
+    let presenceState = {}; // { uid: { name, room, ts } } (sudah disaring < 90 dtk)
+    let presenceRaw = {};   // dokumen mentah terakhir dari snapshot
+
+    const msgSel = (id) => '[data-msg-id="' + (window.CSS && CSS.escape ? CSS.escape(String(id)) : String(id)) + '"]';
 
     function roomMsgs(roomId) { return db.collection('rooms').doc(roomId).collection('messages'); }
 
@@ -324,9 +327,20 @@
         for (let i = 0; i < items.length - 200; i++) items[i].remove();
     }
 
+    // Muat awal (belum ada pesan): urutkan lalu tempel sekali lewat fragment, bukan O(n²) insertSorted
+    function appendMessagesBatch(container, msgs) {
+        const els = msgs.map(buildMessageEl).sort((a, b) => a._ts - b._ts ||
+            (a.dataset.msgId < b.dataset.msgId ? -1 : a.dataset.msgId > b.dataset.msgId ? 1 : 0));
+        const frag = document.createDocumentFragment();
+        els.forEach((el) => frag.appendChild(el));
+        container.appendChild(frag);
+        const items = container.querySelectorAll('.chat-thread-msg');
+        for (let i = 0; i < items.length - 200; i++) items[i].remove();
+    }
+
     // Dokumen 'modified': isi diedit atau created_at server terisi.
     function updateMessageEl(container, msg) {
-        const el = container.querySelector('[data-msg-id="' + msg.id + '"]');
+        const el = container.querySelector(msgSel(msg.id));
         if (!el) return;
         el._raw = msg.content;
         if (!el.classList.contains('is-editing')) setContent(el, msg.content);
@@ -405,7 +419,7 @@
     }
 
     function removeMessageEl(container, id) {
-        const el = container.querySelector('[data-msg-id="' + id + '"]');
+        const el = container.querySelector(msgSel(id));
         if (el) el.remove();
         refreshDaySeparators(container);
         if (!container.querySelector('.chat-thread-msg')) {
@@ -462,17 +476,25 @@
 
         threadUnsub = roomMsgs(roomId).orderBy('created_at', 'desc').limit(100).onSnapshot((snap) => {
             if (currentRoomId !== roomId || !threadUnsub) return;
+            // Diukur sebelum DOM berubah: auto-scroll hanya bila pembaca memang di dasar (tidak menyeret saat membaca riwayat)
+            const nearBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 150;
             if (list.querySelector('.chat-thread-loading') || list.querySelector('.chat-thread-empty')) list.innerHTML = '';
+            const firstLoad = !list.querySelector('.chat-thread-msg');
             snap.docChanges().forEach((c) => {
                 if (c.type === 'removed') removeMessageEl(list, c.doc.id);
                 else if (c.type === 'modified') updateMessageEl(list, { id: c.doc.id, ...c.doc.data() });
             });
             const added = snap.docChanges().filter((c) => c.type === 'added')
                 .map((c) => ({ id: c.doc.id, ...c.doc.data() }));
-            added.forEach((m) => appendMessageEl(list, m));
+            if (firstLoad && added.length > 1) appendMessagesBatch(list, added);
+            else added.forEach((m) => appendMessageEl(list, m));
             refreshDaySeparators(list);
             ChatFormat.observe(list);
-            if (added.length) { scrollThreadToBottom(list); markRoomRead(roomId); }
+            if (added.length) {
+                const mine = !!currentUser && added.some((m) => m.user_id === currentUser.uid);
+                if (firstLoad || nearBottom || mine) scrollThreadToBottom(list);
+                markRoomRead(roomId);
+            }
             if (!snap.docs.length && !list.children.length) list.innerHTML = '<p class="chat-thread-empty">Belum ada pesan.</p>';
         }, (err) => {
             if (currentRoomId !== roomId) return;
@@ -480,6 +502,8 @@
                 (err && err.code === 'permission-denied' ? ', atau kamu tidak punya akses.' : '') + '.</p>';
         });
     }
+
+    let sendSkip = 0, sendSkipUid = null; // tingkat varian yang terakhir berhasil, per user
 
     async function sendMessage(roomId, content) {
         const text = content.trim().slice(0, 1000);
@@ -498,8 +522,13 @@
         if (photo) variants.push({ photo_url: photo });
         variants.push({});
         let err = null;
-        for (const extra of variants) {
-            try { await roomMsgs(roomId).add({ ...doc, ...extra }); return; } catch (e) {
+        const start = sendSkipUid === currentUser.uid ? Math.min(sendSkip, variants.length - 1) : 0;
+        for (let k = start; k < variants.length; k++) {
+            try {
+                await roomMsgs(roomId).add({ ...doc, ...variants[k] });
+                sendSkip = k; sendSkipUid = currentUser.uid;
+                return;
+            } catch (e) {
                 err = e;
                 if (e.code !== 'permission-denied') break;
             }
@@ -638,7 +667,7 @@
         if (onlineTotalBtn) {
             onlineTotalBtn.addEventListener('click', () => {
                 const listEl = document.getElementById('chatapp-online-list');
-                if (listEl) listEl.hidden = !listEl.hidden;
+                if (listEl) { listEl.hidden = !listEl.hidden; if (!listEl.hidden) renderGlobalOnlineWidget(); }
             });
         }
 
@@ -895,7 +924,7 @@
 
     async function countUnread(roomId, sinceDate) {
         try {
-            const snap = await roomMsgs(roomId).where('created_at', '>', sinceDate).get();
+            const snap = await roomMsgs(roomId).where('created_at', '>', sinceDate).limit(100).get();
             return snap.size || 0;
         } catch (e) { return 0; }
     }
@@ -1089,7 +1118,7 @@
         totalEl.hidden = entries.length === 0;
 
         const listEl = document.getElementById('chatapp-online-list');
-        if (!listEl) return;
+        if (!listEl || listEl.hidden) return; // daftar tertutup: render ditunda sampai dibuka
         listEl.innerHTML = '';
         entries
             .slice()
@@ -1136,7 +1165,16 @@
         document.removeEventListener('visibilitychange', onPresenceVisibility);
         window.removeEventListener('pagehide', onPresencePageHide);
         presenceState = {};
+        presenceRaw = {};
         renderOnlineBadges();
+    }
+
+    function applyPresence(force) {
+        const now = Date.now(), data = {};
+        Object.keys(presenceRaw).forEach((id) => { const d = presenceRaw[id]; if (d && d.ts && now - d.ts < 90000) data[id] = d; });
+        const changed = force || Object.keys(data).length !== Object.keys(presenceState).length;
+        presenceState = data;
+        if (changed) renderOnlineBadges();
     }
 
     // Heartbeat 30s ke chat_presence/{uid}; entri dianggap online kalau ts < 90s
@@ -1154,14 +1192,17 @@
             }).catch(() => {});
         };
         presenceBeat();
-        presenceInterval = setInterval(presenceBeat, 30000);
+        presenceInterval = setInterval(() => {
+            if (document.visibilityState !== 'hidden') presenceBeat(); // tab tersembunyi: doc sudah dihapus, jangan dibuat lagi
+            applyPresence(false);
+        }, 30000);
         document.addEventListener('visibilitychange', onPresenceVisibility);
         window.addEventListener('pagehide', onPresencePageHide);
         presenceUnsub = db.collection('chat_presence').onSnapshot((snap) => {
-            const now = Date.now(), data = {};
-            snap.forEach((doc) => { const d = doc.data(); if (d && d.ts && now - d.ts < 90000) data[doc.id] = d; });
-            presenceState = data;
-            renderOnlineBadges();
+            const raw = {};
+            snap.forEach((doc) => { raw[doc.id] = doc.data(); });
+            presenceRaw = raw;
+            applyPresence(true);
         }, () => {});
     }
 

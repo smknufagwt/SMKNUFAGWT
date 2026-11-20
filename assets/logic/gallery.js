@@ -84,6 +84,7 @@
                 try {
                     const cache = JSON.parse(localStorage.getItem('nufa_gallery_cache') || '[]');
                     cache.unshift(item); // foto terbaru tampil di atas
+                    if (cache.length > 50) cache.length = 50; // batasi agar localStorage tidak membengkak
                     localStorage.setItem('nufa_gallery_cache', JSON.stringify(cache));
                 } catch (e) {
                     /* storage penuh/diblok, abaikan */
@@ -229,6 +230,7 @@
             },
 
             close() {
+                clearTimeout(this._t);
                 this.lb.classList.remove('open');
                 document.body.style.overflow = '';
                 this.img.src = '';
@@ -251,10 +253,14 @@
             _show() {
                 const item = DATABASE_FOTO[this.index];
                 this.img.style.opacity = '0';
-                setTimeout(() => {
+                clearTimeout(this._t); // geser cepat: batalkan pergantian foto yang belum sempat tampil
+                this._t = setTimeout(() => {
                     this.img.src = item.file;
                     this.img.style.opacity = '1';
                 }, 100);
+                // Pra-muat foto berikutnya agar geser terasa instan (dilewati saat mode hemat data)
+                const nx = DATABASE_FOTO[(this.index + 1) % DATABASE_FOTO.length];
+                if (nx && nx.file && !(navigator.connection && navigator.connection.saveData)) new Image().src = nx.file;
                 this.cap.textContent = item.caption;
                 this.ctr.textContent = `[ ${this.index + 1} / ${DATABASE_FOTO.length} ]`;
             }

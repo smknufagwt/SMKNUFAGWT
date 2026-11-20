@@ -49,19 +49,34 @@
     const urlCache = new Map();
     let cur = null;
 
-    async function loadUrl(id) {
+    const URL_CACHE_MAX = 30;
+    // Buang object URL tertua (kecuali yang sedang diputar) agar memori tidak menumpuk
+    function evictUrls() {
+        for (const k of urlCache.keys()) {
+            if (urlCache.size <= URL_CACHE_MAX) break;
+            if (cur && cur.box.dataset.vid === k) continue;
+            const pr = urlCache.get(k);
+            urlCache.delete(k);
+            pr.then((u) => URL.revokeObjectURL(u), () => {});
+        }
+    }
+    // Cache menyimpan Promise: tap ganda saat memuat tidak membaca Firestore dua kali
+    function loadUrl(id) {
         if (urlCache.has(id)) return urlCache.get(id);
-        const db = getDb();
-        if (!db) throw new Error('db');
-        const snap = await db.collection(COL).doc(id).get();
-        if (!snap.exists) throw new Error('missing');
-        const { d, m } = snap.data();
-        const bin = atob(d);
-        const u8 = new Uint8Array(bin.length);
-        for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
-        const url = URL.createObjectURL(new Blob([u8], { type: m || 'audio/webm' }));
-        urlCache.set(id, url);
-        return url;
+        const pr = (async () => {
+            const db = getDb();
+            if (!db) throw new Error('db');
+            const snap = await db.collection(COL).doc(id).get();
+            if (!snap.exists) throw new Error('missing');
+            const { d, m } = snap.data();
+            const bin = atob(d);
+            const u8 = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+            return URL.createObjectURL(new Blob([u8], { type: m || 'audio/webm' }));
+        })();
+        urlCache.set(id, pr);
+        pr.then(evictUrls, () => urlCache.delete(id)); // gagal: jangan simpan, boleh dicoba lagi
+        return pr;
     }
 
     const ICONS = { idle: 'play', paused: 'play', playing: 'pause', loading: 'spinner fa-spin', error: 'triangle-exclamation' };
@@ -98,9 +113,12 @@
             const tEl = box.querySelector('.voice-time');
             const total = tEl.textContent;
             const me = { box, audio, locked: false, total, fb: secs(total), tick: null, paint: null };
+            let lastW = '', lastT = ''; // tulis DOM hanya saat nilainya berubah (hindari layout tiap frame)
             me.paint = (t, d) => {
-                fill.style.width = (d ? Math.min(1, t / d) * 100 : 0) + '%';
-                tEl.textContent = fmt(t);
+                const w = (d ? Math.min(1, t / d) * 100 : 0).toFixed(1) + '%';
+                if (w !== lastW) { fill.style.width = w; lastW = w; }
+                const tx = fmt(t);
+                if (tx !== lastT) { tEl.textContent = tx; lastT = tx; }
             };
             me.tick = ticker(audio, me.fb, me.paint);
             cur = me;
@@ -185,14 +203,21 @@
         if (rec.stream) rec.stream.getTracks().forEach((t) => t.stop());
         rec.stream = null;
     }
+    let lastSeek = -1, lastSeekTxt = '';
     function paintSeek(t, d) {
         if (rec.seeking) return;
         const p = d ? Math.min(1, t / d) : 0;
-        bar.querySelector('.vn-seek').value = Math.round(p * 1000);
-        bar.style.setProperty('--vn-p', (p * 100).toFixed(1) + '%');
-        bar.querySelector('.vn-time').textContent = fmt(t) + ' / ' + fmt(rec.dur);
+        const v = Math.round(p * 1000);
+        if (v !== lastSeek) {
+            lastSeek = v;
+            bar.querySelector('.vn-seek').value = v;
+            bar.style.setProperty('--vn-p', (p * 100).toFixed(1) + '%');
+        }
+        const tx = fmt(t) + ' / ' + fmt(rec.dur);
+        if (tx !== lastSeekTxt) { lastSeekTxt = tx; bar.querySelector('.vn-time').textContent = tx; }
     }
     function previewIdle() {
+        lastSeek = -1; lastSeekTxt = '';
         bar.dataset.play = '0';
         bar.querySelector('.vn-prev i').className = 'fa-solid fa-play';
         bar.querySelector('.vn-seek').value = 0;

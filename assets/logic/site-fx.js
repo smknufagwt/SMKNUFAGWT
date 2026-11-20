@@ -25,7 +25,7 @@
                 } catch (err) {
                     clearTimeout(timer);
                     const isAbort = err.name === 'AbortError';
-                    if (attempt < retries) continue; // coba sekali lagi
+                    if (attempt < retries) { await new Promise((r) => setTimeout(r, 400)); continue; } // coba sekali lagi (setelah jeda singkat)
                     throw new Error(isAbort ? 'Waktu tunggu server habis (timeout)' : err.message);
                 }
             }
@@ -100,7 +100,8 @@
                 const originalText = el.getAttribute('data-original') || el.innerText;
                 if(!el.getAttribute('data-original')) el.setAttribute('data-original', originalText);
                 let frame = 0; const length = originalText.length;
-                const interval = setInterval(() => {
+                clearInterval(el._scrInt);
+                const interval = el._scrInt = setInterval(() => {
                     let output = '';
                     for(let i = 0; i < length; i++) {
                         if(frame >= (i * 2) + 5) { output += originalText[i]; } 
@@ -113,38 +114,37 @@
             }
 
             write(el, htmlContent) {
+                clearInterval(el._scrInt);
                 el.innerHTML = htmlContent;
-                
-                const processNode = (node) => {
-                    if (node.nodeType === 3) { 
-                        const originalText = node.textContent;
-                        if (originalText.trim().length === 0) return;
-                        
-                        const length = originalText.length;
-                        let frame = 0;
-                        const interval = setInterval(() => {
-                            let output = '';
-                            for (let i = 0; i < length; i++) {
-                                if (frame >= i) output += originalText[i];
-                                else output += this.chars[Math.floor(Math.random() * this.chars.length)];
-                            }
-                            node.textContent = output;
-                            if (frame >= length) {
-                                clearInterval(interval);
-                                node.textContent = originalText;
-                            }
-                            frame += 2;
-                        }, 15);
-                    } else if (node.nodeType === 1) { 
-                        
-                        if (node.classList.contains('marquee-container')) return;
-                        for (let child of node.childNodes) {
-                            processNode(child);
-                        }
+
+                // Satu timer untuk semua text node (sebelumnya 1 interval 15ms per node)
+                const jobs = [];
+                const collect = (node) => {
+                    if (node.nodeType === 3) {
+                        const text = node.textContent;
+                        if (text.trim().length) jobs.push({ node, text, frame: 0, done: false });
+                    } else if (node.nodeType === 1 && !node.classList.contains('marquee-container')) {
+                        node.childNodes.forEach(collect);
                     }
                 };
+                collect(el);
+                if (!jobs.length) return;
 
-                processNode(el);
+                const timer = el._scrInt = setInterval(() => {
+                    let active = 0;
+                    for (const j of jobs) {
+                        if (j.done) continue;
+                        const length = j.text.length;
+                        let output = '';
+                        for (let i = 0; i < length; i++) {
+                            output += j.frame >= i ? j.text[i] : this.chars[Math.floor(Math.random() * this.chars.length)];
+                        }
+                        j.node.textContent = output;
+                        if (j.frame >= length) { j.node.textContent = j.text; j.done = true; } else active++;
+                        j.frame += 2;
+                    }
+                    if (!active) clearInterval(timer);
+                }, 15);
             }
 
             animate(el, newText) {
@@ -181,7 +181,12 @@
                 ['mousemove', 'touchstart'].forEach(evt => window.addEventListener(evt, (e) => this.createRipple(e), {passive: true}));
                 this.loop();
             }
-            resize() { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; this.initDrops(); }
+            resize() {
+                const w = window.innerWidth, h = window.innerHeight;
+                // Bar alamat mobile naik-turun saat scroll memicu resize tinggi kecil: abaikan agar kanvas tidak reset/kedip
+                if (this.drops.length && this.canvas.width === w && Math.abs(this.canvas.height - h) < 150) return;
+                this.canvas.width = w; this.canvas.height = h; this.initDrops();
+            }
             initDrops() {
                 const targetColumns = 90;
                 const spacing = Math.max(20, this.canvas.width / targetColumns);
@@ -192,6 +197,11 @@
                 }
             }
             createRipple(e) {
+                // Tidak ada yang menggambar saat efek mati/tab tersembunyi; mousemove juga sangat rapat → batasi
+                if (!this._running) return;
+                const now = performance.now();
+                if (now - (this._lastRipple || 0) < 80 || this.ripples.length >= 12) return;
+                this._lastRipple = now;
                 const x = e.touches ? e.touches[0].clientX : e.clientX;
                 const y = e.touches ? e.touches[0].clientY : e.clientY;
                 this.ripples.push({x, y, size: 0, life: 1});
@@ -340,25 +350,6 @@
             ],
             currentVisits: 0, 
 
-            typeWriter: function(elementId, text, speed = 100) {
-                const element = document.getElementById(elementId);
-                if (!element) return;
-                
-                element.innerHTML = ""; 
-                element.classList.add('typing-cursor');
-                
-                let i = 0;
-                function type() {
-                    if (i < text.length) {
-                        element.innerHTML += text.charAt(i);
-                        i++;
-                        const randomSpeed = speed + (Math.random() * 50 - 25);
-                        setTimeout(type, randomSpeed);
-                    }
-                }
-                type();
-            },
-
             // syncVisitorCount & useLocalFallback dipindah ke inline <script> di bawah index.html
             // (lihat sebelum </body>) — di-attach ke object System ini via assignment.
           loadSavedTheme: function() {
@@ -429,7 +420,8 @@
                 }
                 this.bgm.volume = 0.7;
 
-                const savedMusic = localStorage.getItem('nufa_music');
+                let savedMusic = null;
+                try { savedMusic = localStorage.getItem('nufa_music'); } catch (e) { /* storage diblok */ }
                 if (savedMusic === 'off') {
                     this.bgm.pause();
                     this.musicIcon.innerText = "🔇";
@@ -488,6 +480,7 @@
         img.src = item.file;
         img.alt = item.caption;
         img.loading = 'lazy';
+        img.decoding = 'async';
         img.onerror = function() {
             this.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='200'%3E%3Crect width='300' height='200' fill='%23000'/%3E%3Ctext x='50%25' y='50%25' fill='%2300ff00' font-family='monospace' font-size='14' text-anchor='middle' dy='.3em'%3EFOTO TIDAK ADA%3C/text%3E%3C/svg%3E";
             this.onerror = null;
@@ -549,7 +542,7 @@
                     container.innerHTML = `
                         <div style="color:#ff003c;grid-column:1/-1;text-align:center;padding:40px 0;font-size:0.8rem;letter-spacing:1px;">
                             ⚠ GAGAL MEMUAT GALERI<br>
-                            <span style="color:#666;font-size:0.7rem;margin-top:8px;display:block;">${err.message}</span>
+                            <span style="color:#666;font-size:0.7rem;margin-top:8px;display:block;">${String(err.message).replace(/[&<>"']/g, (c) => '&#' + c.charCodeAt(0) + ';')}</span>
                             <button onclick="System.fetchGallery()" style="margin-top:16px;padding:8px 20px;border:1px solid #ff003c;background:transparent;color:#ff003c;font-family:var(--font-main);cursor:pointer;letter-spacing:1px;">↺ COBA LAGI</button>
                         </div>`;
                 }
@@ -565,8 +558,9 @@ startLatency: function() {
         document.querySelectorAll('.lat-val').forEach(el => el.innerText = val);
     };
     const measure = () => {
+        if (!document.querySelector('.lat-val')) return; // tidak ada HUD yang menampilkan latensi
         const start = performance.now();
-        fetch(window.location.href + '?ping=' + Date.now(), { method: 'HEAD', cache: 'no-store' })
+        fetch(location.origin + location.pathname + '?ping=' + Date.now(), { method: 'HEAD', cache: 'no-store' })
             .then(() => updateAll(Math.round(performance.now() - start)))
             .catch(() => updateAll('ERR'));
     };
@@ -585,16 +579,16 @@ toggleLatency: function() {
                 if (this.musicBtn && this.musicBtn.classList.contains('sound-locked')) return;
                 AudioFX.click();
                 if (this.bgm.paused) { 
-                    this.bgm.play(); 
+                    this.bgm.play().catch(() => {}); 
                     this.musicIcon.innerText = "🔊"; 
                     this.musicBtn.style.opacity = "1";
-                    localStorage.setItem('nufa_music', 'on'); // ✅ simpan state
+                    try { localStorage.setItem('nufa_music', 'on'); } catch (e) {} // ✅ simpan state
                 }
                 else { 
                     this.bgm.pause(); 
                     this.musicIcon.innerText = "🔇"; 
                     this.musicBtn.style.opacity = "0.8";
-                    localStorage.setItem('nufa_music', 'off'); // ✅ simpan state
+                    try { localStorage.setItem('nufa_music', 'off'); } catch (e) {} // ✅ simpan state
                 }
             },
 
@@ -740,55 +734,6 @@ toggleLatency: function() {
             `;
             document.head.appendChild(style);
 
-            function playTransitionSound() {
-                if (typeof AudioFX === 'undefined' || !AudioFX.ctx) return;
-                AudioFX.resume();
-                const ctx = AudioFX.ctx;
-                const now = ctx.currentTime;
-
-                const oscBeep = ctx.createOscillator();
-                const gainBeep = ctx.createGain();
-                oscBeep.type = 'sine';
-                oscBeep.frequency.setValueAtTime(1200, now);
-                gainBeep.gain.setValueAtTime(0.3, now);
-                gainBeep.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-                oscBeep.connect(gainBeep);
-                gainBeep.connect(ctx.destination);
-                oscBeep.start(now);
-                oscBeep.stop(now + 0.15);
-
-                const oscDrop = ctx.createOscillator();
-                const gainDrop = ctx.createGain();
-                oscDrop.type = 'sawtooth';
-                oscDrop.frequency.setValueAtTime(450, now + 0.05); 
-                oscDrop.frequency.exponentialRampToValueAtTime(40, now + 1.2); 
-                gainDrop.gain.setValueAtTime(0.4, now + 0.05);
-                gainDrop.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
-                oscDrop.connect(gainDrop);
-                gainDrop.connect(ctx.destination);
-                oscDrop.start(now + 0.05);
-                oscDrop.stop(now + 1.2);
-            }
-
-            function playTick(isPanic = false) {
-                if (typeof AudioFX === 'undefined' || !AudioFX.ctx) return;
-                AudioFX.resume();
-                const ctx = AudioFX.ctx;
-                const o = ctx.createOscillator();
-                const g = ctx.createGain();
-                
-                o.type = 'square';
-                const startFreq = isPanic ? 1400 : 800;
-                const endFreq = isPanic ? 400 : 100;
-                
-                o.frequency.setValueAtTime(startFreq, ctx.currentTime); 
-                o.frequency.exponentialRampToValueAtTime(endFreq, ctx.currentTime + 0.1); 
-                g.gain.setValueAtTime(isPanic ? 0.25 : 0.15, ctx.currentTime);
-                g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-                o.connect(g); g.connect(ctx.destination);
-                o.start(); o.stop(ctx.currentTime + 0.1);
-            }
-
             let holdTimer;         
             let pressTimer;        
             let countdownInterval; 
@@ -813,8 +758,6 @@ toggleLatency: function() {
 
             function startCountdownUI() {
                 timeLeft = 9;
-                playTransitionSound();
-
                 btnPembuat.classList.add('override-chaos');
                 btnPembuat.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> OVERRIDE: ${timeLeft}s`;
                 
@@ -822,12 +765,7 @@ toggleLatency: function() {
                     timeLeft--;
                     if (timeLeft > 0) {
                         btnPembuat.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> OVERRIDE: ${timeLeft}s`;
-                        if (timeLeft <= 5) {
-                            document.body.classList.add('system-panic');
-                            playTick(true);
-                        } else {
-                            playTick(false); 
-                        }
+                        if (timeLeft <= 5) document.body.classList.add('system-panic');
                     } else {
                         clearInterval(countdownInterval);
                     }

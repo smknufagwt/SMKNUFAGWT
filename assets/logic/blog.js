@@ -112,9 +112,10 @@ document.getElementById('year').textContent = new Date().getFullYear();
 render();
 
 /* Switch tab Jurnal <-> Update, with a smooth crossfade instead of an instant cut */
+let switching = false; // klik beruntun saat transisi berjalan membuat tombol & tampilan tidak sinkron
 document.getElementById('view-switch').addEventListener('click', (e) => {
     const btn = e.target.closest('.view-btn');
-    if (!btn || btn.classList.contains('active')) return;
+    if (!btn || btn.classList.contains('active') || switching) return;
     const target = btn.dataset.view;
 
     document.querySelectorAll('.view-btn').forEach(b => {
@@ -126,6 +127,7 @@ document.getElementById('view-switch').addEventListener('click', (e) => {
     const current = document.querySelector('.view.active');
     const next = document.getElementById(`view-${target}`);
     if (!current || current === next) return;
+    switching = true;
 
     current.classList.remove('entered');
     current.classList.add('leaving');
@@ -137,5 +139,6 @@ document.getElementById('view-switch').addEventListener('click', (e) => {
         // force reflow so the transition actually plays
         void next.offsetWidth;
         requestAnimationFrame(() => next.classList.add('entered'));
+        switching = false;
     }, 320);
 });
