@@ -69,8 +69,9 @@ By leveraging **highly structured Vanilla JS** without bloated modern frameworks
 
 ```
 SMKNUFAGWT/
-├── 📄 index.html              ⭐ Main app (single-file frontend)
-├── 📄 dashmin.html            🛠️  Admin dashboard
+├── 📄 index.html              ⭐ Main app (beranda + Global Live Chat anonim)
+├── 📄 chat.html               💬 /chat — room per kelas (login Google, approval admin)
+├── 📄 dashmin.html            🛠️  Admin dashboard (/dashmin)
 ├── 📄 404.html                Custom error page
 │
 ├── 📝 blog/
@@ -81,24 +82,26 @@ SMKNUFAGWT/
 │
 ├── 🎨 assets/
 │   ├─ audio/                  BGM & scene audio
-│   ├─ logic/                  Chat, voice note, transitions, site FX modules
-│   └─ style/                  CSS variables, theming & voice note UI
+│   ├─ logic/                  Modul JS: chat, auth, voice note, FX, transisi, dll.
+│   └─ style/                  main, variable, dashmin & voice-note CSS
 │
 ├── 🖼️ images/                  Gallery & static image assets
 ├── ⚙️ sw.js                    Service worker (cache, push, offline sync)
-├── ⚙️ .github/workflows/       CI: deploy, manual deploy, notify-cron
+├── ⚙️ .github/workflows/       CI: deploy, manual deploy (nufabase), notify-cron
 ├── 📋 manifest.json            PWA manifest
 │
 ├── 🖼️ appcover.jpg             Social share image
 ├── 📋 firebase.json / .firebaserc   Firebase Hosting config
-├── 🔒 firestore.rules          Firestore security rules (chat, voice_notes, …)
-├── 📋 vercel.json              Edge deployment config
+├── 🔒 firestore.rules / firestore.indexes.json   Security rules & indexes
+├── 📋 vercel.json              Edge deployment config (mirror)
 ├── 📋 .env.example             Environment variables template
 ├── 📋 robots.txt / sitemap.xml SEO metadata
 ├── 📋 LICENSE                  BSD 2-Clause "Simplified"
 ├── 📋 SECURITY.md              Vulnerability reporting policy
 └── 📋 README.md                ← You are here
 ```
+
+**`assets/logic/` modules:** `auth-helper` (Google sign-in, popup→redirect fallback) · `chat-app` (router & thread `/chat`) · `chat-format` / `chat-prefs` / `chat-feature` (format & embed, tampilan, form usul fitur via GitHub Issue/email) · `dashmin-app` (approve/reject akses kelas, kelola admin) · `voice-note` · `gallery` · `headline` / `scramble-engine` / `chat-beta-scrambler` / `online-blink` / `footer-fx` / `page-transition` / `site-fx` (efek & visitor counter) · `notify-throttle` / `sw-register` (push & service worker) · `blog`.
 
 ---
 
@@ -178,6 +181,12 @@ Record, preview, and send voice messages straight from the chat composer (home p
 | Format | Opus / AAC via `MediaRecorder` | `m` must match `audio/*`, ≤ 60 chars |
 | Fields | `d`, `m`, `s`, `ts` | `keys().hasOnly(['d','m','s','ts'])`, `ts == request.time` |
 | Access | lazy read by ID | `get` by 20-char ID only; `list`, `update`, `delete` denied |
+
+### 🎓 Chat per Kelas (Beta)
+- Login Google via `auth-helper` (popup, fallback redirect)
+- Room Public, Announcement (admin-only tulis), dan 6 room kelas (Pemasaran & Otomotif, kelas 1–3)
+- Akses room kelas lewat permintaan → approval admin di `/dashmin`
+- Aturan akses ditegakkan di `firestore.rules`, bukan cuma di UI
 
 ### 💬 Offline-First Architecture
 - Messages queued in **IndexedDB** when offline
@@ -369,7 +378,7 @@ Found a vulnerability? See [SECURITY.md](SECURITY.md) for how to report it.
 Fullstack Dev Engineer | Backend | DevOps | Frontend | AI Engineering
 
 📧 **Email:** [smknufagwt@gmail.com](mailto:smknufagwt@gmail.com)  
-💬 **WhatsApp:** [+62 831-9975-3711](https://wa.me/6283199753711)  
+🐙 **GitHub Issues:** [smknufagwt/SMKNUFAGWT](https://github.com/smknufagwt/SMKNUFAGWT/issues)  
 🎨 **TikTok:** [@arlingkin](https://tiktok.com/@arlingkin)
 
 ### **About the Build**
@@ -432,8 +441,7 @@ If this project inspired you or helped you learn something new:
 
 **Questions?** Reach out anytime:
 - 📧 Email: smknufagwt@gmail.com
-- 💬 WhatsApp: [+62 831-9975-3711](https://wa.me/6283199753711)
-- 🐙 GitHub Issues: [@smknufagwt](https://github.com/smknufagwt)
+- 🐙 GitHub Issues: [smknufagwt/SMKNUFAGWT](https://github.com/smknufagwt/SMKNUFAGWT/issues)
 
 ---
 
