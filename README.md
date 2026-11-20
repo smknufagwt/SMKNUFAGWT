@@ -32,17 +32,19 @@ By leveraging **highly structured Vanilla JS** without bloated modern frameworks
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  🖼️  BROWSER FRONTEND (index.html + inline JS/CSS)     │
+│  🖼️  BROWSER FRONTEND (HTML + modular JS/CSS)          │
 │  • Matrix rain canvas background                        │
 │  • Cyberpunk neon UI with glitch effects                │
-│  • Real-time chat panel (bottom center)                 │
+│  • Global Live Chat panel (bottom center)               │
+│  • /chat room per kelas (login Google)                  │
 │  • Image gallery with lightbox viewer                   │
 │  • Music toggle & color theme control                   │
 └─────────────────────────────────────────────────────────┘
                            ↕️
 ┌─────────────────────────────────────────────────────────┐
 │  🔥 FIREBASE FIRESTORE                                  │
-│  • global_chat collection (real-time listeners)         │
+│  • global_chat & messages (real-time listeners)         │
+│  • profiles, room_access_requests, room_members         │
 │  • Message sync across all clients instantly            │
 │  • Fallback broadcast matrix for delivery               │
 └─────────────────────────────────────────────────────────┘
@@ -69,8 +71,9 @@ By leveraging **highly structured Vanilla JS** without bloated modern frameworks
 
 ```
 SMKNUFAGWT/
-├── 📄 index.html              ⭐ Main app (single-file frontend)
-├── 📄 dashmin.html            🛠️  Admin dashboard
+├── 📄 index.html              ⭐ Main app (beranda + Global Live Chat anonim)
+├── 📄 chat.html               💬 /chat — room per kelas (login Google, approval admin)
+├── 📄 dashmin.html            🛠️  Admin dashboard (/dashmin)
 ├── 📄 404.html                Custom error page
 │
 ├── 📝 blog/
@@ -81,22 +84,26 @@ SMKNUFAGWT/
 │
 ├── 🎨 assets/
 │   ├─ audio/                  BGM & scene audio
-│   ├─ logic/                  Chat, transitions, site FX modules
-│   └─ style/                  CSS variables & theming
+│   ├─ logic/                  Modul JS: chat, auth, FX, transisi, dll.
+│   └─ style/                  main, variable & dashmin CSS
 │
 ├── 🖼️ images/                  Gallery & static image assets
 ├── ⚙️ sw.js                    Service worker (cache, push, offline sync)
 ├── ⚙️ .github/workflows/       CI: deploy, manual deploy, notify-cron
+├── 📋 manifest.json            PWA manifest
 │
 ├── 🖼️ appcover.jpg             Social share image
 ├── 📋 firebase.json / .firebaserc   Firebase Hosting config
-├── 📋 vercel.json              Edge deployment config
+├── 🔒 firestore.rules / firestore.indexes.json   Security rules & indexes
+├── 📋 vercel.json              Edge deployment config (deploy utama)
 ├── 📋 .env.example             Environment variables template
 ├── 📋 robots.txt / sitemap.xml SEO metadata
 ├── 📋 LICENSE                  BSD 2-Clause "Simplified"
 ├── 📋 SECURITY.md              Vulnerability reporting policy
 └── 📋 README.md                ← You are here
 ```
+
+**`assets/logic/` modules:** `auth-helper` (Google sign-in, popup→redirect fallback) · `chat-app` (router & thread `/chat`) · `chat-format` / `chat-prefs` / `chat-feature` (format & embed, tampilan, form usul fitur via GitHub Issue/email) · `dashmin-app` (approve/reject akses kelas, kelola admin) · `gallery` · `headline` / `scramble-engine` / `chat-beta-scrambler` / `online-blink` / `footer-fx` / `page-transition` / `site-fx` (efek & visitor counter) · `notify-throttle` / `sw-register` (push & service worker) · `blog`.
 
 ---
 
@@ -157,6 +164,12 @@ ruby -run -ehttpd . -p8000
 - Throttled triggers (10s between spam-prevention)
 - Retry logic with exponential backoff
 - User IP & timestamp tracking
+
+### 🎓 Chat per Kelas (Beta)
+- Login Google via `auth-helper` (popup, fallback redirect)
+- Room Public, Announcement (admin-only tulis), dan 6 room kelas (Pemasaran & Otomotif, kelas 1–3)
+- Akses room kelas lewat permintaan → approval admin di `/dashmin`
+- Aturan akses ditegakkan di `firestore.rules`, bukan cuma di UI
 
 ### 💬 Offline-First Architecture
 - Messages queued in **IndexedDB** when offline
