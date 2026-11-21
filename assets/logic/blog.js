@@ -4,6 +4,12 @@
    ========================================================================== */
 const POSTS = [
     {
+        date: "2026-11-21",
+        tag: "UPDATE",
+        title: "Versi 2026.11.21: Pesan suara lewat mikrofon",
+        body: "Pembaruan kali ini menambahkan <b>mikrofon</b>. Suara yang direkam disimpan dalam format <b>WebM</b>, dibungkus, lalu dikirim ke database server."
+    },
+    {
         date: "2026-11-15",
         tag: "UPDATE",
         title: "Pesan suara makin enak dipakai: ada slider, animasinya mulus, dan email pengirim muncul di /chat",
