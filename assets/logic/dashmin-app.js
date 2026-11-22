@@ -279,9 +279,10 @@
 
     function subscribePending() {
         if (pendingUnsub) { pendingUnsub(); pendingUnsub = null; }
+        let first = true; // snapshot pertama = data awal, sudah dimuat loadPending() saat init
         pendingUnsub = db.collection('room_access_requests')
             .where('status', '==', 'pending')
-            .onSnapshot(() => loadPending(), () => {});
+            .onSnapshot(() => { if (first) { first = false; return; } loadPending(); }, () => {});
     }
 
     function showGate(text, showBtn) {
@@ -369,7 +370,10 @@
                 el['admins-list'].appendChild(row);
             });
         } catch (e) {
-            el['admins-list'].innerHTML = '<p class="dashmin-empty">Gagal memuat admin: ' + (e.message || e.code) + '</p>';
+            const errP = document.createElement('p');
+            errP.className = 'dashmin-empty';
+            errP.textContent = 'Gagal memuat admin: ' + (e.message || e.code);
+            el['admins-list'].replaceChildren(errP);
         }
     }
 

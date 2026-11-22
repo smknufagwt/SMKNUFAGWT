@@ -1,0 +1,105 @@
+/* voice-note.css — pemutar & perekam pesan suara. Warna ikut tema: neon di beranda, gold di /chat. */
+.voice-note, .vn-bar { --vn: var(--neon, #0f0); --vn-dim: var(--neon-dim, #008f11); --vn-track: rgba(255, 255, 255, .16); }
+#chat-view .voice-note, #chat-view .vn-bar { --vn: var(--chat-gold, #d9c089); --vn-dim: var(--chat-gold-dim, #8a7645); --vn-track: rgba(var(--chat-gold-rgb, 217, 192, 137), .25); }
+
+.voice-note {
+    display: inline-flex; align-items: center; gap: 8px; min-width: 190px; max-width: 100%;
+    margin-top: 6px; padding: 6px 12px 6px 6px; border: 1px solid var(--vn-dim);
+    border-radius: 999px; background: rgba(0, 0, 0, .35); color: var(--vn);
+    transition: border-color .25s ease, box-shadow .25s ease;
+    animation: vn-in .3s ease;
+}
+@keyframes vn-in { from { opacity: 0; transform: translateY(4px) scale(.97); } to { opacity: 1; transform: none; } }
+.voice-note[data-state="playing"] { border-color: var(--vn); box-shadow: 0 0 10px var(--vn-dim); }
+.voice-note[data-state="error"] { border-color: #ff003c; }
+.voice-play {
+    flex: 0 0 auto; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; border: 1px solid var(--vn); background: transparent; color: var(--vn);
+    font-size: .7rem; cursor: pointer; transition: background .2s ease, color .2s ease;
+}
+.voice-play:hover, .voice-note[data-state="playing"] .voice-play { background: var(--vn); color: #000; }
+.voice-note[data-state="error"] .voice-play { color: #ff003c; border-color: #ff003c; }
+.voice-track {
+    flex: 1; min-width: 60px; height: 16px; padding: 6px 0; box-sizing: border-box; cursor: pointer;
+    background: var(--vn-track) content-box; border-radius: 2px; overflow: hidden;
+}
+.voice-fill { display: block; height: 100%; width: 0; background: var(--vn); box-shadow: 0 0 6px var(--vn); border-radius: 2px; }
+.voice-time { font-size: .68rem; opacity: .85; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.vn-bar {
+    display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+    border: 1px solid var(--vn-dim); border-radius: 999px; background: rgba(0, 0, 0, .45);
+    font-size: .72rem; color: var(--vn);
+}
+.vn-bar { --vn-level: 0; animation: vn-in .25s ease; }
+.vn-bar [data-s] { display: none; }
+.vn-bar[data-state="recording"] [data-s~="recording"],
+.vn-bar[data-state="ready"] [data-s~="ready"],
+.vn-bar[data-state="sending"] [data-s~="sending"],
+.vn-bar[data-state="note"] [data-s~="note"] { display: inline-flex; align-items: center; justify-content: center; }
+.vn-meter { flex: 1; min-width: 40px; height: 6px; border-radius: 3px; background: var(--vn-track); overflow: hidden; }
+.vn-meter i { display: block; height: 100%; width: 100%; border-radius: 3px; background: var(--vn); box-shadow: 0 0 8px var(--vn); transform-origin: left; transform: scaleX(calc(.04 + var(--vn-level) * .96)); transition: transform .1s linear; }
+.vn-time, .vn-note { margin-right: auto; font-variant-numeric: tabular-nums; }
+.vn-dot { width: 8px; height: 8px; border-radius: 50%; background: #ff003c; box-shadow: 0 0 8px #ff003c; animation: vn-pulse 1s ease-in-out infinite; }
+@keyframes vn-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .4; transform: scale(.8); } }
+.vn-btn {
+    width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--vn-dim);
+    background: #000; color: var(--vn); font-size: .7rem; cursor: pointer; transition: background .2s ease, color .2s ease;
+}
+.vn-btn:hover { background: var(--vn); color: #000; }
+.vn-btn:disabled { opacity: .4; pointer-events: none; }
+.vn-mic-btn.rec { background: #ff003c; border-color: #ff003c; color: #fff; }
+@media (prefers-reduced-motion: reduce) { .vn-dot, .voice-note, .vn-bar, .voice-play, .vn-prev, .voice-fill { animation: none !important; } .vn-meter i { transition: none; } }
+
+/* ── Composer beranda: mic kiri, bar rekam menggantikan textarea, kirim tetap 1 tombol ── */
+.vn-mic-compose {
+    flex: 0 0 auto; width: 36px; height: 36px; padding: 0; border-radius: 50%;
+    border: 1px solid var(--neon-dim, #008f11); background: #000; color: var(--neon, #0f0);
+    font-size: .85rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+.vn-mic-compose:hover { background: var(--neon, #0f0); color: #000; border-color: var(--neon, #0f0); }
+.vn-mic-compose:disabled { opacity: .4; pointer-events: none; }
+#chat-field .vn-bar { flex: 1; min-width: 0; height: 36px; box-sizing: border-box; padding: 0 4px; gap: 6px; }
+
+/* ── Slider pemutaran rekaman (di dalam bar textarea) ── */
+.vn-seek { -webkit-appearance: none; appearance: none; flex: 1; min-width: 40px; height: 16px; margin: 0; padding: 0; background: transparent; cursor: pointer; touch-action: none; }
+.vn-bar[data-state="ready"] .vn-seek, .vn-bar[data-state="sending"] .vn-seek { display: block; }
+.vn-seek::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--vn) var(--vn-p, 0%), var(--vn-track) var(--vn-p, 0%)); }
+.vn-seek::-moz-range-track { height: 4px; border-radius: 2px; background: var(--vn-track); }
+.vn-seek::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--vn); }
+.vn-seek::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; margin-top: -4px; border: 0; border-radius: 50%; background: var(--vn); box-shadow: 0 0 6px var(--vn); transition: transform .15s ease; }
+.vn-seek::-moz-range-thumb { width: 12px; height: 12px; border: 0; border-radius: 50%; background: var(--vn); box-shadow: 0 0 6px var(--vn); }
+.vn-seek:active::-webkit-slider-thumb { transform: scale(1.3); }
+.vn-seek:disabled { opacity: .4; pointer-events: none; }
+.vn-seek:focus-visible { outline: 1px solid var(--vn); outline-offset: 3px; }
+
+/* ── Animasi saat memutar: preview di bar & bubble terkirim ── */
+.voice-note[data-state="playing"] .voice-play, .vn-bar[data-play="1"] .vn-prev { animation: vn-ring 1.3s ease-out infinite; }
+@keyframes vn-ring { 0% { box-shadow: 0 0 0 0 var(--vn); } 70% { box-shadow: 0 0 0 7px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+.voice-note[data-state="playing"] .voice-fill {
+    background-image: linear-gradient(90deg, var(--vn) 0%, rgba(255, 255, 255, .9) 50%, var(--vn) 100%);
+    background-size: 200% 100%; animation: vn-sheen 1.1s linear infinite;
+}
+@keyframes vn-sheen { to { background-position: -200% 0; } }
+.vn-bar[data-play="1"] .vn-seek::-webkit-slider-thumb { animation: vn-thumb .9s ease-in-out infinite alternate; }
+.vn-bar[data-play="1"] .vn-seek::-moz-range-thumb { animation: vn-thumb .9s ease-in-out infinite alternate; }
+@keyframes vn-thumb { from { box-shadow: 0 0 4px var(--vn); } to { box-shadow: 0 0 12px var(--vn), 0 0 2px #fff; } }
+.voice-note[data-state="paused"] .voice-time { opacity: .6; }
+.lite-mode .voice-note, .lite-mode .voice-note *, .lite-mode .vn-bar, .lite-mode .vn-bar * { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .vn-bar[data-play="1"] .vn-seek::-webkit-slider-thumb { animation: none; } .vn-bar[data-play="1"] .vn-seek::-moz-range-thumb { animation: none; } }
+
+/* ── Composer /chat: sama seperti beranda (mic kiri, bar menggantikan textarea, kirim tetap 1 tombol) ── */
+.chat-input-wrap.vn-active #chat-thread-input { display: none; }
+.chat-input-wrap .vn-bar { height: 36px; box-sizing: border-box; padding: 0 4px; gap: 6px; }
+#chat-view .vn-bar { background: var(--chat-field, rgba(0, 0, 0, .45)); border-color: var(--chat-nav-border); }
+#chat-view .vn-btn { background: var(--chat-bg, #060502); }
+#chat-view .vn-btn:hover { background: var(--chat-gold); color: var(--chat-bg, #060502); }
+#chat-view .chat-thread-form > button.vn-mic-compose {
+    flex: 0 0 auto; width: 36px; min-width: 36px; height: 36px; padding: 0; border-radius: 50%;
+    border: 1px solid var(--chat-gold-dim); background: var(--chat-bg, #060502); color: var(--chat-gold);
+    font-size: .85rem; filter: none; display: flex; align-items: center; justify-content: center;
+}
+#chat-view .chat-thread-form > button.vn-mic-compose:hover { background: var(--chat-gold); border: 1px solid var(--chat-gold); color: var(--chat-bg, #060502); filter: none; }
+#chat-view .chat-thread-form > button.vn-mic-compose.rec { background: #ff003c; border-color: #ff003c; color: #fff; }
+#chat-view .chat-thread-form > button.vn-hold { opacity: .45; cursor: not-allowed; }

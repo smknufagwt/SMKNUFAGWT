@@ -10,18 +10,8 @@
       return;
     }
     try {
+      // SW baru langsung aktif sendiri (skipWaiting + clients.claim di sw.js)
       swReg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-      swReg.addEventListener('updatefound', () => {
-        const newWorker = swReg.installing;
-        newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            if (navigator.serviceWorker.controller) {
-              navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
-            }
-          }
-        });
-      });
-
       sendFirebaseConfig();
 
     } catch (e) {
@@ -30,11 +20,13 @@
   }
 
   function sendFirebaseConfig() {
-    if (typeof FIREBASE_CONFIG === 'undefined') return;
-    if (!navigator.serviceWorker.controller) return;
-    navigator.serviceWorker.controller.postMessage({
+    if (typeof FIREBASE_CONFIG === 'undefined' || !FIREBASE_CONFIG.projectId) return;
+    const target = navigator.serviceWorker.controller || (swReg && swReg.active);
+    if (!target) return;
+    // Hanya projectId yang dibutuhkan SW (REST sync) — apiKey & config lain tidak dikirim
+    target.postMessage({
       type:    'SET_FIREBASE_CONFIG',
-      payload: FIREBASE_CONFIG,
+      payload: { projectId: FIREBASE_CONFIG.projectId },
     });
   }
   function initBroadcastChannel() {

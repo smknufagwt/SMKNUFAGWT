@@ -25,7 +25,7 @@
                 } catch (err) {
                     clearTimeout(timer);
                     const isAbort = err.name === 'AbortError';
-                    if (attempt < retries) continue; // coba sekali lagi
+                    if (attempt < retries) { await new Promise((r) => setTimeout(r, 400)); continue; } // coba sekali lagi (setelah jeda singkat)
                     throw new Error(isAbort ? 'Waktu tunggu server habis (timeout)' : err.message);
                 }
             }
@@ -45,11 +45,6 @@
                 <div class="marquee-container">
                     <div class="marquee-clip">
                         <div class="marquee-content">SMK NUFA JAYA &nbsp;///&nbsp; BISA - HEBAT - DISIPLIN - KOMPETEN - SIAP KERJA &nbsp;///&nbsp; SYSTEM ONLINE &nbsp;///&nbsp; SMK NUFA JAYA</div>
-                    </div>
-                    <div class="petir-fx" id="petir-fx">
-                        <div class="petir-bolt"></div>
-                        <div class="petir-bolt"></div>
-                        <div class="petir-bolt"></div>
                     </div>
                 </div>
             `,
@@ -105,7 +100,8 @@
                 const originalText = el.getAttribute('data-original') || el.innerText;
                 if(!el.getAttribute('data-original')) el.setAttribute('data-original', originalText);
                 let frame = 0; const length = originalText.length;
-                const interval = setInterval(() => {
+                clearInterval(el._scrInt);
+                const interval = el._scrInt = setInterval(() => {
                     let output = '';
                     for(let i = 0; i < length; i++) {
                         if(frame >= (i * 2) + 5) { output += originalText[i]; } 
@@ -118,38 +114,37 @@
             }
 
             write(el, htmlContent) {
+                clearInterval(el._scrInt);
                 el.innerHTML = htmlContent;
-                
-                const processNode = (node) => {
-                    if (node.nodeType === 3) { 
-                        const originalText = node.textContent;
-                        if (originalText.trim().length === 0) return;
-                        
-                        const length = originalText.length;
-                        let frame = 0;
-                        const interval = setInterval(() => {
-                            let output = '';
-                            for (let i = 0; i < length; i++) {
-                                if (frame >= i) output += originalText[i];
-                                else output += this.chars[Math.floor(Math.random() * this.chars.length)];
-                            }
-                            node.textContent = output;
-                            if (frame >= length) {
-                                clearInterval(interval);
-                                node.textContent = originalText;
-                            }
-                            frame += 2;
-                        }, 15);
-                    } else if (node.nodeType === 1) { 
-                        
-                        if (node.classList.contains('marquee-container')) return;
-                        for (let child of node.childNodes) {
-                            processNode(child);
-                        }
+
+                // Satu timer untuk semua text node (sebelumnya 1 interval 15ms per node)
+                const jobs = [];
+                const collect = (node) => {
+                    if (node.nodeType === 3) {
+                        const text = node.textContent;
+                        if (text.trim().length) jobs.push({ node, text, frame: 0, done: false });
+                    } else if (node.nodeType === 1 && !node.classList.contains('marquee-container')) {
+                        node.childNodes.forEach(collect);
                     }
                 };
+                collect(el);
+                if (!jobs.length) return;
 
-                processNode(el);
+                const timer = el._scrInt = setInterval(() => {
+                    let active = 0;
+                    for (const j of jobs) {
+                        if (j.done) continue;
+                        const length = j.text.length;
+                        let output = '';
+                        for (let i = 0; i < length; i++) {
+                            output += j.frame >= i ? j.text[i] : this.chars[Math.floor(Math.random() * this.chars.length)];
+                        }
+                        j.node.textContent = output;
+                        if (j.frame >= length) { j.node.textContent = j.text; j.done = true; } else active++;
+                        j.frame += 2;
+                    }
+                    if (!active) clearInterval(timer);
+                }, 15);
             }
 
             animate(el, newText) {
@@ -175,6 +170,7 @@
                 this.drops = []; this.ripples = [];
                 this.enabled = true; this._running = true;
                 this._lastFrame = 0; this._frameInterval = 1000 / 30;
+                this._nextBin = performance.now() + 2000;
                 this.resize();
                 let resizeTO;
                 window.addEventListener('resize', () => { clearTimeout(resizeTO); resizeTO = setTimeout(() => this.resize(), 150); });
@@ -185,22 +181,48 @@
                 ['mousemove', 'touchstart'].forEach(evt => window.addEventListener(evt, (e) => this.createRipple(e), {passive: true}));
                 this.loop();
             }
-            resize() { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; this.initDrops(); }
+            resize() {
+                const w = window.innerWidth, h = window.innerHeight;
+                // Bar alamat mobile naik-turun saat scroll memicu resize tinggi kecil: abaikan agar kanvas tidak reset/kedip
+                if (this.drops.length && this.canvas.width === w && Math.abs(this.canvas.height - h) < 150) return;
+                this.canvas.width = w; this.canvas.height = h; this.initDrops();
+            }
             initDrops() {
                 const targetColumns = 90;
                 const spacing = Math.max(20, this.canvas.width / targetColumns);
                 const columns = Math.ceil(this.canvas.width / spacing);
                 this.drops = [];
                 for (let i = 0; i < columns; i++) {
-                    this.drops.push({ x: i * spacing, y: Math.random() * this.canvas.height, speed: Math.random() * 0.5 + 0.5, depth: Math.random() > 0.8 ? 2 : 1 });
+                    this.drops.push({ x: i * spacing, y: Math.random() * this.canvas.height, speed: Math.random() * 0.5 + 0.5, depth: Math.random() > 0.8 ? 2 : 1, bin: 0, binFrom: 0, binUntil: 0 });
                 }
             }
             createRipple(e) {
+                // Tidak ada yang menggambar saat efek mati/tab tersembunyi; mousemove juga sangat rapat → batasi
+                if (!this._running) return;
+                const now = performance.now();
+                if (now - (this._lastRipple || 0) < 80 || this.ripples.length >= 12) return;
+                this._lastRipple = now;
                 const x = e.touches ? e.touches[0].clientX : e.clientX;
                 const y = e.touches ? e.touches[0].clientY : e.clientY;
                 this.ripples.push({x, y, size: 0, life: 1});
             }
             setColor(c) { this.color = c; }
+            _triggerBinary(t) {
+                const n = this.drops.length;
+                if (!n) return;
+                const dur = 2500 + Math.random() * 3500;
+                const mode = Math.floor(Math.random() * 3);
+                if (mode === 0) {
+                    const w = Math.max(4, Math.floor(n * (0.08 + Math.random() * 0.12)));
+                    const s = Math.floor(Math.random() * Math.max(1, n - w));
+                    for (let i = s; i < s + w && i < n; i++) { this.drops[i].binFrom = t; this.drops[i].binUntil = t + dur; }
+                } else if (mode === 1) {
+                    const step = 25 + Math.random() * 35, fwd = Math.random() < 0.5;
+                    this.drops.forEach((d, i) => { d.binFrom = t + (fwd ? i : n - 1 - i) * step; d.binUntil = d.binFrom + dur * 0.6; });
+                } else {
+                    this.drops.forEach(d => { if (Math.random() < 0.25) { d.binFrom = t + Math.random() * 800; d.binUntil = d.binFrom + dur; } });
+                }
+            }
             setEnabled(on) {
                 this.enabled = on;
                 this.canvas.style.display = on ? 'block' : 'none';
@@ -218,8 +240,12 @@
                     r.size += 2; r.life -= 0.05; if(r.life <= 0) this.ripples.splice(i, 1);
                 }
                 this.ctx.font = "14px monospace";
+                const t = performance.now();
+                if (t >= this._nextBin) { this._triggerBinary(t); this._nextBin = t + 1500 + Math.random() * 3500; }
                 this.drops.forEach(drop => {
-                    const text = Math.floor(Math.random() * 10).toString();
+                    drop.bin += (((t >= drop.binFrom && t < drop.binUntil) ? 1 : 0) - drop.bin) * 0.08;
+                    if (drop.bin < 0.01) drop.bin = 0;
+                    const text = Math.random() < drop.bin ? (Math.random() < 0.5 ? '0' : '1') : Math.floor(Math.random() * 10).toString();
                     this.ctx.fillStyle = drop.depth === 2 ? "#fff" : this.color;
                     this.ctx.fillText(text, drop.x, drop.y);
                     if (drop.y > this.canvas.height && Math.random() > 0.975) drop.y = 0;
@@ -322,27 +348,7 @@
                 { neon: '#FF10F0', dim: '#d11fb0', hex: '#FF10F0' }  
 
             ],
-            baseOffset: 6340,
             currentVisits: 0, 
-
-            typeWriter: function(elementId, text, speed = 100) {
-                const element = document.getElementById(elementId);
-                if (!element) return;
-                
-                element.innerHTML = ""; 
-                element.classList.add('typing-cursor');
-                
-                let i = 0;
-                function type() {
-                    if (i < text.length) {
-                        element.innerHTML += text.charAt(i);
-                        i++;
-                        const randomSpeed = speed + (Math.random() * 50 - 25);
-                        setTimeout(type, randomSpeed);
-                    }
-                }
-                type();
-            },
 
             // syncVisitorCount & useLocalFallback dipindah ke inline <script> di bawah index.html
             // (lihat sebelum </body>) — di-attach ke object System ini via assignment.
@@ -373,13 +379,15 @@
                 // this.currentVisits versi terbaru (bukan snapshot lama sebelum syncVisitorCount() selesai).
                 const logLines = [
                     () => "Scanning connection...",
-                    () => "Encrypting connection...",
-                    () => `Public Access: ${this.currentVisits} Users`,
-                    () => "System stable.",
-                    () => "Monitoring network..."
+                    () => "Encrypting connection..." + vis(),
+                    () => "System stable." + vis(),
+                    () => "Monitoring network..." + vis()
                 ];
+                const vis = () => this.currentVisits > 0 ? " | " + this.currentVisits.toLocaleString('id-ID') + " pengunjung" : "";
                 let i = 0;
                 setInterval(() => {
+                    if (document.hidden) return;
+                    this.log.classList.remove('log-tick'); void this.log.offsetWidth; this.log.classList.add('log-tick');
                     this.log.innerText = ">> " + logLines[i]();
                     i = (i + 1) % logLines.length;
                 }, 2400);
@@ -412,7 +420,8 @@
                 }
                 this.bgm.volume = 0.7;
 
-                const savedMusic = localStorage.getItem('nufa_music');
+                let savedMusic = null;
+                try { savedMusic = localStorage.getItem('nufa_music'); } catch (e) { /* storage diblok */ }
                 if (savedMusic === 'off') {
                     this.bgm.pause();
                     this.musicIcon.innerText = "🔇";
@@ -433,20 +442,10 @@
                 this.initLog(); 
 
                 Scrambler.write(document.getElementById('home-content'), DATABASE_CONTENT.home);
-                this.randomizePetir();
-
-                // Jumlah pengunjung disinkron di LATAR BELAKANG (tidak menunda tampilan)
-                this.syncVisitorCount().catch(()=>{});
 
                 document.getElementById('overlay').style.opacity = '0';
-                const scanlinesEl = document.querySelector('.scanlines');
-                const scanBeamEl = document.querySelector('.scan-beam');
-                if (scanlinesEl) scanlinesEl.style.opacity = '0';
-                if (scanBeamEl) scanBeamEl.style.opacity = '0';
                 setTimeout(() => {
                     document.getElementById('overlay').style.display = 'none';
-                    if (scanlinesEl) scanlinesEl.style.display = 'none';
-                    if (scanBeamEl) scanBeamEl.style.display = 'none';
                     document.getElementById('main-content').style.display = 'block';
                     startChaosMode(); 
                 }, 500);
@@ -458,14 +457,6 @@
                 this.colorIndex = (this.colorIndex + 1) % this.colors.length;
                 try { localStorage.setItem('nufa_theme', this.colorIndex); } catch(e) {}
                 this.applyTheme();
-            },
-
-            // Acak variabel CSS tiap bolt petir biar polanya gak keliatan monoton/looping sama
-            randomizePetir: function() {
-                document.querySelectorAll('#petir-fx .petir-bolt').forEach(el => {
-                    el.style.setProperty('--petir-dur', (2.5 + Math.random() * 3).toFixed(2) + 's');
-                    el.style.setProperty('--petir-delay', (Math.random() * 4).toFixed(2) + 's');
-                });
             },
 
    renderGallery: function(photos) {
@@ -489,6 +480,7 @@
         img.src = item.file;
         img.alt = item.caption;
         img.loading = 'lazy';
+        img.decoding = 'async';
         img.onerror = function() {
             this.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='200'%3E%3Crect width='300' height='200' fill='%23000'/%3E%3Ctext x='50%25' y='50%25' fill='%2300ff00' font-family='monospace' font-size='14' text-anchor='middle' dy='.3em'%3EFOTO TIDAK ADA%3C/text%3E%3C/svg%3E";
             this.onerror = null;
@@ -550,7 +542,7 @@
                     container.innerHTML = `
                         <div style="color:#ff003c;grid-column:1/-1;text-align:center;padding:40px 0;font-size:0.8rem;letter-spacing:1px;">
                             ⚠ GAGAL MEMUAT GALERI<br>
-                            <span style="color:#666;font-size:0.7rem;margin-top:8px;display:block;">${err.message}</span>
+                            <span style="color:#666;font-size:0.7rem;margin-top:8px;display:block;">${String(err.message).replace(/[&<>"']/g, (c) => '&#' + c.charCodeAt(0) + ';')}</span>
                             <button onclick="System.fetchGallery()" style="margin-top:16px;padding:8px 20px;border:1px solid #ff003c;background:transparent;color:#ff003c;font-family:var(--font-main);cursor:pointer;letter-spacing:1px;">↺ COBA LAGI</button>
                         </div>`;
                 }
@@ -566,8 +558,9 @@ startLatency: function() {
         document.querySelectorAll('.lat-val').forEach(el => el.innerText = val);
     };
     const measure = () => {
+        if (!document.querySelector('.lat-val')) return; // tidak ada HUD yang menampilkan latensi
         const start = performance.now();
-        fetch(window.location.href + '?ping=' + Date.now(), { method: 'HEAD', cache: 'no-store' })
+        fetch(location.origin + location.pathname + '?ping=' + Date.now(), { method: 'HEAD', cache: 'no-store' })
             .then(() => updateAll(Math.round(performance.now() - start)))
             .catch(() => updateAll('ERR'));
     };
@@ -586,16 +579,16 @@ toggleLatency: function() {
                 if (this.musicBtn && this.musicBtn.classList.contains('sound-locked')) return;
                 AudioFX.click();
                 if (this.bgm.paused) { 
-                    this.bgm.play(); 
+                    this.bgm.play().catch(() => {}); 
                     this.musicIcon.innerText = "🔊"; 
                     this.musicBtn.style.opacity = "1";
-                    localStorage.setItem('nufa_music', 'on'); // ✅ simpan state
+                    try { localStorage.setItem('nufa_music', 'on'); } catch (e) {} // ✅ simpan state
                 }
                 else { 
                     this.bgm.pause(); 
                     this.musicIcon.innerText = "🔇"; 
                     this.musicBtn.style.opacity = "0.8";
-                    localStorage.setItem('nufa_music', 'off'); // ✅ simpan state
+                    try { localStorage.setItem('nufa_music', 'off'); } catch (e) {} // ✅ simpan state
                 }
             },
 
@@ -611,7 +604,6 @@ toggleLatency: function() {
 
                 if(id === 'home') {
                     Scrambler.write(document.getElementById('home-content'), DATABASE_CONTENT.home);
-                    this.randomizePetir();
                 } else if (id === 'visi') {
                     Scrambler.write(document.getElementById('visi-content'), DATABASE_CONTENT.visi);
                 } else if (id === 'gallery') {
@@ -642,29 +634,7 @@ toggleLatency: function() {
             } catch (e) {}
         })();
 
-        const chaosTexts = ["SYSTEM_FAILURE", "0x00_FATAL_ERR", "S#K N@R*L F!L^H", "404_NOT_FOUND", "CONNECTING...", "ENCRYPT_//_99%", "µ-sys$-Hacked"];
-        function startChaosMode() {
-            const title = document.querySelector('.glitch');
-            if (!title) return;
-            const originalText = "SMK NURUL FALAH";
-            function randomGlitchLoop() {
-                const randomTime = Math.random() * 15000 + 5000; 
-                setTimeout(() => {
-                    const randomString = chaosTexts[Math.floor(Math.random() * chaosTexts.length)];
-                    title.innerText = randomString;          
-                    title.setAttribute('data-text', randomString); 
-                    title.classList.add('critical-error');   
-                    
-                    setTimeout(() => {
-                        title.innerText = originalText;
-                        title.setAttribute('data-text', originalText);
-                        title.classList.remove('critical-error');
-                        randomGlitchLoop(); 
-                    }, 100 + Math.random() * 200);
-                }, randomTime);
-            }
-            randomGlitchLoop();
-        }
+       
 
         document.addEventListener("DOMContentLoaded", () => {
             // --- INJEKSI ANIMATION KEYFRAME UNTUK SKEW INFINITE ---
@@ -764,55 +734,6 @@ toggleLatency: function() {
             `;
             document.head.appendChild(style);
 
-            function playTransitionSound() {
-                if (typeof AudioFX === 'undefined' || !AudioFX.ctx) return;
-                AudioFX.resume();
-                const ctx = AudioFX.ctx;
-                const now = ctx.currentTime;
-
-                const oscBeep = ctx.createOscillator();
-                const gainBeep = ctx.createGain();
-                oscBeep.type = 'sine';
-                oscBeep.frequency.setValueAtTime(1200, now);
-                gainBeep.gain.setValueAtTime(0.3, now);
-                gainBeep.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-                oscBeep.connect(gainBeep);
-                gainBeep.connect(ctx.destination);
-                oscBeep.start(now);
-                oscBeep.stop(now + 0.15);
-
-                const oscDrop = ctx.createOscillator();
-                const gainDrop = ctx.createGain();
-                oscDrop.type = 'sawtooth';
-                oscDrop.frequency.setValueAtTime(450, now + 0.05); 
-                oscDrop.frequency.exponentialRampToValueAtTime(40, now + 1.2); 
-                gainDrop.gain.setValueAtTime(0.4, now + 0.05);
-                gainDrop.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
-                oscDrop.connect(gainDrop);
-                gainDrop.connect(ctx.destination);
-                oscDrop.start(now + 0.05);
-                oscDrop.stop(now + 1.2);
-            }
-
-            function playTick(isPanic = false) {
-                if (typeof AudioFX === 'undefined' || !AudioFX.ctx) return;
-                AudioFX.resume();
-                const ctx = AudioFX.ctx;
-                const o = ctx.createOscillator();
-                const g = ctx.createGain();
-                
-                o.type = 'square';
-                const startFreq = isPanic ? 1400 : 800;
-                const endFreq = isPanic ? 400 : 100;
-                
-                o.frequency.setValueAtTime(startFreq, ctx.currentTime); 
-                o.frequency.exponentialRampToValueAtTime(endFreq, ctx.currentTime + 0.1); 
-                g.gain.setValueAtTime(isPanic ? 0.25 : 0.15, ctx.currentTime);
-                g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-                o.connect(g); g.connect(ctx.destination);
-                o.start(); o.stop(ctx.currentTime + 0.1);
-            }
-
             let holdTimer;         
             let pressTimer;        
             let countdownInterval; 
@@ -837,8 +758,6 @@ toggleLatency: function() {
 
             function startCountdownUI() {
                 timeLeft = 9;
-                playTransitionSound();
-
                 btnPembuat.classList.add('override-chaos');
                 btnPembuat.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> OVERRIDE: ${timeLeft}s`;
                 
@@ -846,12 +765,7 @@ toggleLatency: function() {
                     timeLeft--;
                     if (timeLeft > 0) {
                         btnPembuat.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> OVERRIDE: ${timeLeft}s`;
-                        if (timeLeft <= 5) {
-                            document.body.classList.add('system-panic');
-                            playTick(true);
-                        } else {
-                            playTick(false); 
-                        }
+                        if (timeLeft <= 5) document.body.classList.add('system-panic');
                     } else {
                         clearInterval(countdownInterval);
                     }
@@ -975,3 +889,56 @@ toggleLatency: function() {
             }
         }); // akhir DOMContentLoaded utama
 
+// Heading acak: tiap huruf (semua baris, termasuk yang wrap di HP) dikunci dalam urutan acak baru tiap siklus.
+function startChaosMode() {
+    const title = document.querySelector('.glitch');
+    if (!title || title._fxOn) return;
+    title._fxOn = true;
+    const original = title.textContent.trim();
+    const pool = '!<>-_\\/[]{}—=+*^?#01$%&@';
+    const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const noise = ['SYSTEM_FAILURE', '0x00_FATAL_ERR', '404_NOT_FOUND', 'ENCRYPT_//_99%', 'CONNECTING...'];
+    let raf = 0;
+
+    function scramble(target, dur, done) {
+        const n = target.length;
+        const order = Array.from({ length: n }, (_, i) => i);
+        for (let i = n - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+        const lockAt = new Array(n);
+        order.forEach((idx, rank) => { lockAt[idx] = (rank / n) * dur * 0.85 + Math.random() * dur * 0.15; });
+        const start = performance.now();
+        let last = 0;
+        cancelAnimationFrame(raf);
+        (function frame(now) {
+            if (now - last >= 33) {
+                last = now;
+                const t = now - start;
+                let out = '';
+                for (let i = 0; i < n; i++) {
+                    const c = target[i];
+                    out += (c === ' ' || t >= lockAt[i]) ? c : pool[Math.floor(Math.random() * pool.length)];
+                }
+                title.textContent = out;
+                title.setAttribute('data-text', out);
+                if (t >= dur) { title.textContent = target; title.setAttribute('data-text', target); if (done) done(); return; }
+            }
+            raf = requestAnimationFrame(frame);
+        })(performance.now());
+    }
+
+    function loop() {
+        setTimeout(() => {
+            if (document.hidden) return loop();
+            const glitchy = Math.random() < 0.25;
+            title.classList.toggle('critical-error', glitchy);
+            const src = glitchy ? noise[Math.floor(Math.random() * noise.length)] : original;
+            scramble(src, 700 + Math.random() * 600, () => {
+                if (glitchy) setTimeout(() => { title.classList.remove('critical-error'); scramble(original, 600, null); }, 250);
+            });
+            loop();
+        }, 5000 + Math.random() * 9000);
+    }
+    if (reduce) return;
+    scramble(original, 1100, null);
+    loop();
+}

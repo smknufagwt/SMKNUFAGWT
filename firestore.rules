@@ -53,7 +53,8 @@ service cloud.firestore {
 
     function validMsg(room) {
       let d = request.resource.data;
-      return d.keys().hasOnly(['room_id','user_id','display_name','content','created_at','photo_url']) &&
+      return d.keys().hasOnly(['room_id','user_id','display_name','content','created_at','photo_url','user_email']) &&
+        (!('user_email' in d) || d.user_email == request.auth.token.email) &&
         (!('photo_url' in d) || (d.photo_url is string && d.photo_url.size() <= 300 &&
           d.photo_url.matches('https://lh[0-9]\\.googleusercontent\\.com/.*'))) &&
         d.room_id == room &&
@@ -139,6 +140,37 @@ service cloud.firestore {
     }
     match /presence_global/{doc} {
       allow read, write: if true;
+    }
+
+    // ── counter pengunjung (footer index.html) ──────────────
+    // Hanya doc 'total' yang boleh dibuat/dinaikkan tepat +1 per tulis.
+    match /user_in/{doc} {
+      allow read: if true;
+      allow create: if doc == 'total' && request.resource.data.keys().hasOnly(['count']) && request.resource.data.count == 1;
+      allow update: if doc == 'total' && request.resource.data.keys().hasOnly(['count']) && request.resource.data.count == resource.data.count + 1;
+      allow delete: if false;
+    }
+
+    // Pesan suara (base64 Opus/AAC, maks ~30 dtk): dibuat sekali, hanya bisa dibaca per-ID (tanpa list).
+    match /voice_notes/{vid} {
+      allow get: if true;
+      allow create: if vid.matches('^[A-Za-z0-9]{20}$') &&
+        request.resource.data.keys().hasOnly(['d','m','s','ts']) &&
+        request.resource.data.d is string && request.resource.data.d.size() <= 480000 &&
+        request.resource.data.m is string && request.resource.data.m.size() <= 60 &&
+        request.resource.data.m.matches('^audio/.*') &&
+        request.resource.data.s is int && request.resource.data.s >= 1 && request.resource.data.s <= 31 &&
+        request.resource.data.ts == request.time;
+      allow list, update, delete: if false;
+    }
+
+    // Registri unik pengunjung: 1 doc per visitor-id, hanya bisa dibuat sekali (dedupe permanen server-side).
+    match /user_in_visitors/{vid} {
+      allow get: if true;
+      allow create: if vid.matches('^[A-Za-z0-9_-]{16,64}$') &&
+        request.resource.data.keys().hasOnly(['ts']) &&
+        request.resource.data.ts == request.time;
+      allow list, update, delete: if false;
     }
 
     match /_notify_state/{doc} {

@@ -26,15 +26,18 @@
     });
     window.MediaPrefs = MediaPrefs;
 
+    const YT_ORIGIN = 'https://www.youtube-nocookie.com';
+
     // iframe YouTube selalu autoplay=0 di URL; playVideo ditembak via postMessage setelah onReady
     window.addEventListener('message', (e) => {
+        if (e.origin !== YT_ORIGIN) return; // abaikan pesan dari origin selain player YouTube
         let data;
         try { data = JSON.parse(e.data); } catch (err) { return; }
         if (data.event !== 'onReady' || !e.source) return;
         document.querySelectorAll('#chat-thread-messages iframe.chat-yt, #chat-thread-messages iframe.chat-yt-short').forEach((f) => {
             if (f.contentWindow !== e.source) return;
             if (f.dataset.autoplay === '1') {
-                f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
+                f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), YT_ORIGIN);
             }
         });
     });
@@ -105,7 +108,7 @@
                         media.muted = !willUnmute;
                         if (willUnmute) media.play().catch(() => {});
                     } else if (type === 'yt' && media.contentWindow) {
-                        media.contentWindow.postMessage(JSON.stringify({ event: 'command', func: willUnmute ? 'unMute' : 'mute', args: [] }), '*');
+                        media.contentWindow.postMessage(JSON.stringify({ event: 'command', func: willUnmute ? 'unMute' : 'mute', args: [] }), YT_ORIGIN);
                     }
                 }
                 btn.classList.toggle('muted', !willUnmute);

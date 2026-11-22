@@ -3,7 +3,11 @@
       'use strict';
 
       // ── Konfigurasi ───────────────────────────────────────
-      const NOTIFY_ENDPOINT  = '/api/notify';
+      // Firebase Hosting (nufabase.web.app) tidak menyajikan /api (di-ignore di firebase.json),
+      // jadi di sana endpoint menunjuk ke Vercel (CORS allowlist di api/notify.js).
+      const NOTIFY_ENDPOINT  = /(^|\.)vercel\.app$|^localhost$/.test(location.hostname)
+        ? '/api/notify'
+        : 'https://smknufa-bdp.vercel.app/api/notify';
       const NOTIFY_SECRET    = '%%NOTIFY_SECRET%%';
       const THROTTLE_MS      = 10000; // 10 detik antar trigger (anti-spam ramai)
       const FETCH_TIMEOUT_MS = 6000;  // timeout fetch ke /api/notify

@@ -3,8 +3,12 @@ document.addEventListener("DOMContentLoaded", function () {
     // Sisi main site: kalau baru balik dari blog, langsung masuk (skip overlay) —
     // TAPI cuma kalau autoResumeAccess (site-fx.js) belum lebih dulu masukin (cek opacity,
     // di-set synchronous di awal System.enter, jadi aman dijadikan penanda "sudah jalan").
-    if (localStorage.getItem('aksesTerbuka') === 'true') {
-        localStorage.removeItem('aksesTerbuka');
+    let resume = false;
+    try {
+        resume = localStorage.getItem('aksesTerbuka') === 'true';
+        if (resume) localStorage.removeItem('aksesTerbuka');
+    } catch (_) { /* storage diblok */ }
+    if (resume) {
         const overlay = document.getElementById('overlay');
         const alreadyEntering = overlay && overlay.style.opacity === '0';
         if (!alreadyEntering) {
@@ -21,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (btnKembali) {
         btnKembali.addEventListener('click', function (e) {
             e.preventDefault();
-            localStorage.setItem('aksesTerbuka', 'true');
+            try { localStorage.setItem('aksesTerbuka', 'true'); } catch (_) { /* storage diblok */ }
             window.location.href = '/';
         });
     }
