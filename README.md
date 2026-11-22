@@ -1,5 +1,5 @@
-<p align="left"> 
- <img src="https://avatars.githubusercontent.com/u/255634825?v=4" alt="nufabase">
+<p align="center"> 
+ <img src="https://avatars.githubusercontent.com/u/255634825?v=4" alt="nufabase" width="80%"><a href="https://nufabase.web.app"></a>
 </p>
 
 
