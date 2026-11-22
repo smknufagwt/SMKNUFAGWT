@@ -4,6 +4,12 @@
    ========================================================================== */
 const POSTS = [
     {
+        date: "2026-11-15",
+        tag: "UPDATE",
+        title: "Tampilan lebih membulat, kirim pesan suara seperti di WhatsApp, dan halaman /chat makin enak dipakai",
+        body: "Pembaruan kali ini membuat tampilan situs lebih nyaman dilihat, menambah cara baru untuk berkirim pesan, dan merapikan banyak hal kecil supaya lebih enak dipakai sehari-hari.\n\n<b>1. Tampilan lebih membulat dan animasi lebih lega</b>\n<ul>\n<li>Tombol, kotak, dan gelembung pesan kini bersudut lebih membulat, sehingga terlihat lebih lembut dan rapi.</li>\n<li>Gerak animasi dibuat lebih lega: tidak terlalu rapat dan tidak terburu-buru, jadi lebih nyaman di mata.</li>\n<li>Kalau kamu memakai Mode Lite, atau HP kamu diatur untuk mengurangi gerakan, animasi akan mati otomatis agar HP tetap ringan.</li>\n</ul>\n\n<b>2. Pesan suara seperti di WhatsApp dan Telegram</b>\n<ul>\n<li>Tekan ikon mikrofon, bicara, lalu kirim. Kamu tidak perlu memasang aplikasi tambahan.</li>\n<li>Sebelum dikirim, rekaman bisa diputar ulang, digeser ke bagian yang ingin didengar, direkam ulang, atau dibatalkan.</li>\n<li>Suara direkam dalam format <b>WebM/Opus</b>, yaitu format suara berukuran kecil sehingga hemat kuota dan cepat terkirim. Rekamannya dibuat langsung oleh browser di perangkat kamu sendiri.</li>\n<li>Satu pesan suara bisa berdurasi sampai 30 detik. Suaranya baru diunduh saat tombol putar ditekan, jadi percakapan tetap cepat dibuka.</li>\n</ul>\n\n<b>3. Halaman /chat lebih bagus</b>\n<ul>\n<li>Kolom ketik dibuat lebih ringkas: tombol suara ada di kiri dan tombol kirim hanya satu di kanan.</li>\n<li>Di <b>/chat</b>, setiap gelembung pesan kini menampilkan email pengirim sehingga lebih jelas siapa yang menulis. Di Global Live Chat beranda, identitas pengirim tetap disamarkan demi privasi.</li>\n<li>Tombol pengaturan dan tombol perlebar panel menyala saat sedang aktif, jadi mudah dibedakan dari yang mati.</li>\n</ul>\n\n<b>4. Penyempurnaan umum</b>\nBanyak perbaikan kecil di berbagai bagian agar situs terasa lebih lancar dan nyaman dipakai, baik di HP maupun di komputer."
+    },
+    {
         date: "2026-10-11",
         tag: "UPDATE",
         title: "Chat NUFABASE makin rapi dan nyaman: pilihan tampilan, foto profil, dan kotak usul fitur",
