@@ -1,3 +1,10 @@
+<div align="center"> 
+ <a href="https://nufabase.web.app">
+ <img src="https://avatars.githubusercontent.com/u/255634825?v=4" alt="nufabase" width="80%">
+ </a>
+
+
+
 # 🌐 SMK NURUL FALAH — THE GLIMPSE OF FUTURE
 
 > **Real-Time Centralized Notification & Communication System**  
@@ -445,7 +452,6 @@ If this project inspired you or helped you learn something new:
 
 ---
 
-<div align="center">
 
 ### 🚀 **[Visit Live Demo](https://nufabase.web.app/)**
 
