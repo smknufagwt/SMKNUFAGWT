@@ -2,7 +2,6 @@
  <a href="https://nufabase.web.app">
  <img src="https://avatars.githubusercontent.com/u/255634825?v=4" alt="nufabase" width="80%">
  </a>
-</div>
 
 
 # 🌐 SMK NURUL FALAH — THE GLIMPSE OF FUTURE
@@ -407,6 +406,7 @@ If this project inspired you or helped you learn something new:
 
 ---
 
+</div>
 <div align="center">
 
 ### 🚀 **[Visit Live Demo](https://smknufa-bdp.vercel.app/)**
