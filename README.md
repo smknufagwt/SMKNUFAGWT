@@ -10,7 +10,7 @@
 > **Real-Time Centralized Notification & Communication System**  
 > A cyberpunk-themed, edge-optimized communication hub built entirely on vanilla JavaScript, Firebase, and OneSignal.
 
-[![Live Demo](https://img.shields.io/badge/🔗%20Live%20Demo-nufabase.web.app-00ff41?style=for-the-badge&logo=vercel)](https://nufabase.web.app/)
+[![Live Demo](https://img.shields.io/badge/🔗%20Live%20Demo-nufabase.web.app-00ff41?style=for-the-badge&logo=firebase)](https://nufabase.web.app/)
 [![Blog](https://img.shields.io/badge/📖%20Blog%20&%20Changelog-Journal-00f0ff?style=for-the-badge)](https://nufabase.web.app/blog)
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-1f4788?style=for-the-badge)](LICENSE)
 
@@ -27,7 +27,7 @@ By leveraging **highly structured Vanilla JS** without bloated modern frameworks
 | **HTML/CSS/JS (96.3% / 3.7%)** | Pure frontend, no build step required |
 | **Firebase Firestore** | Real-time database & chat synchronization |
 | **OneSignal** | Push notifications (cross-device, background) |
-| **Service Worker** | Offline-first, background sync, cache strategy |
+| **Service Worker** | Network-first with cache fallback, background sync, push handling |
 | **BroadcastChannel API** | Instant tab-to-tab communication |
 | **MediaRecorder + Web Audio API** | Voice note recording (Opus) & live level meter |
 
@@ -51,6 +51,7 @@ By leveraging **highly structured Vanilla JS** without bloated modern frameworks
 │  • global_chat collection (real-time listeners)         │
 │  • voice_notes collection (Base64 Opus, get-by-ID)     │
 │  • Message sync across all clients instantly            │
+│  • rooms, room_members, polls, profiles (/chat)         │
 │  • Fallback broadcast matrix for delivery               │
 └─────────────────────────────────────────────────────────┘
                            ↕️
@@ -65,7 +66,7 @@ By leveraging **highly structured Vanilla JS** without bloated modern frameworks
 │  ⚙️  SERVICE WORKER (sw.js)                             │
 │  • Offline message queue (IndexedDB)                    │
 │  • Background sync on reconnection                      │
-│  • Cache-first static asset strategy                    │
+│  • Network-first + cache fallback                       │
 │  • Push notification handler                            │
 └─────────────────────────────────────────────────────────┘
 ```
@@ -129,9 +130,6 @@ cd SMKNUFAGWT
 # Using Python 3
 python -m http.server 8000
 
-# Using Python 2
-python -m SimpleHTTPServer 8000
-
 # Using Node.js (http-server)
 npx http-server
 
@@ -144,20 +142,32 @@ ruby -run -ehttpd . -p8000
 
 ### **Environment Setup**
 
-1. Copy `.env.example` to `.env` and fill in your secrets:
+1. Copy `.env.example` to `.env` and fill in your values:
    ```bash
    cp .env.example .env
    ```
 
-2. Required variables:
-   - `NOTIFY_SECRET` — API secret for OneSignal endpoint (`/api/notify`)
-   - Firebase keys are already embedded in `index.html` (public config)
+2. Variables (see `.env.example`):
 
-3. Deploy to Vercel:
-   ```bash
-   npm i -g vercel
-   vercel
-   ```
+   | Variable | Used for |
+   |---|---|
+   | `FIREBASE_API_KEY`, `FIREBASE_DATABASE_URL` | Firebase client config (injected into the HTML at deploy time) |
+   | `ACCESS_CODE_B64` | Gallery upload access code (Base64) |
+   | `ONESIGNAL_APP_ID`, `ONESIGNAL_REST_API_KEY` | OneSignal push (`/api/notify`) |
+   | `NOTIFY_SECRET` | Shared secret for `/api/notify` (`x-notify-secret` header) |
+   | `VERCEL_NOTIFY_URL` | Notify endpoint called by the cron workflow |
+   | `ALLOWED_ORIGINS` *(optional)* | Extra CORS origins for `/api/notify`, comma-separated |
+
+3. The HTML/JS files contain placeholders such as `%%FIREBASE_API_KEY%%`, `%%NOTIFY_SECRET%%` and `%%ACCESS_CODE_B64%%`. GitHub Actions replaces them with repository **Secrets** at deploy time, so a plain local run shows the UI, but Firebase/notify features need real values.
+
+### **Deployment**
+
+| Branch | Target | How |
+|---|---|---|
+| `nufabase` | Firebase Hosting → [nufabase.web.app](https://nufabase.web.app/) | `nufabase-manual-deploy.yml` — runs when `.github/workflows/version` changes, or manually (`workflow_dispatch`) |
+| `main` | Vercel → [smknufa-bdp.vercel.app](https://smknufa-bdp.vercel.app/) | `deploy.yml` on every push to `main` (injects secrets, then `vercel --prod`) |
+
+`/api/notify` is a Vercel serverless function, so only the Vercel deployment serves it (Firebase Hosting ignores `api/**`). Pages on `nufabase.web.app` call it cross-origin; the allowed origins are listed in `api/notify.js`.
 
 ---
 
@@ -199,6 +209,7 @@ Record, preview, and send voice messages straight from the chat composer (home p
 - Messages queued in **IndexedDB** when offline
 - Automatic **Background Sync** when connection returns
 - Service Worker replays pending messages via Firestore REST API
+- Queue and Firebase project ID persist in IndexedDB (survive SW restarts); only successfully sent messages are removed and failures are retried by the browser (no duplicates)
 - No data loss, seamless UX
 
 ### 🎨 Cyberpunk UI
@@ -233,7 +244,7 @@ Record, preview, and send voice messages straight from the chat composer (home p
 ### **Why Vanilla JavaScript?**
 - **Zero build step** — ship as-is to production
 - **No framework overhead** — pure DOM manipulation, event delegation
-- **Smaller bundle** — 157 KB single HTML file (vs. React/Vue + deps = 300+ KB)
+- **Smaller bundle** — `index.html` ≈ 100 KB with the rest split into modules under `assets/`, no framework (React/Vue + deps = 300+ KB)
 - **Faster parse/execution** — direct browser interpretation
 - **Better mobile performance** — critical for 3GB RAM phones
 
@@ -257,9 +268,14 @@ await SyncModule.enqueue({ ip, text, ts });
 // Register background sync
 await self.registration.sync.register('nufa-sync-chat');
 
-// When online: replay all pending messages
-const pending = await SyncModule.getAll();
-pending.forEach(msg => sendToFirestore(msg));
+// When online: replay pending messages, delete only the ones that were sent
+const pending = await SyncModule.getAllWithKeys();   // [{ key, value }]
+const sent = [];
+for (const { key, value } of pending) {
+  if (await sendToFirestore(value)) sent.push(key);
+}
+await SyncModule.deleteKeys(sent);
+if (sent.length < pending.length) throw new Error('sync-incomplete'); // browser retries
 ```
 
 ### **BroadcastChannel Cross-Tab Sync**
@@ -306,7 +322,7 @@ const url = URL.createObjectURL(new Blob([u8], { type: m }));
 ## 🛠️ How to Customize
 
 ### **Change Color Scheme**
-Edit CSS variables in `index.html` (lines ~45-62):
+Edit the CSS variables at the top of `assets/style/main.css` (`:root`; shared tokens also live in `assets/style/variable.css`):
 ```css
 :root {
   --neon: #0f0;              /* Lime green */
@@ -317,9 +333,9 @@ Edit CSS variables in `index.html` (lines ~45-62):
 ```
 
 ### **Update Firebase Config**
-Replace the config in `index.html` (line ~40):
+Replace the config in `index.html`, `chat.html` and `dashmin.html` (`apiKey` is the `%%FIREBASE_API_KEY%%` placeholder filled in by CI):
 ```javascript
-const firebaseConfig = {
+const FIREBASE_CONFIG = {
   apiKey: "YOUR_API_KEY",
   authDomain: "your-project.firebaseapp.com",
   projectId: "your-project-id",
@@ -328,7 +344,7 @@ const firebaseConfig = {
 ```
 
 ### **Modify Chat Messages Display**
-Edit the `renderChatMessage()` function in `index.html` to customize message formatting, styling, or fields displayed.
+Message markup/formatting lives in `assets/logic/chat-format.js` (`ChatFormat`); the global panel renderer is `GlobalChat` in `index.html`, and `/chat` is driven by `assets/logic/chat-app.js`.
 
 ### **Add New Pages**
 Create new `.html` files in root; link from main nav buttons in header.
@@ -344,21 +360,23 @@ Create new `.html` files in root; link from main nav buttons in header.
 | **Chat Message Latency** | < 500ms | ~120ms (Firestore) |
 | **Service Worker Cache Hit** | > 95% | 98% |
 | **Mobile Lighthouse Score** | > 90 | 94/100 |
-| **Bundle Size** | < 200 KB | 157 KB |
+| **Raw Size (uncompressed)** | < 200 KB per HTML file | `index.html` 100 KB · `assets/logic` 245 KB · `assets/style` 127 KB |
 
 ---
 
 ## 🔐 Security & Privacy
 
-- **No server-side secrets exposed** — Firebase keys are public (browser API)
-- **Notify endpoint** protected by `x-notify-secret` header
+- **Firebase client keys are public** (browser API) — real protection comes from `firestore.rules`
+- **Notify endpoint** protected by `x-notify-secret` header (constant-time check, sanitized input, 8 s upstream timeout)
 - **User IPs logged** for moderation (can be disabled)
-- **HTTPS enforced** on production (Vercel auto-HTTPS)
-- **CORS configured** to allow only same-origin requests
+- **HTTPS enforced** on production (Vercel / Firebase Hosting auto-HTTPS)
+- **CORS allowlist** on `/api/notify` (`nufabase.web.app`, `smknufa-bdp.vercel.app`, plus optional `ALLOWED_ORIGINS`)
 - **Service Worker scope** limited to `/` (single domain)
+- **Chat content is escaped** before rendering (`ChatFormat`) and user-supplied URLs are validated
+- **Client-side values are not secrets** — `NOTIFY_SECRET` and the gallery upload code are injected into browser JS at deploy time, so treat them as a light spam/UX gate, not authentication; the real gate must be server-side or in Firestore rules
 - **Voice notes** are create-only and readable per ID only (no listing); size, duration, MIME type and field set are validated in `firestore.rules`
 
-Found a vulnerability? See [SECURITY.md](SECURITY.md) for how to report it.
+Found a vulnerability? See [SECURITY.md](SECURITY.md) and report it privately by email (not via a public issue).
 
 ---
 
@@ -414,6 +432,8 @@ In short:
 |-----------|--------|
 | **Main App** | ✅ Stable, Production |
 | **Real-Time Chat** | ✅ Stable, Scaled to 1000+ users |
+| **Chat per Kelas (`/chat`)** | 🧪 Beta, Google sign-in + admin-approved access |
+| **Admin Dashboard (`/dashmin`)** | ✅ Live |
 | **Notifications** | ✅ Stable, Throttled & Reliable |
 | **Offline Sync** | ✅ Stable, 100% delivery |
 | **Voice Notes** | ✅ Live, Opus → Base64, ≤ 30 s |
