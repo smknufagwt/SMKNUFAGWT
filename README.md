@@ -1,6 +1,8 @@
-<p align="center"> 
- <img src="https://avatars.githubusercontent.com/u/255634825?v=4" alt="nufabase" width="80%"><a href="https://nufabase.web.app"></a>
-</p>
+<div align="center"> 
+ <a href="https://nufabase.web.app">
+ <img src="https://avatars.githubusercontent.com/u/255634825?v=4" alt="nufabase" width="80%">
+ </a>
+</div>
 
 
 # 🌐 SMK NURUL FALAH — THE GLIMPSE OF FUTURE
