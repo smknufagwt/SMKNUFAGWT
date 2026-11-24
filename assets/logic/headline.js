@@ -56,7 +56,14 @@
 
         const start = performance.now();
 
+        let lastPaint = 0;
         function scrambleFrame(now) {
+            // Throttle ~30fps: teks 1 baris tak butuh 60fps, hemat CPU di device low-end
+            if (now - lastPaint < 33 && now - start < SCRAMBLE_DURATION) {
+                scrambleRaf = requestAnimationFrame(scrambleFrame);
+                return;
+            }
+            lastPaint = now;
             const elapsed  = now - start;
             const progress = Math.min(elapsed / SCRAMBLE_DURATION, 1);
 
@@ -89,11 +96,27 @@
                     `headline-glow-pulse 2.5s ease-in-out ${GLOW_DELAY}ms infinite`;
 
                 // Jadwalkan siklus berikutnya
-                setTimeout(() => cycleHeadline(el), HOLD_DURATION);
+                setTimeout(() => waitVisibleThenCycle(el), HOLD_DURATION);
             }
         }
 
         scrambleRaf = requestAnimationFrame(scrambleFrame);
+    }
+
+    // Tab tersembunyi atau panel chat tertutup (headline di luar layar): tunda siklus berikutnya
+    function waitVisibleThenCycle(el) {
+        const panel = document.getElementById('chat-panel');
+        if (document.hidden) {
+            document.addEventListener('visibilitychange', function onVis() {
+                if (document.hidden) return;
+                document.removeEventListener('visibilitychange', onVis);
+                waitVisibleThenCycle(el);
+            });
+        } else if (panel && !panel.classList.contains('open')) {
+            setTimeout(() => waitVisibleThenCycle(el), 2000);
+        } else {
+            cycleHeadline(el);
+        }
     }
 
     // ── Glitch micro-shift acak ───────────────────────────────

@@ -1743,7 +1743,7 @@ const onlineHtml = ids.map(key => {
                     }
                     const label = Math.ceil(remain / 1000) + 's';
                     if (btn.getAttribute('data-cd') !== label) btn.setAttribute('data-cd', label);
-                    requestAnimationFrame(tick);
+                    setTimeout(tick, 250); // label cuma berubah per detik, tak perlu 60fps
                 };
                 tick();
             },
