@@ -30,7 +30,7 @@
     },
     {
       "src": "/favicon.ico",
-      "sizes": "32x32",
+      "sizes": "16x16 24x24 32x32 48x48 64x64",
       "type": "image/x-icon"
     }
   ]

@@ -18,7 +18,7 @@ importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 // [1] CONFIG — Ubah sesuai kebutuhan
 // ============================================================
 const CONFIG = {
-  CACHE_NAME: 'nufa-cache-v5',
+  CACHE_NAME: 'nufa-cache-v6',
   THUMB_CACHE_NAME: 'nufa-yt-thumb-v1',
   RUNTIME_CACHE_MAX: 80,
   TRIM_EVERY: 10,          // trim cache tiap N penulisan, bukan tiap request
