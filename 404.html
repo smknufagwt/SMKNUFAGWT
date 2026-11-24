@@ -1,224 +1,214 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f0">
     <title>404 - Page Not Found | SMK NURUL FALAH</title>
     <link rel="icon" type="image/x-icon" sizes="16x16 24x24 32x32 48x48 64x64" href="/favicon.ico?v=2">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* Token disalin dari main.css :root supaya 404 tampil sama dengan situs utama */
+        :root {
+            --neon: #0f0;
+            --neon-dim: #1fb835;
+            --glitch-red: #ff003c;
+            --glitch-blue: #00f0ff;
+            --bg-color: #050505;
+            --glass: rgba(0, 12, 0, 0.9);
+            --font-main: 'Share Tech Mono', monospace;
         }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; cursor: crosshair; }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--neon-dim); border-radius: 4px; }
+
+        html { background: var(--bg-color); }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
-        }
-
-        .container-404 {
-            text-align: center;
-            background: white;
-            padding: 60px 40px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 600px;
-            width: 100%;
-        }
-
-        .error-code {
-            font-size: 120px;
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 20px;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-20px);
-            }
-        }
-
-        .error-icon {
-            font-size: 80px;
-            margin-bottom: 20px;
-            animation: rotate 3s linear infinite;
-        }
-
-        @keyframes rotate {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        h1 {
-            font-size: 32px;
-            color: #333;
-            margin-bottom: 15px;
-        }
-
-        p {
-            font-size: 18px;
-            color: #666;
-            margin-bottom: 30px;
+            background:
+                radial-gradient(ellipse at 50% 0%, rgba(0, 255, 0, 0.10), transparent 60%),
+                repeating-linear-gradient(0deg, rgba(0, 255, 0, 0.03) 0 1px, transparent 1px 3px),
+                var(--bg-color);
+            color: var(--neon);
+            font-family: var(--font-main);
+            font-size: 17px;
             line-height: 1.6;
         }
 
-        .button-group {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
+        .container-404 {
+            width: 100%;
+            max-width: 600px;
+            padding: 48px 36px 28px;
+            text-align: center;
+            background: var(--glass);
+            border: 1px solid var(--neon-dim);
+            border-radius: 14px;
+            box-shadow: 0 0 24px rgba(0, 255, 0, 0.18), inset 0 0 18px rgba(0, 255, 0, 0.06);
         }
+
+        .error-tag {
+            display: inline-block;
+            margin-bottom: 8px;
+            padding: 2px 12px;
+            border: 1px solid var(--neon-dim);
+            border-radius: 999px;
+            font-size: 0.8rem;
+            letter-spacing: 3px;
+            color: var(--neon-dim);
+        }
+
+        .error-code {
+            position: relative;
+            display: inline-block;
+            font-size: clamp(76px, 22vw, 128px);
+            font-weight: bold;
+            line-height: 1.1;
+            letter-spacing: 6px;
+            color: var(--neon);
+            text-shadow: 0 0 12px rgba(0, 255, 0, 0.55);
+        }
+        .error-code::before,
+        .error-code::after {
+            content: attr(data-text);
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .error-code::before { color: var(--glitch-red);  text-shadow: none; animation: glitch-a 3s infinite steps(1); }
+        .error-code::after  { color: var(--glitch-blue); text-shadow: none; animation: glitch-b 3s infinite steps(1); }
+
+        @keyframes glitch-a {
+            0%, 90%, 100% { transform: translate(0); clip-path: inset(0 0 100% 0); }
+            92% { transform: translate(-4px, 1px); clip-path: inset(10% 0 55% 0); }
+            96% { transform: translate(3px, -1px); clip-path: inset(60% 0 12% 0); }
+        }
+        @keyframes glitch-b {
+            0%, 91%, 100% { transform: translate(0); clip-path: inset(0 0 100% 0); }
+            93% { transform: translate(4px, -1px); clip-path: inset(50% 0 20% 0); }
+            97% { transform: translate(-3px, 1px); clip-path: inset(15% 0 60% 0); }
+        }
+
+        h1 {
+            margin: 6px 0 14px;
+            font-size: 1.7rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--neon);
+        }
+        h1::after {
+            content: '';
+            display: inline-block;
+            width: 0.55em;
+            height: 1em;
+            margin-left: 6px;
+            vertical-align: -0.12em;
+            background: var(--neon);
+            animation: blink-cursor 0.8s step-end infinite;
+        }
+        @keyframes blink-cursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        .error-desc { margin-bottom: 28px; color: var(--neon-dim); }
+
+        .button-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 
         .btn {
-            padding: 12px 30px;
-            font-size: 16px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
             display: inline-block;
+            padding: 10px 26px;
+            font: inherit;
+            font-size: 1rem;
+            text-decoration: none;
+            color: var(--neon);
+            background: transparent;
+            border: 1px solid var(--neon-dim);
+            border-radius: 10px;
+            transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
-            border: 2px solid #667eea;
-        }
-
-        .btn-secondary:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-3px);
+        .btn-primary { border-color: var(--neon); box-shadow: 0 0 10px rgba(0, 255, 0, 0.3); }
+        .btn:hover, .btn:focus-visible {
+            background: var(--neon);
+            color: #000;
+            border-color: var(--neon);
+            box-shadow: 0 0 16px rgba(0, 255, 0, 0.55);
+            outline: none;
         }
 
         .info-box {
-            background: #f8f9ff;
-            border-left: 4px solid #667eea;
-            padding: 20px;
-            margin-top: 40px;
-            border-radius: 8px;
+            margin-top: 32px;
+            padding: 16px 20px;
             text-align: left;
+            background: rgba(0, 255, 0, 0.04);
+            border-left: 3px solid var(--neon);
+            border-radius: 6px;
         }
-
-        .info-box h3 {
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-
-        .info-box ul {
-            list-style: none;
-            margin-left: 0;
-        }
-
-        .info-box li {
-            color: #666;
-            margin-bottom: 8px;
-            padding-left: 20px;
-            position: relative;
-        }
-
-        .info-box li:before {
-            content: "✓";
-            color: #667eea;
-            position: absolute;
-            left: 0;
-            font-weight: bold;
-        }
+        .info-box h2 { margin-bottom: 8px; font-size: 1rem; letter-spacing: 2px; text-transform: uppercase; }
+        .info-box ul { list-style: none; }
+        .info-box li { position: relative; padding-left: 20px; margin-bottom: 4px; }
+        .info-box li::before { content: ">"; position: absolute; left: 0; color: var(--neon-dim); }
+        .info-box a { color: var(--neon); text-decoration: none; border-bottom: 1px dashed transparent; transition: border-color 0.2s ease; }
+        .info-box a:hover, .info-box a:focus-visible { border-bottom-color: var(--neon); outline: none; }
 
         footer {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-            color: #999;
-            font-size: 14px;
+            margin-top: 28px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(31, 184, 53, 0.35);
+            font-size: 0.85rem;
+            color: var(--neon-dim);
+        }
+        footer a { color: var(--neon); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+
+        @media (max-width: 600px) {
+            body { font-size: 16px; }
+            .container-404 { padding: 36px 18px 22px; }
+            h1 { font-size: 1.3rem; }
+            .button-group { flex-direction: column; }
+            .btn { width: 100%; }
         }
 
-        /* Responsive Design */
-        @media (max-width: 600px) {
-            .container-404 {
-                padding: 40px 20px;
-            }
-
-            .error-code {
-                font-size: 80px;
-            }
-
-            .error-icon {
-                font-size: 60px;
-            }
-
-            h1 {
-                font-size: 24px;
-            }
-
-            p {
-                font-size: 16px;
-            }
-
-            .button-group {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-            }
+        @media (prefers-reduced-motion: reduce) {
+            .error-code::before, .error-code::after { animation: none; display: none; }
+            h1::after { animation: none; }
         }
     </style>
 </head>
 <body>
-    <div class="container-404">
-        <div class="error-icon">🔒</div>
-        <div class="error-code">404</div>
-        
+    <main class="container-404">
+        <span class="error-tag">ERROR_404</span>
+        <div class="error-code" data-text="404" aria-label="404">404</div>
+
         <h1>Halaman Tidak Ditemukan</h1>
-        <p>Maaf, halaman yang Anda cari tidak ada atau telah dipindahkan. Kemungkinan ada kesalahan dalam URL atau halaman telah dihapus.</p>
-<p> Atau dalam perbaikan.</p>
+        <p class="error-desc">Maaf, halaman yang Anda cari tidak ada atau telah dipindahkan. Kemungkinan ada kesalahan dalam URL, halaman telah dihapus, atau sedang dalam perbaikan.</p>
+
         <div class="button-group">
             <a href="/" class="btn btn-primary">← Kembali ke Beranda</a>
-            <button class="btn btn-secondary" onclick="history.back()">Kembali</button>
+            <button type="button" class="btn" onclick="history.back()">Kembali</button>
         </div>
 
-        <div class="info-box">
-            <h3>📍 Navigasi Cepat</h3>
+        <nav class="info-box" aria-label="Navigasi cepat">
+            <h2>Navigasi Cepat</h2>
             <ul>
-                <li><a href="/" style="color: #667eea; text-decoration: none;">Beranda</a></li>
-                <li><a href="/#visi-misi" style="color: #667eea; text-decoration: none;">Visi & Misi</a></li>
-                <li><a href="/#materi" style="color: #667eea; text-decoration: none;">Materi</a></li>
-                <li><a href="/#galeri" style="color: #667eea; text-decoration: none;">Galeri</a></li>
-                <li><a href="/blog" style="color: #667eea; text-decoration: none;">BLOG</a></li>
+                <li><a href="/">Beranda</a></li>
+                <li><a href="/#visi-misi">Visi &amp; Misi</a></li>
+                <li><a href="/#materi">Materi</a></li>
+                <li><a href="/#galeri">Galeri</a></li>
+                <li><a href="/blog">BLOG</a></li>
             </ul>
-        </div>
+        </nav>
 
         <footer>
             <p>© 2026 SMK NURUL FALAH. All Rights Reserved.</p>
             <p>Intellectual Property of <a href="https://instagram.com/__lingg4" target="_blank" rel="noopener noreferrer">arlingkin</a></p>
         </footer>
-    </div>
+    </main>
 </body>
 </html>
